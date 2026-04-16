@@ -47,12 +47,28 @@ module.exports = async function handler(req, res) {
     }
 
     const data = JSON.parse(text);
-    const content = data?.choices?.[0]?.message?.content;
-    if (!content || typeof content !== 'string') {
-      return res.status(502).json({ error: 'Empty response from OpenRouter.' });
+
+    // OpenRouter generally follows the OpenAI chat-completions shape, but in practice
+    // free routers can return slightly different structures. Be robust.
+    const content =
+      data?.choices?.[0]?.message?.content ??
+      data?.choices?.[0]?.text ??
+      data?.choices?.[0]?.delta?.content ??
+      '';
+
+    const contentTrimmed = typeof content === 'string' ? content.trim() : '';
+    if (!contentTrimmed) {
+      // Don't leak the API key; only return safe debugging info.
+      const debug = {
+        model,
+        hasChoices: Array.isArray(data?.choices),
+        firstChoiceKeys: data?.choices?.[0] ? Object.keys(data.choices[0]) : null,
+        finishReason: data?.choices?.[0]?.finish_reason ?? null,
+      };
+      return res.status(502).json({ error: 'Empty response from OpenRouter.', debug });
     }
 
-    return res.status(200).json({ response: content.trim() });
+    return res.status(200).json({ response: contentTrimmed });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return res.status(500).json({ error: message });
