@@ -494,10 +494,10 @@
       <div class="label">KI-gestützte Empfehlungen</div>
       <div id="rec-list"><div style="font-size:13px; color:var(--gray-400);">Empfehlungen erscheinen nach Dateneingabe.</div></div>
       <div class="ai-controls">
-        <input id="claude-api-key" class="ai-input" type="password" placeholder="Anthropic API Key (sk-ant-...)" autocomplete="off">
+        <input id="claude-api-key" class="ai-input" type="password" placeholder="(Bei Ollama nicht benoetigt)" autocomplete="off" style="display:none;">
         <button id="ai-start-btn" class="ai-btn" onclick="startAIConsulting()">KI-Beratung starten</button>
       </div>
-      <div id="ai-status" class="ai-status">Optional: API-Key eingeben. In Produktion besser ueber ein sicheres Backend-Proxy arbeiten.</div>
+      <div id="ai-status" class="ai-status">Lokal via Ollama. Kein API-Key notwendig.</div>
       <div id="ai-response" class="ai-response" style="display:none;"></div>
     </div>
     <div style="font-size:12px; color:var(--gray-400); margin-top:-0.25rem; padding: 0 0.25rem;">
@@ -514,7 +514,10 @@
     buero:      { strom:90,  gas:40,  wasser:8,  abfall:50,  recycling:70, label:'Büro / Verwaltung' },
     produktion: { strom:250, gas:150, wasser:40, abfall:200, recycling:45, label:'Produktion' },
   };
-  const CLAUDE_MODEL = 'claude-3-5-sonnet-latest';
+  // Uses Ollama's local server on your Mac (free, no API key).
+  // Default model name assumes you've pulled it via: `ollama pull llama3`
+  const OLLAMA_API_URL = 'http://localhost:11434/api/generate';
+  const OLLAMA_MODEL = 'llama3';
 
   function getVals() {
     return {
@@ -696,58 +699,45 @@ Antwortformat:
 Sprache: Deutsch, klar und praxisnah.`;
   }
 
-  async function callClaudeDirect(apiKey, prompt) {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+  async function callOllamaDirect(prompt) {
+    const response = await fetch(OLLAMA_API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: 900,
-        temperature: 0.3,
-        messages: [{ role: 'user', content: prompt }]
+        model: OLLAMA_MODEL,
+        prompt,
+        // Limits output size so responses feel fast in a browser UI.
+        // Adjust if you want more/less detail.
+        stream: false
+        ,options: { temperature: 0.3, num_predict: 320 }
       })
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`Claude API Fehler (${response.status}): ${errText}`);
+      throw new Error(`Ollama API Fehler (${response.status}): ${errText}`);
     }
 
     const data = await response.json();
-    const text = (data.content || [])
-      .filter(item => item.type === 'text')
-      .map(item => item.text)
-      .join('\n')
-      .trim();
+    const text = (data.response || '').trim();
 
-    if (!text) throw new Error('Leere Antwort von Claude erhalten.');
+    if (!text) throw new Error('Leere Antwort von Ollama erhalten.');
     return text;
   }
 
   async function startAIConsulting() {
     const btn = document.getElementById('ai-start-btn');
-    const apiKeyInput = document.getElementById('claude-api-key');
-    const apiKey = apiKeyInput.value.trim();
     const vals = getVals();
     const b = benchmarks[document.getElementById('branche').value];
     const score = calcScore(vals, b);
     const prompt = buildClaudePrompt(vals, b, score);
 
-    if (!apiKey) {
-      setAIStatus('Bitte zuerst einen gueltigen Anthropic API Key eingeben (sk-ant-...).', true);
-      return;
-    }
-
     btn.disabled = true;
-    setAIStatus('Claude wird angefragt ...');
+    setAIStatus('Lokales KI-Modell (Ollama) wird angefragt ...');
     setAIResponse('Analyse laeuft, bitte kurz warten ...');
 
     try {
-      const text = await callClaudeDirect(apiKey, prompt);
+      const text = await callOllamaDirect(prompt);
       setAIResponse(text);
       setAIStatus('KI-Beratung erfolgreich aktualisiert.');
     } catch (err) {
@@ -756,7 +746,7 @@ Sprache: Deutsch, klar und praxisnah.`;
       setAIResponse(
         'Die KI-Beratung konnte nicht geladen werden.\n\n' +
         `Grund: ${message}\n\n` +
-        'Hinweis: Fuer produktive Nutzung den API-Key nicht im Browser verwenden, sondern ueber ein Backend-Proxy weiterleiten.'
+        'Hinweis: Stelle sicher, dass Ollama laeuft (Standard: http://localhost:11434).'
       );
     } finally {
       btn.disabled = false;
