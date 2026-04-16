@@ -520,7 +520,9 @@
   const OLLAMA_API_URL = OLLAMA_BASE + '/api/generate';
   const OLLAMA_TAGS_URL = OLLAMA_BASE + '/api/tags';
   const OLLAMA_MODEL = 'llama3';
-  const OLLAMA_GENERATE_TIMEOUT_MS = 60000; // 60 s — abort if generation hangs
+  // On deployed environments Ollama is unreachable (localhost). Keep this low so we fail fast
+  // and fall back to the OpenRouter proxy quickly.
+  const OLLAMA_GENERATE_TIMEOUT_MS = 4500; // 4.5 s
   const OLLAMA_CHECK_TIMEOUT_MS = 4000;     // 4 s — reachability probe on page load
 
   function getVals() {
