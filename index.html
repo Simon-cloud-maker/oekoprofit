@@ -497,7 +497,7 @@
         <input id="claude-api-key" class="ai-input" type="password" placeholder="(Bei Ollama nicht benoetigt)" autocomplete="off" style="display:none;">
         <button id="ai-start-btn" class="ai-btn" onclick="startAIConsulting()">KI-Beratung starten</button>
       </div>
-      <div id="ai-status" class="ai-status">Lokal via Ollama. Kein API-Key notwendig.</div>
+      <div id="ai-status" class="ai-status">Lokal via Ollama. Wenn nicht erreichbar: online via OpenRouter (free tier).</div>
       <div id="ai-response" class="ai-response" style="display:none;"></div>
     </div>
     <div style="font-size:12px; color:var(--gray-400); margin-top:-0.25rem; padding: 0 0.25rem;">
@@ -516,8 +516,12 @@
   };
   // Uses Ollama's local server on your Mac (free, no API key).
   // Default model name assumes you've pulled it via: `ollama pull llama3`
-  const OLLAMA_API_URL = 'http://localhost:11434/api/generate';
+  const OLLAMA_BASE = 'http://localhost:11434';
+  const OLLAMA_API_URL = OLLAMA_BASE + '/api/generate';
+  const OLLAMA_TAGS_URL = OLLAMA_BASE + '/api/tags';
   const OLLAMA_MODEL = 'llama3';
+  const OLLAMA_GENERATE_TIMEOUT_MS = 60000; // 60 s — abort if generation hangs
+  const OLLAMA_CHECK_TIMEOUT_MS = 4000;     // 4 s — reachability probe on page load
 
   function getVals() {
     return {
@@ -699,19 +703,58 @@ Antwortformat:
 Sprache: Deutsch, klar und praxisnah.`;
   }
 
+  async function checkOllamaReachability() {
+    const btn = document.getElementById('ai-start-btn');
+    // Even if Ollama is not reachable (e.g. on Vercel), we still want the user to be able to
+    // use the online fallback (OpenRouter via /api/ki-consulting).
+    btn.disabled = false;
+    setAIStatus('Prüfe Ollama-Verbindung ...');
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), OLLAMA_CHECK_TIMEOUT_MS);
+    try {
+      // Use Content-Type header so this request triggers a CORS preflight (OPTIONS).
+      // That way CORS failures are caught here instead of silently passing and then
+      // failing on the actual POST to /api/generate.
+      const res = await fetch(OLLAMA_TAGS_URL, {
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal
+      });
+      clearTimeout(timer);
+      if (res.ok) {
+        setAIStatus('Lokal via Ollama. Kein API-Key notwendig.');
+      } else {
+        throw new Error(`HTTP ${res.status}`);
+      }
+    } catch (err) {
+      clearTimeout(timer);
+      const hint = (err instanceof TypeError)
+        ? `CORS-Fehler oder Ollama nicht gestartet. Lösung: Ollama mit OLLAMA_ORIGINS="*" starten, dann Seite neu laden.`
+        : `Ollama nicht erreichbar (${OLLAMA_BASE}). Nutze stattdessen OpenRouter (online) fuer die KI-Beratung.`;
+      setAIStatus(hint, false);
+    }
+  }
+
   async function callOllamaDirect(prompt) {
-    const response = await fetch(OLLAMA_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: OLLAMA_MODEL,
-        prompt,
-        // Limits output size so responses feel fast in a browser UI.
-        // Adjust if you want more/less detail.
-        stream: false
-        ,options: { temperature: 0.3, num_predict: 320 }
-      })
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), OLLAMA_GENERATE_TIMEOUT_MS);
+    let response;
+    try {
+      response = await fetch(OLLAMA_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model: OLLAMA_MODEL,
+          prompt,
+          // Limits output size so responses feel fast in a browser UI.
+          // Adjust if you want more/less detail.
+          stream: false,
+          options: { temperature: 0.3, num_predict: 320 }
+        })
+      });
+    } finally {
+      clearTimeout(timer);
+    }
 
     if (!response.ok) {
       const errText = await response.text();
@@ -725,6 +768,27 @@ Sprache: Deutsch, klar und praxisnah.`;
     return text;
   }
 
+  async function callOpenRouterDirect(prompt) {
+    // Calls the Vercel backend endpoint. This avoids exposing API keys in the browser.
+    const response = await fetch('/api/ki-consulting', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`OpenRouter API Fehler (${response.status}): ${errText}`);
+    }
+
+    const data = await response.json();
+    if (!data?.response || typeof data.response !== 'string') {
+      throw new Error('Leere Antwort vom Server erhalten.');
+    }
+
+    return data.response.trim();
+  }
+
   async function startAIConsulting() {
     const btn = document.getElementById('ai-start-btn');
     const vals = getVals();
@@ -733,20 +797,34 @@ Sprache: Deutsch, klar und praxisnah.`;
     const prompt = buildClaudePrompt(vals, b, score);
 
     btn.disabled = true;
-    setAIStatus('Lokales KI-Modell (Ollama) wird angefragt ...');
+    setAIStatus('KI wird angefragt ... (Ollama wenn moeglich, sonst OpenRouter)');
     setAIResponse('Analyse laeuft, bitte kurz warten ...');
 
+    let localErr;
     try {
-      const text = await callOllamaDirect(prompt);
+      // Try local free Ollama first. If it fails (e.g. on Vercel), fall back to the online proxy.
+      try {
+        const text = await callOllamaDirect(prompt);
+        setAIResponse(text);
+        setAIStatus('KI-Beratung erfolgreich aktualisiert (lokal via Ollama).');
+        return;
+      } catch (err) {
+        localErr = err instanceof Error ? err.message : String(err);
+      }
+
+      const text = await callOpenRouterDirect(prompt);
       setAIResponse(text);
-      setAIStatus('KI-Beratung erfolgreich aktualisiert.');
+      setAIStatus('KI-Beratung erfolgreich aktualisiert (online via OpenRouter).');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unbekannter Fehler';
-      setAIStatus('API-Aufruf fehlgeschlagen.', true);
+      setAIStatus('KI-Beratung fehlgeschlagen.', true);
       setAIResponse(
         'Die KI-Beratung konnte nicht geladen werden.\n\n' +
         `Grund: ${message}\n\n` +
-        'Hinweis: Stelle sicher, dass Ollama laeuft (Standard: http://localhost:11434).'
+        (localErr
+          ? `Hinweis: Lokales Ollama ist fehlgeschlagen.\nLokale Fehlermeldung: ${localErr}\n\n`
+          : '') +
+        'Hinweis: Auf Vercel muss OPENROUTER_API_KEY gesetzt sein und das /api/ki-consulting Backend muss funktionieren.'
       );
     } finally {
       btn.disabled = false;
@@ -762,6 +840,7 @@ Sprache: Deutsch, klar und praxisnah.`;
   }
 
   update();
+  checkOllamaReachability();
 </script>
 </body>
 </html>
