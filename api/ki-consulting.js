@@ -48,6 +48,14 @@ module.exports = async function handler(req, res) {
 
     const data = JSON.parse(text);
 
+    if (data?.error) {
+      // OpenRouter sometimes returns an error object with details instead of choices.
+      return res.status(502).json({
+        error: 'OpenRouter returned an error.',
+        details: data.error,
+      });
+    }
+
     // OpenRouter generally follows the OpenAI chat-completions shape, but in practice
     // free routers can return slightly different structures. Be robust.
     const content =
