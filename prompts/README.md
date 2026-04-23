@@ -6,7 +6,8 @@ This folder is a lightweight, versioned prompt system for LLM-driven software de
 
 - `personas/`: reusable role definitions
 - `templates/`: reusable prompt building blocks
-- `stages/`: assignment prompts for the 3 development stages
+- `stages/`: active prompts for the 3 development stages
+- `stages/archive/`: archived prompt versions and archive table
 - `evaluation/`: scorecards and experiment logs for prompt quality
 - `CHANGELOG.md`: prompt version history and rationale
 
