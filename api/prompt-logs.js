@@ -46,11 +46,18 @@ module.exports = async function handler(req, res) {
     const raw = await kv.lrange(key, 0, limit - 1);
     const events = Array.isArray(raw)
       ? raw.map((line) => {
-          try {
-            return JSON.parse(line);
-          } catch {
-            return { type: 'prompt_log_parse_error', raw: String(line) };
+          // @vercel/kv may already deserialize JSON values into objects.
+          if (line && typeof line === 'object') return line;
+
+          if (typeof line === 'string') {
+            try {
+              return JSON.parse(line);
+            } catch {
+              return { type: 'prompt_log_parse_error', raw: line };
+            }
           }
+
+          return { type: 'prompt_log_parse_error', raw: String(line) };
         })
       : [];
 
