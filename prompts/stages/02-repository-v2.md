@@ -23,6 +23,7 @@ Required deliverables:
 3. Optional files/placeholders with purpose
 4. Scripts and setup commands
 5. Rationale for major structure and tooling choices
+6. Run Log Update
 
 ## Output Requirements
 
@@ -37,6 +38,9 @@ Required deliverables:
   - content or placeholder content
 - Include "Day-1 Runbook" with copy-paste commands.
 - Include "Day-2 Extension Plan" with 3 concrete next improvements.
+- In "Run Log Update", include concrete append-ready text blocks for:
+  - `logs/actions.md`
+  - `memory/decisions.md` (if decisions were made)
 
 ## Quality Gate (self-check before final answer)
 
@@ -46,6 +50,7 @@ Before finishing, verify:
 - setup commands are complete and ordered
 - no unnecessary boilerplate
 - structure supports future backend addition without reorganization
+- run log text is ready to append without reformatting
 
 ## Evaluation Hook
 

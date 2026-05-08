@@ -35,6 +35,7 @@ Feature contract:
   4. Tests
   5. Verification
   6. Limitations
+  7. Run Log Update
 - In "Changes", include file-by-file modifications.
 - In "Tests", include at least:
   - happy path
@@ -42,6 +43,9 @@ Feature contract:
   - invalid numeric input
   - boundary value
 - In "Verification", provide commands or exact local actions.
+- In "Run Log Update", include concrete append-ready text blocks for:
+  - `logs/actions.md`
+  - `memory/decisions.md` (if decisions were made)
 
 ## Quality Gate (self-check before final answer)
 
@@ -51,6 +55,7 @@ Before finishing, verify:
 - feature behavior is testable from UI only
 - formula assumptions are explained
 - at least one edge-case handling is demonstrated
+- run log text is ready to append without reformatting
 
 ## Evaluation Hook
 

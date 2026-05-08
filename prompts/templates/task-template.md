@@ -40,6 +40,23 @@ Use this template to compose a versioned prompt from interchangeable parts.
 - Mark uncertain statements as assumptions.
 - Prefer minimal complexity and explain trade-offs.
 
+## Execution Logging Contract (Mandatory)
+
+Before finalizing output, the run must update project logs:
+
+1. Append one checkpoint to `logs/actions.md` with:
+   - timestamp
+   - goal
+   - key actions
+   - result
+   - next step
+2. If a non-trivial decision was made, append it to `memory/decisions.md` with:
+   - decision
+   - alternatives considered
+   - rationale
+   - impact/risk
+3. Mention both updates in the final "Verification" section.
+
 ---
 
 ## Prompt Version Metadata

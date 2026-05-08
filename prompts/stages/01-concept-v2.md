@@ -24,6 +24,7 @@ Required sections:
 4. Core data entities and data flow
 5. Risks, trade-offs, and mitigations
 6. MVP implementation plan by sprint
+7. Run Log Update
 
 ## Output Requirements
 
@@ -34,6 +35,9 @@ Required sections:
   - alternatives considered
   - reason selected
 - End with exactly 5 engineering tasks, each with expected output artifact.
+- In "Run Log Update", include concrete append-ready text blocks for:
+  - `logs/actions.md`
+  - `memory/decisions.md`
 
 ## Quality Gate (self-check before final answer)
 
@@ -43,6 +47,7 @@ Before finishing, verify:
 - no missing data-flow explanation
 - risks include both technical and product risks
 - implementation plan includes sequence and dependencies
+- run log text is ready to append without reformatting
 
 ## Evaluation Hook
 
