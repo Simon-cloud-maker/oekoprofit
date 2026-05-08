@@ -443,6 +443,7 @@
       .score-wrap { flex-direction: column; align-items: flex-start; }
     }
   </style>
+  <script src="benchmarks.js"></script>
 </head>
 <body>
 <div class="wrapper">
@@ -576,10 +577,18 @@
 
 <script>
   const benchmarks = {
-    gastro:     { strom:160, gas:80,  wasser:25, abfall:100, recycling:60, label:'Gastronomie' },
-    handel:     { strom:120, gas:50,  wasser:12, abfall:80,  recycling:65, label:'Einzelhandel' },
-    buero:      { strom:90,  gas:40,  wasser:8,  abfall:50,  recycling:70, label:'Büro / Verwaltung' },
+    gastro:     { strom:230, gas:80,  wasser:25, abfall:100, recycling:60, label:'Gastronomie' },
+    handel:     { strom:289, gas:89,  wasser:12, abfall:80,  recycling:65, label:'Einzelhandel' },
+    buero:      { strom:65,  gas:110, wasser:8,  abfall:60,  recycling:70, label:'Büro / Verwaltung' },
     produktion: { strom:250, gas:150, wasser:40, abfall:200, recycling:45, label:'Produktion' },
+  };
+
+  // Maps select values to OEKOPROFIT_BENCHMARKS.branchen keys
+  const BRANCH_BENCHMARK_MAP = {
+    gastro:     'gastronomie',
+    handel:     'einzelhandel_food',
+    buero:      'buero',
+    produktion: 'produktion',
   };
   // Uses Ollama's local server on your Mac (free, no API key).
   // Default model name assumes you've pulled it via: `ollama pull llama3`
@@ -603,17 +612,50 @@
   }
 
   function calcScore(vals, b) {
-    const ratios = [
-      b.strom / Math.max(vals.strom, 1),
-      b.gas   / Math.max(vals.gas + 1, 1),
-      b.wasser / Math.max(vals.wasser, 1),
-      b.abfall / Math.max(vals.abfall, 1),
-      vals.recycling / Math.max(b.recycling, 1),
-    ];
-    const weights = [0.30, 0.20, 0.20, 0.15, 0.15];
-    let s = 0;
-    for (let i = 0; i < 5; i++) s += Math.min(ratios[i], 1.5) * weights[i];
-    return Math.round(Math.min(s * 80, 100));
+    const branchKey = BRANCH_BENCHMARK_MAP[document.getElementById('branche').value];
+    const benchData = OEKOPROFIT_BENCHMARKS.branchen[branchKey];
+    const k = benchData && benchData.kennzahlen;
+    const scored = [];
+
+    if (k && k.strom_kwh_per_m2) {
+      const s = calcBenchmarkScore(vals.strom, k.strom_kwh_per_m2);
+      if (s !== null) scored.push({ s, w: 0.30 });
+    }
+    const gasKennzahl = k && (k.heizwaerme_kwh_per_m2 || k.waerme_kwh_per_m2);
+    if (gasKennzahl) {
+      const s = calcBenchmarkScore(vals.gas, gasKennzahl);
+      if (s !== null) scored.push({ s, w: 0.20 });
+    }
+    if (k && k.abfall_kg_per_ma) {
+      const s = calcBenchmarkScore(vals.abfall, k.abfall_kg_per_ma);
+      if (s !== null) scored.push({ s, w: 0.15 });
+    }
+    if (k && k.wasser_liter_per_ma_tag) {
+      const lTag = (vals.wasser * 1000) / 250;
+      const s = calcBenchmarkScore(lTag, k.wasser_liter_per_ma_tag);
+      if (s !== null) scored.push({ s, w: 0.20 });
+    }
+    // Recycling: invertiert — mehr ist besser; Ziel DE 2022: 70 %
+    const recycScore = calcBenchmarkScore(vals.recycling, { p25: 70, median: 55, p75: 40, invertiert: true });
+    if (recycScore !== null) scored.push({ s: recycScore, w: 0.15 });
+
+    if (scored.length === 0) {
+      // Legacy fallback for branches without P25/P75 data
+      const ratios = [
+        b.strom / Math.max(vals.strom, 1),
+        b.gas   / Math.max(vals.gas + 1, 1),
+        b.wasser / Math.max(vals.wasser, 1),
+        b.abfall / Math.max(vals.abfall, 1),
+        vals.recycling / Math.max(b.recycling, 1),
+      ];
+      const weights = [0.30, 0.20, 0.20, 0.15, 0.15];
+      let s = 0;
+      for (let i = 0; i < 5; i++) s += Math.min(ratios[i], 1.5) * weights[i];
+      return Math.round(Math.min(s * 80, 100));
+    }
+
+    const totalW = scored.reduce((acc, x) => acc + x.w, 0);
+    return Math.round(scored.reduce((acc, x) => acc + x.s * x.w, 0) / totalW);
   }
 
   function scoreLabel(s) {
@@ -632,7 +674,8 @@
     document.getElementById('recycling-v').textContent= vals.recycling;
     document.getElementById('branche-badge').textContent = b.label;
 
-    const co2 = +(vals.strom * 0.4 + vals.gas * 0.2).toFixed(1);
+    const ef = OEKOPROFIT_BENCHMARKS.emissionFactors;
+    const co2 = +((vals.strom * ef.strom_de_mix_g_per_kwh / 1000) + (vals.gas * ef.erdgas_g_per_kwh / 1000)).toFixed(1);
     const energy = vals.strom + vals.gas;
     const score = calcScore(vals, b);
     const sl = scoreLabel(score);
@@ -897,25 +940,57 @@
   }
 
   function buildClaudePrompt(vals, b, score) {
+    const branchKey = BRANCH_BENCHMARK_MAP[document.getElementById('branche').value];
+    const benchData = OEKOPROFIT_BENCHMARKS.branchen[branchKey];
+    const k = benchData && benchData.kennzahlen;
+    const ef = OEKOPROFIT_BENCHMARKS.emissionFactors;
+
+    const stromK = k && k.strom_kwh_per_m2;
+    const stromScore = stromK ? Math.round(calcBenchmarkScore(vals.strom, stromK) || 0) : null;
+    const stromInfo = stromK
+      ? `${vals.strom} kWh/m²·a (P25: ${stromK.p25} | Median: ${stromK.median} | P75: ${stromK.p75}) → Score: ${stromScore}/100 [${getAmpelColor(stromScore)}]`
+      : `${vals.strom} kWh/m²·a (Median: ${b.strom})`;
+
+    const gasK = k && (k.heizwaerme_kwh_per_m2 || k.waerme_kwh_per_m2);
+    const gasInfo = gasK
+      ? `${vals.gas} kWh/m²·a (P25: ${gasK.p25} | Median: ${gasK.median} | P75: ${gasK.p75})`
+      : `${vals.gas} kWh/m²·a (Median: ${b.gas})`;
+
+    const co2 = +((vals.strom * ef.strom_de_mix_g_per_kwh / 1000) + (vals.gas * ef.erdgas_g_per_kwh / 1000)).toFixed(1);
+
+    const qwLines = benchData && benchData.quick_wins
+      ? benchData.quick_wins.slice(0, 3).map(q => {
+          const parts = [q.massnahme];
+          if (q.invest_eur !== undefined) parts.push(`Invest: ${q.invest_eur} €`);
+          if (q.amort_jahre !== undefined) parts.push(`Amort.: ${q.amort_jahre} J.`);
+          if (q.einsparung_pct !== undefined) parts.push(`–${q.einsparung_pct}% ${q.bereich || ''}`);
+          return `- ${parts.join(' | ')}`;
+        }).join('\n')
+      : '';
+
     return `Du bist Energie- und Nachhaltigkeitsberater fuer OEKOPROFIT-Betriebe.
-Analysiere die folgenden Kennzahlen gegen den Branchendurchschnitt und gib eine umsetzbare Beratung.
+Analysiere die folgenden Kennzahlen gegen die Branchen-Benchmarks und gib umsetzbare Beratung.
 
 Branche: ${b.label}
+Emissionsfaktoren: Strom ${ef.strom_de_mix_g_per_kwh} g CO₂/kWh | Erdgas ${ef.erdgas_g_per_kwh} g CO₂/kWh
+
 Kennzahlen des Betriebs:
-- Stromverbrauch: ${vals.strom} kWh/m² (Benchmark: ${b.strom})
-- Gasverbrauch: ${vals.gas} kWh/m² (Benchmark: ${b.gas})
-- Wasserverbrauch: ${vals.wasser} m³/MA (Benchmark: ${b.wasser})
-- Abfallaufkommen: ${vals.abfall} kg/MA (Benchmark: ${b.abfall})
-- Recyclingquote: ${vals.recycling}% (Benchmark: ${b.recycling}%)
-- Oeko-Score: ${score}/100
+- Stromverbrauch: ${stromInfo}
+- Gasverbrauch: ${gasInfo}
+- Wasserverbrauch: ${vals.wasser} m³/MA·a (Median: ${b.wasser})
+- Abfallaufkommen: ${vals.abfall} kg/MA (Median: ${b.abfall})
+- Recyclingquote: ${vals.recycling}% (Ziel DE: ≥ 70 %)
+- CO₂-Äquivalent (Scope 1+2): ${co2} kg/m²·a
+- Oeко-Score gesamt: ${score}/100
+${qwLines ? `\nBranchenspezifische Quick Wins (ÖKOPROFIT-Datenbasis):\n${qwLines}` : ''}
 
 Antwortformat:
-0) Kennzahlen-Uebersicht als Markdown-Tabelle mit Spalten: Kennzahl | Ihr Wert | Benchmark | Abweichung | Status
+0) Kennzahlen-Tabelle: Kennzahl | Ihr Wert | Benchmark (Median) | Abweichung | Status (gruen/gelb/rot)
 1) Kurzfazit (max. 3 Saetze)
-2) Top-3 Massnahmen (jeweils: Aufwand, Einsparpotenzial, naechster Schritt)
+2) Top-3 Massnahmen mit: Invest (€), Einsparung (kWh/CO₂/€ p.a.), Amortisationsdauer, naechster Schritt
 3) 90-Tage-Aktionsplan in 4 Stichpunkten
 
-Sprache: Deutsch, klar und praxisnah.`;
+Sprache: Deutsch, klar und praxisnah. Maximal 400 Woerter.`;
   }
 
   async function checkOllamaReachability() {
