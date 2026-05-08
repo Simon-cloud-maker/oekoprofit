@@ -44,6 +44,51 @@ Establishes a baseline system for reusable, versioned prompt engineering. This a
 
 Moves the prompt system from reusable storage to measurable experimentation. This supports academic reporting on prompt quality improvements, not just prompt collection.
 
+## 2026-04-27
+
+### Added
+
+- Neuer feature-spezifischer Stage-03-Prompt: `stages/03-excel-upload-v1.md`
+  - Feature: Excel-Datei-Upload zur automatischen Befüllung der Umweltkennzahlen-Schieberegler
+  - Persona: feature-implementer
+  - Technologie: SheetJS via CDN, kein Build-Schritt
+- Scorecard für dieses Feature: `evaluation/scorecard-stage-03-excel-upload-v1.md`
+- Experiment-Log: `evaluation/experiment-log-excel-upload.md`
+- Memory/Logs-Struktur für Agenten-Transparenz eingerichtet:
+  - `memory/short_term.md`, `memory/long_term.md`, `memory/decisions.md`, `memory/known_issues.md`
+  - `logs/actions.md`
+
+### Evaluation Result (v1)
+
+- Score: 18/21 (86 %) – Verdict: Keep
+- Stärken: saubere Struktur, kein Scope Creep, gute Validierungslogik
+- Schwächen: Testdatei-Erstellung fehlt in Verification; keine Next Steps
+
+### Rationale
+
+Erster feature-spezifischer Prompt nach dem etablierten Stage-03-Muster. Demonstriert den vollständigen Workflow: Prompt → LLM → Scorecard → Log → CHANGELOG.
+
+### Next Iteration Ideas
+
+- v2 mit Testdatei-Anleitung in Verification und Next-Steps-Section erstellen
+- Edge-Case „mehrere Datenzeilen" ergänzen
+
+## 2026-05-08
+
+### Changed
+
+- `After-Task Protocol`-Block zu vier Personas hinzugefügt:
+  - `personas/feature-implementer.md`
+  - `personas/technical-writer.md`
+  - `personas/code-reviewer.md`
+  - `personas/system-architect.md`
+
+### Rationale
+
+Verankert das Transparenz-Logging im Prompt-System: Agenten, die mit diesen Personas arbeiten, sind jetzt explizit angewiesen, nach jeder Aufgabe `logs/actions.md` und `memory/short_term.md` zu aktualisieren. Damit werden die vorhandenen Memory/Logs-Dateien aktiv gepflegt statt nur einmalig befüllt.
+
+---
+
 ## 2026-04-16 (Iteration 3)
 
 ### Added
