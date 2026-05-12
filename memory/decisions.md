@@ -2,6 +2,23 @@
 
 ---
 
+## [2026-05-12] Entscheidung: Gemischte Projektsprache (Englisch/Deutsch)
+
+Kontext:
+Das Prompt-System (`/prompts/`) ist auf Englisch, die Memory- und Log-Dateien (`/memory/`, `/logs/`) auf Deutsch. Diese Mischung ist historisch gewachsen, nicht aktiv entschieden worden.
+
+Entscheidung:
+Zustand bewusst beibehalten: Prompts bleiben auf Englisch, Memory/Logs bleiben auf Deutsch.
+
+Begründung:
+Englische Prompts sind für LLM-Aufrufe robuster und konsistenter. Deutsche Memory/Log-Dateien sind für den menschlichen Leser (Student, Prüfer) leichter zugänglich. Eine Übersetzung würde entweder die Prompt-Qualität riskieren oder keinen echten Mehrwert bringen.
+
+Alternativen verworfen:
+- Alles Englisch: Memory/Logs für deutschsprachigen Kontext unpraktisch.
+- Alles Deutsch: Prompt-Effektivität bei LLM-Aufrufen potenziell reduziert.
+
+---
+
 ## [2026-04-16] Entscheidung: OpenRouter statt lokalem Ollama
 
 Kontext:

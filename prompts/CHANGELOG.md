@@ -1,5 +1,40 @@
 # Prompt Changelog
 
+## 2026-05-12
+
+### Added
+
+- `prompts/stages/03-excel-upload-v3.md` – Feature-Prompt: Betrieb-Label und Branche-Dropdown aus Excel-Spalten befüllen
+- `prompts/evaluation/scorecard-stage-03-excel-upload-v3.md` – Scorecard v3: 21/21 (100 %)
+
+### Evaluation Result (v3)
+
+- Score: 21/21 (100 %) – Verdict: Keep
+- Neue Funktionalität: Keyword-Mapping Branche, Betrieb-Label-Update
+- Next Steps für v4: Branche-Keywords konfigurierbar, Mehrjahresauswahl
+
+---
+
+### Added
+
+- `prompts/stages/03-excel-upload-v1.md` – Feature-Prompt: Excel-Upload mit direktem Slider-Mapping
+- `prompts/stages/03-excel-upload-v2.md` – Feature-Prompt: Excel-Upload mit Normierungslogik (MWh→kWh/m², t→kg/MA, Keyword-Matching, Mitarbeiter/Nutzflaeche_m2-Spalten)
+- `prompts/evaluation/scorecard-stage-03-excel-upload-v1.md` – Scorecard v1: 19/21 (90 %)
+- `prompts/evaluation/scorecard-stage-03-excel-upload-v2.md` – Scorecard v2: 21/21 (100 %)
+
+### Evaluation Result (v1 → v2)
+
+| Version | Score | Schwäche | Behoben in v2 |
+|---|---|---|---|
+| v1 | 19/21 (90 %) | Keine Testdatei, keine Next Steps, kein Normierungskonzept | ✓ |
+| v2 | 21/21 (100 %) | — | — |
+
+### Rationale
+
+v1 deckte nur direkte Spaltenmaps ab. Reale Unternehmensdaten (z.B. Münchner Rück) liefern absolute Verbrauchswerte, die normiert werden müssen. v2 löst dies durch Keyword-basiertes Spaltenmatching und automatische Einheitenumrechnung anhand von Mitarbeiterzahl und Nutzfläche aus der Excel-Datei selbst.
+
+---
+
 ## 2026-04-16
 
 ### Added
@@ -44,34 +79,6 @@ Establishes a baseline system for reusable, versioned prompt engineering. This a
 
 Moves the prompt system from reusable storage to measurable experimentation. This supports academic reporting on prompt quality improvements, not just prompt collection.
 
-## 2026-04-27
-
-### Added
-
-- Neuer feature-spezifischer Stage-03-Prompt: `stages/03-excel-upload-v1.md`
-  - Feature: Excel-Datei-Upload zur automatischen Befüllung der Umweltkennzahlen-Schieberegler
-  - Persona: feature-implementer
-  - Technologie: SheetJS via CDN, kein Build-Schritt
-- Scorecard für dieses Feature: `evaluation/scorecard-stage-03-excel-upload-v1.md`
-- Experiment-Log: `evaluation/experiment-log-excel-upload.md`
-- Memory/Logs-Struktur für Agenten-Transparenz eingerichtet:
-  - `memory/short_term.md`, `memory/long_term.md`, `memory/decisions.md`, `memory/known_issues.md`
-  - `logs/actions.md`
-
-### Evaluation Result (v1)
-
-- Score: 18/21 (86 %) – Verdict: Keep
-- Stärken: saubere Struktur, kein Scope Creep, gute Validierungslogik
-- Schwächen: Testdatei-Erstellung fehlt in Verification; keine Next Steps
-
-### Rationale
-
-Erster feature-spezifischer Prompt nach dem etablierten Stage-03-Muster. Demonstriert den vollständigen Workflow: Prompt → LLM → Scorecard → Log → CHANGELOG.
-
-### Next Iteration Ideas
-
-- v2 mit Testdatei-Anleitung in Verification und Next-Steps-Section erstellen
-- Edge-Case „mehrere Datenzeilen" ergänzen
 
 ## 2026-05-08
 

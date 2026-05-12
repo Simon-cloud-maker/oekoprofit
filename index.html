@@ -442,8 +442,37 @@
       .metric-grid { grid-template-columns: 1fr 1fr; }
       .score-wrap { flex-direction: column; align-items: flex-start; }
     }
+
+    .upload-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .upload-row label.btn {
+      display: inline-block;
+      padding: 7px 14px;
+      background: var(--green-400);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .upload-row label.btn:hover { background: var(--green-600); }
+    .upload-row input[type=file] { display: none; }
+    .upload-status {
+      font-size: 0.8rem;
+      color: var(--gray-600);
+      font-family: 'DM Mono', monospace;
+    }
+    .upload-status.ok  { color: var(--green-600); }
+    .upload-status.err { color: var(--coral-400); }
   </style>
   <script src="benchmarks.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="wrapper">
@@ -455,7 +484,7 @@
         <h1>ÖKOPROFIT KI-Dashboard</h1>
       </div>
       <div class="sub">
-        Betrieb: Muster GmbH
+        Betrieb: <span id="betrieb-name">Muster GmbH</span>
         <span class="badge" id="branche-badge">Gastronomie</span>
       </div>
     </div>
@@ -477,6 +506,11 @@
   <div id="tab-eingabe">
     <div class="card">
       <div class="label">Umweltkennzahlen</div>
+      <div class="upload-row">
+        <label class="btn" for="excel-upload">📂 Excel importieren</label>
+        <input type="file" id="excel-upload" accept=".xlsx" onchange="handleExcelUpload(event)">
+        <span class="upload-status" id="upload-status">Noch keine Datei geladen</span>
+      </div>
       <div class="slider-row">
         <label>Stromverbrauch</label>
         <input type="range" min="10" max="500" value="180" id="strom" step="1" oninput="update()">
@@ -576,6 +610,144 @@
 </div>
 
 <script>
+  // --- Excel Upload ---
+  function handleExcelUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const workbook = XLSX.read(e.target.result, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: null });
+
+        if (!rows.length) {
+          setUploadStatus('Fehler: Keine Datenzeile gefunden.', 'err');
+          return;
+        }
+
+        const row = rows[0];
+        // Normalize all header keys: lowercase, trim
+        const data = {};
+        for (const k of Object.keys(row)) data[k.toLowerCase().trim()] = { val: row[k], key: k };
+
+        // Helper: find value by keyword in header
+        function findCol(keyword) {
+          const k = Object.keys(data).find(h => h.includes(keyword));
+          return k ? Number(data[k].val) : null;
+        }
+        function headerContains(kw) {
+          return Object.keys(data).find(h => h.includes(kw));
+        }
+
+        const mitarbeiter = findCol('mitarbeiter');
+        const flaeche     = findCol('nutzflaeche');
+
+        // Detect unit from header key
+        function isMWh(kw)    { const h = headerContains(kw); return h && h.includes('mwh'); }
+        function isTonnes(kw) { const h = headerContains(kw); return h && (h.includes('(t)') || h.endsWith(' t)')); }
+
+        const skipped = [];
+        let filled = 0;
+
+        function setSlider(id, value) {
+          if (value === null || isNaN(value)) return;
+          const slider = document.getElementById(id);
+          const clamped = Math.min(Math.max(Math.round(value), Number(slider.min)), Number(slider.max));
+          slider.value = clamped;
+          document.getElementById(id + '-v').textContent = clamped;
+          filled++;
+        }
+
+        // Strom: MWh → kWh/m²
+        const stromRaw = findCol('strom');
+        if (stromRaw !== null) {
+          if (isMWh('strom')) {
+            if (!flaeche) { skipped.push('Strom (Nutzflaeche_m2 fehlt)'); }
+            else setSlider('strom', stromRaw * 1000 / flaeche);
+          } else setSlider('strom', stromRaw);
+        }
+
+        // Gas: MWh → kWh/m²
+        const gasRaw = findCol('gas');
+        if (gasRaw !== null) {
+          if (isMWh('gas')) {
+            if (!flaeche) { skipped.push('Gas (Nutzflaeche_m2 fehlt)'); }
+            else setSlider('gas', gasRaw * 1000 / flaeche);
+          } else setSlider('gas', gasRaw);
+        }
+
+        // Wasser: m³ → m³/MA
+        const wasserRaw = findCol('wasser');
+        if (wasserRaw !== null) {
+          if (headerContains('wasser') && !headerContains('wasser/')) {
+            if (!mitarbeiter) { skipped.push('Wasser (Mitarbeiter fehlt)'); }
+            else setSlider('wasser', wasserRaw / mitarbeiter);
+          } else setSlider('wasser', wasserRaw);
+        }
+
+        // Abfall (t → kg/MA); exclude Recycled column
+        const abfallKey = Object.keys(data).find(h => h.includes('abfall') && !h.includes('recycl'));
+        const abfallRaw = abfallKey ? Number(data[abfallKey].val) : null;
+        if (abfallRaw !== null) {
+          if (isTonnes('abfall')) {
+            if (!mitarbeiter) { skipped.push('Abfall (Mitarbeiter fehlt)'); }
+            else setSlider('abfall', abfallRaw * 1000 / mitarbeiter);
+          } else setSlider('abfall', abfallRaw);
+        }
+
+        // Recyclingquote: decimal → %
+        const recyclingKey = Object.keys(data).find(h => h.includes('recyclingquote') || (h.includes('recycl') && h.includes('%')));
+        const recyclingRaw = recyclingKey ? Number(data[recyclingKey].val) : null;
+        if (recyclingRaw !== null) {
+          setSlider('recycling', recyclingRaw < 1 ? recyclingRaw * 100 : recyclingRaw);
+        }
+
+        // Betrieb
+        const betriebKey = Object.keys(data).find(h => h.includes('betrieb'));
+        if (betriebKey && data[betriebKey].val) {
+          document.getElementById('betrieb-name').textContent = data[betriebKey].val;
+        }
+
+        // Branche
+        const brancheKey = Object.keys(data).find(h => h.includes('branche'));
+        if (brancheKey && data[brancheKey].val) {
+          const b = String(data[brancheKey].val).toLowerCase();
+          const brancheMap = [
+            { match: v => v.includes('gastro'),                              val: 'gastro',     label: 'Gastronomie' },
+            { match: v => v.includes('handel') || v.includes('einzel'),      val: 'handel',     label: 'Einzelhandel' },
+            { match: v => v.includes('büro') || v.includes('buro') || v.includes('verwaltung'), val: 'buero', label: 'Büro / Verwaltung' },
+            { match: v => v.includes('produktion') || v.includes('fertigung') || v.includes('industrie'), val: 'produktion', label: 'Produktion' },
+          ];
+          const match = brancheMap.find(m => m.match(b));
+          if (match) {
+            document.getElementById('branche').value = match.val;
+            document.getElementById('branche-badge').textContent = match.label;
+          }
+        }
+
+        if (filled === 0) {
+          setUploadStatus('Fehler: Keine passenden Spalten gefunden.', 'err');
+        } else {
+          const skipMsg = skipped.length ? ` | Übersprungen: ${skipped.join(', ')}` : '';
+          setUploadStatus(`✓ ${file.name} – ${filled}/5 Werte übernommen${skipMsg}`, 'ok');
+          update();
+        }
+      } catch (err) {
+        setUploadStatus('Fehler beim Einlesen: ' + err.message, 'err');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function setUploadStatus(msg, type) {
+    const el = document.getElementById('upload-status');
+    el.textContent = msg;
+    el.className = 'upload-status ' + (type || '');
+  }
+  // --- Ende Excel Upload ---
+
   const benchmarks = {
     gastro:     { strom:230, gas:80,  wasser:25, abfall:100, recycling:60, label:'Gastronomie' },
     handel:     { strom:289, gas:89,  wasser:12, abfall:80,  recycling:65, label:'Einzelhandel' },
