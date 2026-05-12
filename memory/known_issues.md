@@ -2,6 +2,22 @@
 
 ---
 
+## Issue: Excel-Upload v1 – absolute Rohdaten nicht direkt als Slider-Werte verwendbar
+
+Problem:
+Excel-Dateien realer Unternehmen (z.B. Münchner Rück) enthalten absolute Verbrauchswerte (MWh, m³, t), während die Slider normierte Kennzahlen erwarten (kWh/m², m³/MA, kg/MA).
+
+Ursache:
+Prompt v1 hat das Spaltenmapping zu simpel angenommen (direkte 1:1-Übertragung). Normierungsgrundlagen (Mitarbeiterzahl, Nutzfläche) fehlten im Excel-Format.
+
+Lösung (v2):
+Excel-Vorlage um Spalten `Mitarbeiter` und `Nutzflaeche_m2` erweitern. Upload-Logik erkennt absolute Einheiten anhand der Spaltenbezeichnung und rechnet automatisch um.
+
+Vermeidung:
+Excel-Vorlage als Testdatei beifügen, damit Nutzer das erwartete Format kennen.
+
+---
+
 ## Issue: OpenRouter gibt leere Antwort zurück
 
 Problem:
