@@ -2,6 +2,8 @@
 // Quellen: EHI Retail Institute, dena, DEHOGA, Umweltbundesamt,
 //          Energieinstitut der Wirtschaft, GEG 2024, Statistisches Bundesamt
 // Stand: Mai 2026
+//
+// Dashboard-Scoring-Interpolationen: known-issues.md (Repo-Root)
 
 const OEKOPROFIT_BENCHMARKS = {
 
@@ -23,6 +25,21 @@ const OEKOPROFIT_BENCHMARKS = {
           p25: 180, median: 230, p75: 280,
           ziel_2030: 150,
           quelle: "DEHOGA 'Nachhaltiges Wirtschaften 2016'"
+        },
+        waerme_kwh_per_m2: {
+          einheit: "kWh/m²·a (Heizung/Kühlung/Wärme, Gebäudebezug)",
+          p25: 62, median: 92, p75: 132,
+          quelle: "Interpolation Gastgewerbe nahe EHI-Einzelhandel-Wärme; siehe known-issues.md"
+        },
+        wasser_liter_per_ma_tag: {
+          einheit: "l/MA·Tag",
+          p25: 38, median: 72, p75: 118,
+          quelle: "Proxy Gewerbe/Gastro (nicht gleichbedeutend mit l/Gedeck); siehe known-issues.md"
+        },
+        abfall_kg_per_ma: {
+          einheit: "kg/Mitarbeiter·a",
+          p25: 95, median: 185, p75: 310,
+          quelle: "Schätzung Speisenreste/Verpackung Gastronomie; siehe known-issues.md"
         },
         wasser_liter_per_gedeck: {
           einheit: "l/Gedeck",
@@ -141,6 +158,16 @@ const OEKOPROFIT_BENCHMARKS = {
           p25: 60, median: 89, p75: 130,
           quelle: "EHI 2024"
         },
+        wasser_liter_per_ma_tag: {
+          einheit: "l/MA·Tag",
+          p25: 11, median: 24, p75: 44,
+          quelle: "Schätzung Einzelhandel Food (Hygiene, Kühlung); siehe known-issues.md"
+        },
+        abfall_kg_per_ma: {
+          einheit: "kg/Mitarbeiter·a",
+          p25: 42, median: 82, p75: 135,
+          quelle: "Schätzung Verpackungs-/Bioabfall LEH; siehe known-issues.md"
+        },
         kaeltetechnik_anteil_strom_pct: {
           einheit: "% des Stroms",
           wert: 51,
@@ -182,6 +209,26 @@ const OEKOPROFIT_BENCHMARKS = {
     produktion: {
       label: "Produktion / Fertigung (KMU)",
       kennzahlen: {
+        strom_kwh_per_m2: {
+          einheit: "kWh/m²·a (Betrieb/Strom, stark branchenabhängig)",
+          p25: 72, median: 145, p75: 275,
+          quelle: "Breite KMU-Fertigungsspanne, Vereinfachung; siehe known-issues.md"
+        },
+        waerme_kwh_per_m2: {
+          einheit: "kWh/m²·a (Heizung/Prozesswärme)",
+          p25: 38, median: 115, p75: 245,
+          quelle: "Schätzung variabler Verarbeitungsbetriebe; siehe known-issues.md"
+        },
+        wasser_liter_per_ma_tag: {
+          einheit: "l/MA·Tag",
+          p25: 42, median: 105, p75: 230,
+          quelle: "Industrie-/Handwerk stark gestreut; siehe known-issues.md"
+        },
+        abfall_kg_per_ma: {
+          einheit: "kg/Mitarbeiter·a",
+          p25: 115, median: 275, p75: 560,
+          quelle: "Schätzung Produktions-/Verpackungsabfälle KMU; siehe known-issues.md"
+        },
         strom_kwh_per_ma_tischlerei: {
           einheit: "kWh/Mitarbeiter·a (Tischlerei/Schreinerei)",
           p25: 3000, median: 6000, p75: 9000,

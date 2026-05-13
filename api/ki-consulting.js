@@ -61,6 +61,55 @@ function sha256Hex(value, salt) {
     .digest('hex');
 }
 
+function extractChoiceText(data) {
+  const choice = data?.choices?.[0];
+  const rawContent =
+    choice?.message?.content ??
+    choice?.text ??
+    choice?.delta?.content ??
+    '';
+
+  if (typeof rawContent === 'string') return rawContent.trim();
+
+  // Some providers return message content as an array of typed chunks.
+  if (Array.isArray(rawContent)) {
+    const joined = rawContent
+      .map((part) => {
+        if (typeof part === 'string') return part;
+        if (part && typeof part.text === 'string') return part.text;
+        return '';
+      })
+      .join('')
+      .trim();
+    return joined;
+  }
+
+  return '';
+}
+
+async function callOpenRouter(openrouterKey, prompt, maxTokens) {
+  const model = 'openrouter/free';
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${openrouterKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.3,
+      max_tokens: maxTokens,
+      messages: [
+        { role: 'system', content: BENCHMARK_SYSTEM_PROMPT },
+        { role: 'user', content: prompt },
+      ],
+    }),
+  });
+
+  const text = await response.text();
+  return { model, response, text };
+}
+
 async function appendNdjsonLine(filePath, obj) {
   const dir = path.dirname(filePath);
   await fs.mkdir(dir, { recursive: true });
@@ -177,24 +226,8 @@ module.exports = async function handler(req, res) {
       promptPreview: logMode === 'full' ? redactText(prompt, logMaxChars) : undefined,
     };
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${openrouterKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.3,
-        max_tokens: 1000,
-        messages: [
-          { role: 'system', content: BENCHMARK_SYSTEM_PROMPT },
-          { role: 'user', content: prompt },
-        ],
-      }),
-    });
-
-    const text = await response.text();
+    let call = await callOpenRouter(openrouterKey, prompt, 1000);
+    let { response, text } = call;
 
     if (!response.ok) {
       await persistPromptLog({
@@ -208,7 +241,7 @@ module.exports = async function handler(req, res) {
       return res.status(response.status).json({ error: 'OpenRouter API error', details: text });
     }
 
-    const data = JSON.parse(text);
+    let data = JSON.parse(text);
 
     if (data?.error) {
       // OpenRouter sometimes returns an error object with details instead of choices.
@@ -228,13 +261,32 @@ module.exports = async function handler(req, res) {
 
     // OpenRouter generally follows the OpenAI chat-completions shape, but in practice
     // free routers can return slightly different structures. Be robust.
-    const content =
-      data?.choices?.[0]?.message?.content ??
-      data?.choices?.[0]?.text ??
-      data?.choices?.[0]?.delta?.content ??
-      '';
+    let contentTrimmed = extractChoiceText(data);
+    const finishReason = data?.choices?.[0]?.finish_reason ?? null;
 
-    const contentTrimmed = typeof content === 'string' ? content.trim() : '';
+    // Some OpenRouter free providers return empty content with finish_reason=length.
+    // Retry once with a smaller max token budget to get a complete short answer.
+    if (!contentTrimmed && finishReason === 'length') {
+      call = await callOpenRouter(openrouterKey, prompt, 450);
+      response = call.response;
+      text = call.text;
+
+      if (!response.ok) {
+        await persistPromptLog({
+          ...baseEvent,
+          ok: false,
+          status: response.status,
+          latencyMs: Date.now() - startMs,
+          errorType: 'openrouter_http_error_after_retry',
+          errorDetailsPreview: redactText(text, 1200),
+        });
+        return res.status(response.status).json({ error: 'OpenRouter API error', details: text });
+      }
+
+      data = JSON.parse(text);
+      contentTrimmed = extractChoiceText(data);
+    }
+
     if (!contentTrimmed) {
       // Don't leak the API key; only return safe debugging info.
       const debug = {

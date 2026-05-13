@@ -219,6 +219,16 @@
       text-align: right;
     }
 
+    .slider-cap-hint {
+      font-size: 12px;
+      color: var(--coral-400);
+      margin-top: 6px;
+      line-height: 1.45;
+      padding: 8px 10px;
+      background: var(--coral-50);
+      border-radius: var(--radius-sm);
+    }
+
     /* Benchmark bars */
     .bench-item { margin-bottom: 14px; }
     .bench-labels {
@@ -518,17 +528,17 @@
       </div>
       <div class="slider-row">
         <label>Gasverbrauch</label>
-        <input type="range" min="0" max="300" value="95" id="gas" step="1" oninput="update()">
+        <input type="range" min="0" max="600" value="95" id="gas" step="1" oninput="update()">
         <span class="slider-val"><span id="gas-v">95</span> kWh/m²</span>
       </div>
       <div class="slider-row">
         <label>Wasserverbrauch</label>
-        <input type="range" min="1" max="100" value="28" id="wasser" step="1" oninput="update()">
+        <input type="range" min="1" max="200" value="28" id="wasser" step="1" oninput="update()">
         <span class="slider-val"><span id="wasser-v">28</span> m³/MA</span>
       </div>
       <div class="slider-row">
         <label>Abfallaufkommen</label>
-        <input type="range" min="10" max="500" value="120" id="abfall" step="1" oninput="update()">
+        <input type="range" min="10" max="1000" value="120" id="abfall" step="1" oninput="update()">
         <span class="slider-val"><span id="abfall-v">120</span> kg/MA</span>
       </div>
       <div class="slider-row">
@@ -536,6 +546,7 @@
         <input type="range" min="0" max="100" value="55" id="recycling" step="1" oninput="update()">
         <span class="slider-val"><span id="recycling-v">55</span> %</span>
       </div>
+      <p id="slider-cap-hint" class="slider-cap-hint" style="display:none;"></p>
     </div>
 
     <div class="metric-grid">
@@ -550,9 +561,9 @@
         <div class="metric-sub" id="energy-sub"></div>
       </div>
       <div class="metric-card">
-        <div class="metric-lbl">Öko-Score</div>
-        <div><span class="metric-num good" id="score-num">—</span><span class="metric-unit">/100</span></div>
-        <div class="metric-sub" id="score-lbl"></div>
+        <div class="metric-lbl">Wasser pro MA·Tag</div>
+        <div><span class="metric-num" id="wasser-tag-num">—</span><span class="metric-unit">L</span></div>
+        <div class="metric-sub">Umrechnung aus m³/MA (250 Arbeitstage/Jahr)</div>
       </div>
     </div>
   </div>
@@ -762,6 +773,13 @@
     buero:      'buero',
     produktion: 'produktion',
   };
+
+  const SLIDER_CAPS = [
+    { id: 'strom', max: 500, name: 'Stromverbrauch' },
+    { id: 'gas', max: 600, name: 'Gasverbrauch' },
+    { id: 'wasser', max: 200, name: 'Wasserverbrauch' },
+    { id: 'abfall', max: 1000, name: 'Abfallaufkommen' },
+  ];
   // Uses Ollama's local server on your Mac (free, no API key).
   // Default model name assumes you've pulled it via: `ollama pull llama3`
   const OLLAMA_BASE = 'http://localhost:11434';
@@ -846,6 +864,16 @@
     document.getElementById('recycling-v').textContent= vals.recycling;
     document.getElementById('branche-badge').textContent = b.label;
 
+    const capHint = document.getElementById('slider-cap-hint');
+    const capped = SLIDER_CAPS.filter(c => +document.getElementById(c.id).value >= c.max);
+    if (capped.length) {
+      capHint.style.display = 'block';
+      capHint.textContent = 'Hinweis: ' + capped.map(c => c.name).join(', ')
+        + ': Obergrenze des Schiebereglers erreicht. Liegt Ihr Betrieb darüber, sind die Werte nach oben begrenzt.';
+    } else {
+      capHint.style.display = 'none';
+    }
+
     const ef = OEKOPROFIT_BENCHMARKS.emissionFactors;
     const co2 = +((vals.strom * ef.strom_de_mix_g_per_kwh / 1000) + (vals.gas * ef.erdgas_g_per_kwh / 1000)).toFixed(1);
     const energy = vals.strom + vals.gas;
@@ -854,9 +882,8 @@
 
     document.getElementById('co2-num').textContent    = co2;
     document.getElementById('energy-num').textContent = energy;
-    document.getElementById('score-num').textContent  = score;
-    document.getElementById('score-lbl').textContent  = sl;
-    document.getElementById('score-num').className = 'metric-num ' + (score >= 55 ? 'good' : 'bad');
+    const wasserLiterProMaTag = Math.round((vals.wasser * 1000) / 250);
+    document.getElementById('wasser-tag-num').textContent = wasserLiterProMaTag;
 
     // Score ring
     const arc = document.getElementById('score-arc');
