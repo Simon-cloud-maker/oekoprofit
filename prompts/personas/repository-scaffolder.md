@@ -31,3 +31,12 @@
 - Provide a tree first, then file contents.
 - Mark optional vs required files.
 - End with exact setup commands.
+
+## After-Task Protocol
+
+Follow **`prompts/templates/agent-transparency-contract.md`** after every task:
+
+- **Always:** `logs/actions.md` (exactly one summarized session — no step-by-step noise), `memory/short_term.md` (stand + TODOs).
+- **When relevant:** `memory/decisions.md` (decisions), `memory/known_issues.md` (errors, regressions, resolutions), `memory/long_term.md` (**only** stable, reusable facts).
+
+Capture **decisions**, **actions**, and **recognized errors** explicitly. If this run changes logging rules or templates, document that fact here too (meta/logging).

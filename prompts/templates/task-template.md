@@ -42,20 +42,19 @@ Use this template to compose a versioned prompt from interchangeable parts.
 
 ## Execution Logging Contract (Mandatory)
 
-Before finalizing output, the run must update project logs:
+Follow **`prompts/templates/agent-transparency-contract.md`** before finalizing output.
 
-1. Append one checkpoint to `logs/actions.md` with:
-   - timestamp
-   - goal
-   - key actions
-   - result
-   - next step
-2. If a non-trivial decision was made, append it to `memory/decisions.md` with:
-   - decision
-   - alternatives considered
-   - rationale
-   - impact/risk
-3. Mention both updates in the final "Verification" section.
+Summary:
+
+1. **`logs/actions.md`** — one session summary (goal, key actions, outcome, next step; no fine-grained dump).
+2. **`memory/short_term.md`** — current stand and TODOs.
+3. **`memory/decisions.md`** — if non-trivial decisions (architecture, tooling, privacy, process).
+4. **`memory/known_issues.md`** — if errors, regressions, or fixes to listed issues appeared.
+5. **`memory/long_term.md`** — only for stable, reusable insights (not ephemeral tasks).
+
+In the final **Verification** section, list which of these files were updated (or state **no change** for optional files with a one-line reason).
+
+**Meta:** If this run defines or extends the logging rules themselves, that change must also be reflected in the same log/memory files.
 
 ---
 

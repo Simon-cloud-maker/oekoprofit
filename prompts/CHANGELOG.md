@@ -1,5 +1,24 @@
 # Prompt Changelog
 
+## 2026-05-13
+
+### Added
+
+- `prompts/templates/agent-transparency-contract.md` — zentraler Vertrag für Moodle-/Prüfungs-Transparenz: was nach jedem Lauf in `logs/actions.md`, `memory/short_term.md` und optional `memory/decisions.md`, `memory/known_issues.md`, `memory/long_term.md` gehört; inkl. Meta-Regel für Änderungen am Logging selbst.
+
+### Changed
+
+- `prompts/README.md` — Standard-Workflow und „Mandatory Run Logging“ auf den neuen Contract ausgerichtet.
+- `prompts/templates/task-template.md` — Execution Logging Contract erweitert.
+- `prompts/stages/01-concept-v2.md`, `02-repository-v2.md`, `03-feature-v2.md`, `03-excel-upload-v1.md`–`v3.md` — Run Log Update verlangt append-fertige Blöcke für alle relevanten Memory-/Log-Dateien.
+- `prompts/personas/*.md` — After-Task Protocol vereinheitlicht; `repository-scaffolder` und `domain-expert-oekoprofit` erhalten denselben Contract.
+
+### Rationale
+
+Vorgabe aus coursework (transparente Agentenaktionen): Entscheidungen, Aktionen und Fehler sollen nachvollziehbar in Repository-Dateien landen, ohne API-Telemetry mit menschlichem Arbeitsspeicher zu verwechseln.
+
+---
+
 ## 2026-05-12
 
 ### Added

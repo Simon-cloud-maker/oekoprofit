@@ -5,7 +5,7 @@ This folder is a lightweight, versioned prompt system for LLM-driven software de
 ## Structure
 
 - `personas/`: reusable role definitions
-- `templates/`: reusable prompt building blocks
+- `templates/`: reusable prompt building blocks (incl. `agent-transparency-contract.md` for Moodle-style run documentation)
 - `stages/`: active prompts for the 3 development stages
 - `stages/archive/`: archived prompt versions and archive table
 - `evaluation/`: scorecards and experiment logs for prompt quality
@@ -28,8 +28,8 @@ There are two different logging layers in this project:
   - stored to console and optionally KV/file (`logs/prompt-log.ndjson`)
   - tracks request metadata, hashes, latency, status
 - **Work/process logging** (human-readable run trace):
-  - written into repository files (`logs/actions.md`, `memory/decisions.md`)
-  - tracks what was changed, why it was changed, and what to do next
+  - written into repository files under `/logs` and `/memory` (see `prompts/templates/agent-transparency-contract.md`)
+  - tracks decisions, actions, recognized errors, stable facts, and session summaries
 
 Both layers are useful and complementary: API logs help with runtime debugging, work logs help with reproducibility and handover.
 
@@ -45,22 +45,26 @@ Use this sequence for each change cycle:
 3. Select the matching primary persona from the stage prompt.
 4. Add project-specific context and acceptance criteria.
 5. Run the prompt and execute the resulting implementation steps.
-6. Update logs in the same run:
-   - append checkpoint to `logs/actions.md`
-   - append architectural or policy decisions to `memory/decisions.md`
+6. Update documentation in the same run (full contract: `prompts/templates/agent-transparency-contract.md`):
+   - **`logs/actions.md`** — one summarized session (no detail spam)
+   - **`memory/short_term.md`** — current stand and TODOs
+   - **`memory/decisions.md`** — if new decisions
+   - **`memory/known_issues.md`** — if errors or problems (or resolutions)
+   - **`memory/long_term.md`** — only if something stable and reusable was learned
 7. Validate, commit on branch, and prepare review.
 
 ## Mandatory Run Logging Contract
 
-For every stage run, append at least one action log entry to `logs/actions.md` using:
+Follow **`prompts/templates/agent-transparency-contract.md`** on every stage run.
 
-- timestamp
-- goal
-- actions performed
-- result
-- next step
+Minimum:
 
-If any non-trivial decision is made (architecture, dependency, trade-off, security/privacy, prompt policy), append a decision entry to `memory/decisions.md` in the same run.
+- One entry in `logs/actions.md` (timestamp, goal, main actions, result, next step).
+- Updated `memory/short_term.md` (stand + TODOs).
+
+Additionally, when the run produces **decisions**, **failures**, or **durable insights**, update `memory/decisions.md`, `memory/known_issues.md`, and/or `memory/long_term.md` as described in that contract.
+
+**Meta-rule:** Changes that themselves improve or define this logging behavior must also be recorded in the same files (so tooling evolves in the audit trail).
 
 ## Recommended Persona Set
 

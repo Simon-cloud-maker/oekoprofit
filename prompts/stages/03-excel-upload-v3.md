@@ -43,7 +43,9 @@ Feature contract:
   5. Verification (use Münchner_Rück_Umweltkennzahlen.xlsx as test file)
   6. Limitations
   7. Next Steps
-  8. Run Log Update
+  8. Run Log Update (see `prompts/templates/agent-transparency-contract.md`)
+- In "Run Log Update", include **append-ready markdown** for:
+  - `logs/actions.md`, `memory/short_term.md`, and any of `memory/decisions.md`, `memory/known_issues.md`, `memory/long_term.md` that apply (else "no change" with reason).
 - In "Tests", cover: both columns present, unknown Branche value, missing Betrieb column.
 
 ## Quality Gate (self-check before final answer)
@@ -54,6 +56,7 @@ Before finishing, verify:
 - Branche mapping is case-insensitive and keyword-based
 - Unknown Branche value fails silently (no error shown)
 - `update()` is called after dropdown change so score recalculates
+- run log blocks are ready to append; optional-file "no change" lines are present where needed
 
 ## Evaluation Hook
 
@@ -64,4 +67,4 @@ Optimize for high score in `prompts/evaluation/scorecard-stage-03-feature.md`.
 - Prompt ID: stage-03-excel-upload
 - Version: v3
 - Date: 2026-05-12
-- Change note: Added Betrieb label update and Branche dropdown mapping from Excel columns
+- Change note: Added Betrieb label update and Branche dropdown mapping from Excel columns; Run Log aligned with `agent-transparency-contract.md`

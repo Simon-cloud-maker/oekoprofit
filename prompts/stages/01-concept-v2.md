@@ -24,7 +24,7 @@ Required sections:
 4. Core data entities and data flow
 5. Risks, trade-offs, and mitigations
 6. MVP implementation plan by sprint
-7. Run Log Update
+7. Run Log Update (see `prompts/templates/agent-transparency-contract.md`)
 
 ## Output Requirements
 
@@ -35,9 +35,12 @@ Required sections:
   - alternatives considered
   - reason selected
 - End with exactly 5 engineering tasks, each with expected output artifact.
-- In "Run Log Update", include concrete append-ready text blocks for:
-  - `logs/actions.md`
-  - `memory/decisions.md`
+- In "Run Log Update", include **append-ready markdown** for each file you change:
+  - `logs/actions.md` (one summarized session)
+  - `memory/short_term.md`
+  - `memory/decisions.md` (or "no change" if nothing new beyond the table above)
+  - `memory/known_issues.md` (or "no change")
+  - `memory/long_term.md` (or "no change" — only stable insights)
 
 ## Quality Gate (self-check before final answer)
 
@@ -47,7 +50,7 @@ Before finishing, verify:
 - no missing data-flow explanation
 - risks include both technical and product risks
 - implementation plan includes sequence and dependencies
-- run log text is ready to append without reformatting
+- run log blocks are ready to append; optional-file "no change" lines are present where needed
 
 ## Evaluation Hook
 
@@ -58,4 +61,4 @@ Optimize for high score in `prompts/evaluation/scorecard-stage-01-concept.md`.
 - Prompt ID: stage-01-concept
 - Version: v2
 - Date: 2026-04-16
-- Change note: Added option analysis, decision logging, and measurable quality gate
+- Change note: Added option analysis, decision logging, measurable quality gate, and full agent transparency logging (`agent-transparency-contract.md`)

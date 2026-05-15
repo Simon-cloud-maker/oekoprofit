@@ -50,7 +50,8 @@ Feature contract:
 - In "Changes", include the complete updated `handleExcelUpload()` function.
 - In "Tests", cover: happy path with MWh data, missing Mitarbeiter column, Recyclingquote as decimal vs percentage, non-xlsx file.
 - In "Next Steps", list at least 2 concrete follow-up improvements.
-- In "Run Log Update", include append-ready blocks for `logs/actions.md` and `memory/short_term.md`.
+- In "Run Log Update", include **append-ready markdown** per `prompts/templates/agent-transparency-contract.md` for:
+  - `logs/actions.md`, `memory/short_term.md`, and any of `memory/decisions.md`, `memory/known_issues.md`, `memory/long_term.md` that apply (else "no change" with reason).
 
 ## Quality Gate (self-check before final answer)
 
@@ -60,7 +61,7 @@ Before finishing, verify:
 - Normalization formulas are explicitly documented
 - Missing normalization columns produce a clear, actionable error message
 - Sliders remain functional after upload
-- Run log text is ready to append without reformatting
+- run log blocks are ready to append; optional-file "no change" lines are present where needed
 
 ## Evaluation Hook
 

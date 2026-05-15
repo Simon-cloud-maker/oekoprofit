@@ -2,6 +2,23 @@
 
 ---
 
+## [2026-05-13] Entscheidung: Zentraler Agent-Transparenz-Vertrag für alle Prompts/Personas
+
+Kontext:
+Die Moodle-Aufgabenstellung verlangt nachvollziehbare Agentenaktionen. Bisher verwiesen README und Personas nur teilweise auf `logs/actions.md` und ausgewählte Memory-Dateien; Excel-Prompts erwähnten nicht einheitlich `decisions` / `known_issues` / `long_term`.
+
+Entscheidung:
+Es gibt eine **single source of truth**: `prompts/templates/agent-transparency-contract.md`. Alle Stage-Prompts (01–03 v2, Excel v1–v3), `prompts/README.md`, `task-template.md` und alle sechs Personas verweisen darauf. Pflicht: eine zusammengefasste Session in `logs/actions.md` plus aktualisiertes `memory/short_term.md`; die übrigen Memory-Dateien bei Bedarf. **Meta:** Änderungen am Logging-System selbst müssen im gleichen Lauf in denselben Dateien festgehalten werden.
+
+Alternativen verworfen:
+- Nur README ohne Template-Datei (schlechter auffindbar für LLM und Menschen).
+- Nur Personas ohne Stage-Prompts (Runs ohne Persona-Wechsel würden den Contract verfehlen).
+
+Konsequenzen:
+- Höhere Pflege beim Prompt-Lauf (mehr Dateien), dafür klare Auditierbarkeit für Prüfer und Folge-Agenten.
+
+---
+
 ## [2026-05-12] Entscheidung: Gemischte Projektsprache (Englisch/Deutsch)
 
 Kontext:

@@ -35,7 +35,7 @@ Feature contract:
   4. Tests
   5. Verification
   6. Limitations
-  7. Run Log Update
+  7. Run Log Update (see `prompts/templates/agent-transparency-contract.md`)
 - In "Changes", include file-by-file modifications.
 - In "Tests", include at least:
   - happy path
@@ -43,9 +43,12 @@ Feature contract:
   - invalid numeric input
   - boundary value
 - In "Verification", provide commands or exact local actions.
-- In "Run Log Update", include concrete append-ready text blocks for:
-  - `logs/actions.md`
-  - `memory/decisions.md` (if decisions were made)
+- In "Run Log Update", include **append-ready markdown** for each file you change:
+  - `logs/actions.md` (one summarized session)
+  - `memory/short_term.md`
+  - `memory/decisions.md` (or "no change")
+  - `memory/known_issues.md` (or "no change")
+  - `memory/long_term.md` (or "no change" — only stable insights)
 
 ## Quality Gate (self-check before final answer)
 
@@ -55,7 +58,7 @@ Before finishing, verify:
 - feature behavior is testable from UI only
 - formula assumptions are explained
 - at least one edge-case handling is demonstrated
-- run log text is ready to append without reformatting
+- run log blocks are ready to append; optional-file "no change" lines are present where needed
 
 ## Evaluation Hook
 
@@ -66,4 +69,4 @@ Optimize for high score in `prompts/evaluation/scorecard-stage-03-feature.md`.
 - Prompt ID: stage-03-feature
 - Version: v2
 - Date: 2026-04-16
-- Change note: Added strict section contract, test matrix requirements, and quality gate
+- Change note: Added strict section contract, test matrix requirements, quality gate, and full agent transparency logging (`agent-transparency-contract.md`)

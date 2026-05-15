@@ -44,7 +44,8 @@ Feature contract:
   - value out of slider range
   - non-xlsx file uploaded
 - In "Verification", describe exact manual steps including a sample Excel file structure.
-- In "Run Log Update", include append-ready text blocks for `logs/actions.md` and `memory/short_term.md`.
+- In "Run Log Update", include **append-ready markdown** per `prompts/templates/agent-transparency-contract.md` for:
+  - `logs/actions.md`, `memory/short_term.md`, and any of `memory/decisions.md`, `memory/known_issues.md`, `memory/long_term.md` that apply (else "no change" with reason).
 
 ## Quality Gate (self-check before final answer)
 
@@ -54,7 +55,7 @@ Before finishing, verify:
 - Feature is fully testable from UI without backend
 - Column mapping logic handles missing or misnamed columns gracefully
 - Sliders remain functional after upload (not disabled or hidden)
-- Run log text is ready to append without reformatting
+- run log blocks are ready to append; optional-file "no change" lines are present where needed
 
 ## Evaluation Hook
 

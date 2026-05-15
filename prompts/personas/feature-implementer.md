@@ -34,13 +34,9 @@
 
 ## After-Task Protocol
 
-After completing any task, update the following files:
+Follow **`prompts/templates/agent-transparency-contract.md`** after every task:
 
-**Required:**
-- `logs/actions.md` – append a session entry: date, persona used, task summary, files changed
-- `memory/short_term.md` – update current status and open TODOs
+- **Always:** `logs/actions.md` (exactly one summarized session — no step-by-step noise), `memory/short_term.md` (stand + TODOs).
+- **When relevant:** `memory/decisions.md` (decisions), `memory/known_issues.md` (errors, regressions, resolutions), `memory/long_term.md` (**only** stable, reusable facts).
 
-**If applicable:**
-- `memory/decisions.md` – if an architectural or design decision was made
-- `memory/known_issues.md` – if a new issue was discovered or an existing one resolved
-- `memory/long_term.md` – if a stable insight about architecture or logic was gained
+Capture **decisions**, **actions**, and **recognized errors** explicitly. If this run changes logging rules or templates, document that fact here too (meta/logging).

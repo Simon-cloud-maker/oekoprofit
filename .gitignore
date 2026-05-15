@@ -2,6 +2,11 @@
 .env*
 !.env.example
 
+node_modules/
+
+# Lokale Prompt-Telemetrie (optional)
+logs/prompt-log.ndjson
+
 # Lokale Kontext- und Quelldateien
 kontext-oekoprofit.md
 Umwelt_und_ESG-Benchmarks.pdf

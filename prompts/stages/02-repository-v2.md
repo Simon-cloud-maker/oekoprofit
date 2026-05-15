@@ -23,7 +23,7 @@ Required deliverables:
 3. Optional files/placeholders with purpose
 4. Scripts and setup commands
 5. Rationale for major structure and tooling choices
-6. Run Log Update
+6. Run Log Update (see `prompts/templates/agent-transparency-contract.md`)
 
 ## Output Requirements
 
@@ -38,9 +38,12 @@ Required deliverables:
   - content or placeholder content
 - Include "Day-1 Runbook" with copy-paste commands.
 - Include "Day-2 Extension Plan" with 3 concrete next improvements.
-- In "Run Log Update", include concrete append-ready text blocks for:
-  - `logs/actions.md`
-  - `memory/decisions.md` (if decisions were made)
+- In "Run Log Update", include **append-ready markdown** for each file you change:
+  - `logs/actions.md` (one summarized session)
+  - `memory/short_term.md`
+  - `memory/decisions.md` (or "no change")
+  - `memory/known_issues.md` (or "no change")
+  - `memory/long_term.md` (or "no change" — only stable insights)
 
 ## Quality Gate (self-check before final answer)
 
@@ -50,7 +53,7 @@ Before finishing, verify:
 - setup commands are complete and ordered
 - no unnecessary boilerplate
 - structure supports future backend addition without reorganization
-- run log text is ready to append without reformatting
+- run log blocks are ready to append; optional-file "no change" lines are present where needed
 
 ## Evaluation Hook
 
@@ -61,4 +64,4 @@ Optimize for high score in `prompts/evaluation/scorecard-stage-02-repository.md`
 - Prompt ID: stage-02-repository
 - Version: v2
 - Date: 2026-04-16
-- Change note: Added onboarding runtime target, ordered output contract, and quality gate
+- Change note: Added onboarding runtime target, ordered output contract, quality gate, and full agent transparency logging (`agent-transparency-contract.md`)

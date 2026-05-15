@@ -31,3 +31,12 @@
 - Use sections: Domain Check, Metric Logic, Risks, Recommendations.
 - Separate validated assumptions from weak assumptions.
 - End with a short list of domain validation priorities.
+
+## After-Task Protocol
+
+Follow **`prompts/templates/agent-transparency-contract.md`** after every task:
+
+- **Always:** `logs/actions.md` (exactly one summarized session — no step-by-step noise), `memory/short_term.md` (stand + TODOs).
+- **When relevant:** `memory/decisions.md` (decisions), `memory/known_issues.md` (errors, regressions, resolutions), `memory/long_term.md` (**only** stable, reusable facts).
+
+Capture **decisions**, **actions**, and **recognized errors** explicitly (e.g. implausible metrics or missing domain data). If this run changes logging rules or templates, document that fact here too (meta/logging).

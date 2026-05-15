@@ -2,6 +2,25 @@
 
 ---
 
+## [2026-05-13] Prozess: Agent-Transparenz / Moodle-Logging im Prompt-System
+
+Ziel:
+Agentenentscheidungen, Aktionen und erkannte Fehler verbindlich in `/logs` und `/memory` dokumentieren; die Einführung dieses Regelwerks selbst mitprotokollieren.
+
+Aktionen:
+- Neues Template `prompts/templates/agent-transparency-contract.md` (Pflicht-/Optional-Dateien, Meta-Regel).
+- `prompts/README.md`, `prompts/templates/task-template.md`, Stages `01-concept-v2`, `02-repository-v2`, `03-feature-v2`, `03-excel-upload-v1`–`v3` auf vollständigen Run-Log-Output abgestimmt.
+- Alle Personas: After-Task Protocol angeglichen; `repository-scaffolder` und `domain-expert-oekoprofit` nachgezogen.
+- `memory/decisions.md`, `memory/long_term.md`, `memory/short_term.md` (dieser Lauf) aktualisiert.
+
+Ergebnis:
+Einheitlicher Vertrag für coursework-taugliche Transparenz; technisches API-Prompt-Logging (`api/ki-consulting.js`) bleibt davon getrennt dokumentiert.
+
+Nächster Schritt:
+Beim nächsten Feature-Lauf die fünf Pfade unter `/logs` und `/memory` wie im Contract befüllen und „no change“ nur bei wirklich leeren optionalen Dateien verwenden.
+
+---
+
 ## [2026-05-12] Feature: Excel-Upload v3 – Betrieb & Branche (Persona: feature-implementer)
 
 Ziel:
