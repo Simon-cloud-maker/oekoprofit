@@ -87,7 +87,13 @@ function extractChoiceText(data) {
   return '';
 }
 
-async function callOpenRouter(openrouterKey, prompt, maxTokens) {
+const CONTINUATION_USER_PROMPT =
+  'Fortsetzung: Die Antwort wurde wegen eines Ausgabelimits abgeschnitten. ' +
+  'Vervollständige jetzt ohne Wiederholung des bereits Geschriebenen. ' +
+  'Schließe alle offenen Teile strukturiert ab (fehlende Tabelle/Kennzahlen falls nur begonnen, Fazit, Top-3, 90-Tage-Plan wenn noch nicht vollständig). ' +
+  'Maximal 400 Wörter insgesamt inklusive dieser Fortsetzung. Deutsch.';
+
+async function callOpenRouterWithMessages(openrouterKey, messages, maxTokens) {
   const model = 'openrouter/free';
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -99,15 +105,16 @@ async function callOpenRouter(openrouterKey, prompt, maxTokens) {
       model,
       temperature: 0.3,
       max_tokens: maxTokens,
-      messages: [
-        { role: 'system', content: BENCHMARK_SYSTEM_PROMPT },
-        { role: 'user', content: prompt },
-      ],
+      messages,
     }),
   });
 
   const text = await response.text();
   return { model, response, text };
+}
+
+async function callOpenRouter(openrouterKey, prompt, maxTokens) {
+  return callOpenRouterWithMessages(openrouterKey, [{ role: 'system', content: BENCHMARK_SYSTEM_PROMPT }, { role: 'user', content: prompt }], maxTokens);
 }
 
 async function appendNdjsonLine(filePath, obj) {
@@ -217,6 +224,15 @@ module.exports = async function handler(req, res) {
     // Notes: Free-tier is rate-limited and not meant for heavy production traffic.
     const model = 'openrouter/free';
 
+    const initialMaxTok = Math.min(
+      Math.max(Number.parseInt(process.env.OPENROUTER_MAX_OUTPUT_TOKENS || '2048', 10), 256),
+      8192,
+    );
+    const continuationMaxTok = Math.min(
+      Math.max(Number.parseInt(process.env.OPENROUTER_CONTINUATION_MAX_TOKENS || '1536', 10), 256),
+      4096,
+    );
+
     const baseEvent = {
       requestId,
       ts: nowIso(),
@@ -226,7 +242,7 @@ module.exports = async function handler(req, res) {
       promptPreview: logMode === 'full' ? redactText(prompt, logMaxChars) : undefined,
     };
 
-    let call = await callOpenRouter(openrouterKey, prompt, 1000);
+    let call = await callOpenRouter(openrouterKey, prompt, initialMaxTok);
     let { response, text } = call;
 
     if (!response.ok) {
@@ -262,7 +278,8 @@ module.exports = async function handler(req, res) {
     // OpenRouter generally follows the OpenAI chat-completions shape, but in practice
     // free routers can return slightly different structures. Be robust.
     let contentTrimmed = extractChoiceText(data);
-    const finishReason = data?.choices?.[0]?.finish_reason ?? null;
+    let finishReason = data?.choices?.[0]?.finish_reason ?? null;
+    let continuationUsed = false;
 
     // Some OpenRouter free providers return empty content with finish_reason=length.
     // Retry once with a smaller max token budget to get a complete short answer.
@@ -285,6 +302,33 @@ module.exports = async function handler(req, res) {
 
       data = JSON.parse(text);
       contentTrimmed = extractChoiceText(data);
+      finishReason = data?.choices?.[0]?.finish_reason ?? null;
+    }
+
+    // Non-empty reply but truncated at max_tokens ("length"): one continuation turn.
+    if (contentTrimmed && finishReason === 'length') {
+      try {
+        const contMessages = [
+          { role: 'system', content: BENCHMARK_SYSTEM_PROMPT },
+          { role: 'user', content: prompt },
+          { role: 'assistant', content: contentTrimmed },
+          { role: 'user', content: CONTINUATION_USER_PROMPT },
+        ];
+        const contCall = await callOpenRouterWithMessages(openrouterKey, contMessages, continuationMaxTok);
+
+        if (contCall.response.ok) {
+          const contData = JSON.parse(contCall.text);
+          if (!contData?.error) {
+            const part2 = extractChoiceText(contData);
+            if (part2) {
+              contentTrimmed = `${contentTrimmed}\n\n${part2}`.trim();
+              continuationUsed = true;
+            }
+          }
+        }
+      } catch {
+        // Keep first partial slice if continuation fails (parse/network).
+      }
     }
 
     if (!contentTrimmed) {
@@ -312,6 +356,8 @@ module.exports = async function handler(req, res) {
       status: 200,
       latencyMs: Date.now() - startMs,
       responseLength: contentTrimmed.length,
+      continuationUsed,
+      priorFinishReason: finishReason,
       responseHash: sha256Hex(contentTrimmed, logSalt),
       responsePreview: logMode === 'full' ? redactText(contentTrimmed, logMaxChars) : undefined,
     });
