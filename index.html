@@ -378,6 +378,7 @@
       font-size: 13px;
       color: var(--gray-600);
       line-height: 1.6;
+      overflow-x: auto;
     }
 
     .ai-response p { margin: 0 0 8px; }
@@ -1132,10 +1133,19 @@
     statusEl.style.color = isError ? 'var(--coral-400)' : 'var(--gray-400)';
   }
 
+  /** Removes bogus "(99 Woerter)" style suffixes models sometimes hallucinate */
+  function stripFakeWordCounts(md) {
+    if (typeof md !== 'string') return '';
+    return md
+      .replace(/\([^)]*\b\d{1,4}\s*W[oö]rter\b[^)]*\)/gi, '')
+      .replace(/\s*\([^)]*\b\d{1,4}\s*W[oö]rter\b[^)]*\)\s*$/gim, '')
+      .trim();
+  }
+
   function setAIResponse(text) {
     const responseEl = document.getElementById('ai-response');
     responseEl.style.display = '';
-    responseEl.innerHTML = parseMarkdown(text);
+    responseEl.innerHTML = parseMarkdown(stripFakeWordCounts(text));
   }
 
   function buildClaudePrompt(vals, b, score) {
@@ -1168,7 +1178,7 @@
       : '';
 
     return `Du bist Energie- und Nachhaltigkeitsberater fuer OEKOPROFIT-Betriebe.
-Analysiere die folgenden Kennzahlen gegen die Branchen-Benchmarks und gib umsetzbare Beratung.
+Nutze NUR die vier Bloecke unten. Kein Intro, keine Zwischenüberschrift wie "1. Tabelle" oder "Pseudo-Tabelle".
 
 Branche: ${b.label}
 Emissionsfaktoren: Strom ${ef.strom_de_mix_g_per_kwh} g CO₂/kWh | Erdgas ${ef.erdgas_g_per_kwh} g CO₂/kWh
@@ -1183,13 +1193,41 @@ Kennzahlen des Betriebs:
 - Oeко-Score gesamt: ${score}/100
 ${qwLines ? `\nBranchenspezifische Quick Wins (ÖKOPROFIT-Datenbasis):\n${qwLines}` : ''}
 
-Antwortformat:
-0) Kennzahlen-Tabelle: Kennzahl | Ihr Wert | Benchmark (Median) | Abweichung | Status (gruen/gelb/rot)
-1) Kurzfazit (max. 3 Saetze)
-2) Top-3 Massnahmen mit: Invest (€), Einsparung (kWh/CO₂/€ p.a.), Amortisationsdauer, naechster Schritt
-3) 90-Tage-Aktionsplan in 4 Stichpunkten
+VERBOTEN (wird sonst als Fehler gewertet):
+- Keine Zeilen, die mit "1. Tabelle" oder "1. Kurzfazit" usw. die Abschnitte ersetzen — die Abschnitte heissen NUR die ##-Überschriften unten.
+- Keine fliessende "Strom X vs Y | Status:"-Texte statt Tabelle.
+- Keine Klammerangabe der Wortzahl, z. B. "(99 Woerter)" oder "(398 Woerter)" — nirgends.
 
-Sprache: Deutsch, klar und praxisnah. Maximal 400 Woerter.`;
+PFLICHT-Struktur (Copy-Muster exakt einhalten, Zahlen/Ampel mit echten Daten füllen):
+
+## Kennzahlentabelle
+(Direkt im Anschluss an diese Zeile kommt die Markdown-Tabelle — Erste Zeile = Spaltenköpfe, Zweite Zeile = Trennzeile mit nur Bindestrichen.)
+
+| Kennzahl | Ihr Wert | Benchmark (Median) | Abweichung (%) | Ampel |
+| --- | --- | --- | --- | --- |
+| Strom | … kWh/m²·a | … | … % | Rot/Gelb/Gruen |
+| Gas | … kWh/m²·a | … | … % | … |
+| Wasser | … m³/MA·a | … | … % | … |
+| Abfall | … kg/MA | … | … % | … |
+| Recycling | … % | … | … % | … |
+
+## Kurzfazit
+Zwei bis drei vollstaendige Saetze in normalem Absatz (keine Nummerierung).
+
+## Top-3-Massnahmen
+Nutze fuer die drei Punkte diese Schreibweise (exakt drei Zeilen mit diesen Labels):
+**Massnahme 1:** Invest … €, Effekt/Einsparung …, Amort … J., Naechster Schritt …
+**Massnahme 2:** …
+**Massnahme 3:** …
+
+## 90-Tage-Plan
+Genau vier Zeilen mit Spiegelstrich, fortlaufend sinnvolle Schritte:
+- Erster Schritt …
+- Zweiter Schritt …
+- Dritter Schritt …
+- Vierter Schritt …
+
+Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt gehaltvoll formulieren (~250–380 Woerter), aber die Woerterzahl NICHT angeben oder zaehlen.`;
   }
 
   async function checkOllamaReachability() {

@@ -34,7 +34,12 @@ Quick Wins mit bewährten Kennzahlen:
 - München 2023/24 Schnitt: ~68.000 kWh, ~11 t CO₂, ~20.000 € Einsparung/Jahr
 
 Antworte auf Deutsch. Gib konkrete Zahlen (kWh, t CO₂, €) und Amortisationsdauern an.
-Verweise auf reale ÖKOPROFIT-Beispiele wo relevant. Maximal 400 Wörter.`;
+Verweise auf reale ÖKOPROFIT-Beispiele wo relevant.
+
+Die Nutzer:in liefert ein festes Markdown-Gerüst: vier ##-Abschnitte. Die Kennzahlentabelle MUSS echtes GitHub-Markdown sein: erste Zeile | Köpfe |, zweite Zeile nur | --- | --- | …
+Verbietet: Pseudo-Tabellen als Fließtext mit „1. Tabelle:“; wiederholtes „1.“ für jeden Abschnitt; Klammern mit Wortzahl.
+
+Ziel-Länge etwa 250–380 Wörter, ohne diese Zahl auszuschreiben.`;
 
 
 const crypto = require('crypto');
@@ -88,10 +93,9 @@ function extractChoiceText(data) {
 }
 
 const CONTINUATION_USER_PROMPT =
-  'Fortsetzung: Die Antwort wurde wegen eines Ausgabelimits abgeschnitten. ' +
-  'Vervollständige jetzt ohne Wiederholung des bereits Geschriebenen. ' +
-  'Schließe alle offenen Teile strukturiert ab (fehlende Tabelle/Kennzahlen falls nur begonnen, Fazit, Top-3, 90-Tage-Plan wenn noch nicht vollständig). ' +
-  'Maximal 400 Wörter insgesamt inklusive dieser Fortsetzung. Deutsch.';
+  'Fortsetzung: Abbruch beim Ausgabelimit. Ergänzen ohne den schon geschriebenen Text zu wiederholen. ' +
+  'Nutze echte Markdown-Tabelle mit Kopfzeile und | --- | --- | Trennzeile unter ## Kennzahlentabelle. Kein "1. Tabelle"-Stil. ' +
+  'Abschnitte Top-3 nur mit **Massnahme 1:** / **Massnahme 2:** / **Massnahme 3:**. Keine Wortzahl in Klammern.';
 
 async function callOpenRouterWithMessages(openrouterKey, messages, maxTokens) {
   const model = 'openrouter/free';
