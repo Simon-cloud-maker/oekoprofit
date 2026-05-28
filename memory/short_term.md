@@ -4,6 +4,7 @@ _Zuletzt aktualisiert: 2026-05-19_
 
 ## Aktueller Stand
 
+- **Dark Mode:** Optionaler Toggle im Header (`data-theme`, `localStorage`, System-Präferenz-Fallback).
 - **Benchmark Fix:** Einzelhandel im UI getrennt (`handel_food` / `handel_nonfood` → `einzelhandel_food` / `einzelhandel_nonfood`); Nonfood hat vollständige Kennzahlen inkl. geschätztem Wasser/Abfall.
 - **Agentic Coding:** `AGENTS.md` + `prompts/agent-runs/` (6 Persona-Runs + Template).
 - **CI:** GitHub Action `agent-transparency` — bei Code/Stage/Persona-Änderungen müssen Logs im selben Commit mitkommen.

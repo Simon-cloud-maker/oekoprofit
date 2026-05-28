@@ -4,6 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ÖKOPROFIT KI-Dashboard</title>
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('oekoprofit-theme');
+        var theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,12 +48,37 @@
       --font-mono: 'DM Mono', monospace;
     }
 
+    [data-theme="dark"] {
+      --green-50:  #0d2e24;
+      --green-100: #1a4d3c;
+      --green-600: #3ecf9e;
+      --green-800: #9fe1cb;
+      --blue-50:   #122a3d;
+      --blue-800:  #9ec5e8;
+      --amber-50:  #3d2e14;
+      --coral-50:  #3d2218;
+      --coral-400: #ff8a65;
+      --gray-50:   #252522;
+      --gray-100:  #333330;
+      --gray-200:  #444441;
+      --gray-400:  #a8a7a0;
+      --gray-600:  #c8c7c0;
+      --gray-900:  #f0efe9;
+      --bg:        #181816;
+      --surface:   #222220;
+      --border:    rgba(255, 255, 255, 0.12);
+    }
+
+    html { color-scheme: light; }
+    html[data-theme="dark"] { color-scheme: dark; }
+
     body {
       font-family: var(--font);
       background: var(--bg);
       color: var(--gray-900);
       min-height: 100vh;
       padding: 2rem 1rem 4rem;
+      transition: background 0.2s ease, color 0.2s ease;
     }
 
     .wrapper {
@@ -109,6 +145,58 @@
 
     select:focus { border-color: var(--green-400); }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .theme-toggle {
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--gray-600);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+
+    .theme-toggle:hover { background: var(--gray-50); }
+    .theme-toggle[aria-pressed="true"] {
+      background: var(--gray-100);
+      color: var(--gray-900);
+    }
+
+    .theme-toggle-icon { font-size: 14px; line-height: 1; }
+
+    [data-theme="dark"] .tab.active {
+      background: var(--green-400);
+      color: #fff;
+      border-color: var(--green-400);
+    }
+
+    [data-theme="dark"] .ai-btn {
+      background: var(--green-400);
+      border-color: var(--green-400);
+    }
+
+    [data-theme="dark"] .slider-row input[type=range]::-webkit-slider-thumb {
+      border-color: var(--surface);
+    }
+
+    [data-theme="dark"] #score-track { stroke: var(--gray-200); }
+    [data-theme="dark"] #score-ring-num { fill: var(--gray-900); }
+    #score-track { stroke: var(--gray-100); }
+    #score-ring-num { fill: var(--gray-900); }
+
     /* Tabs */
     .tabs {
       display: flex;
@@ -144,6 +232,7 @@
       border-radius: var(--radius-lg);
       padding: 1.25rem 1.5rem;
       margin-bottom: 1rem;
+      transition: background 0.2s ease, border-color 0.2s ease;
     }
 
     /* Section label */
@@ -514,13 +603,19 @@
         <span class="badge" id="branche-badge">Gastronomie</span>
       </div>
     </div>
-    <select id="branche" onchange="update()">
-      <option value="gastro">Gastronomie</option>
-      <option value="handel_food">Einzelhandel (Lebensmittel)</option>
-      <option value="handel_nonfood">Einzelhandel (Nonfood)</option>
-      <option value="buero">Büro / Verwaltung</option>
-      <option value="produktion">Produktion</option>
-    </select>
+    <div class="header-actions">
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Dark Mode umschalten">
+        <span class="theme-toggle-icon" id="theme-toggle-icon" aria-hidden="true">🌙</span>
+        <span id="theme-toggle-label">Dark</span>
+      </button>
+      <select id="branche" onchange="update()">
+        <option value="gastro">Gastronomie</option>
+        <option value="handel_food">Einzelhandel (Lebensmittel)</option>
+        <option value="handel_nonfood">Einzelhandel (Nonfood)</option>
+        <option value="buero">Büro / Verwaltung</option>
+        <option value="produktion">Produktion</option>
+      </select>
+    </div>
   </div>
 
   <div class="tabs">
@@ -600,7 +695,7 @@
     <div class="card">
       <div class="score-wrap">
         <svg width="88" height="88" viewBox="0 0 88 88" style="flex-shrink:0;">
-          <circle cx="44" cy="44" r="36" fill="none" stroke="#E8E7E2" stroke-width="10"/>
+          <circle cx="44" cy="44" r="36" fill="none" id="score-track" stroke="#E8E7E2" stroke-width="10"/>
           <circle cx="44" cy="44" r="36" fill="none" id="score-arc"
             stroke="#1D9E75" stroke-width="10"
             stroke-dasharray="226" stroke-dashoffset="113"
@@ -608,7 +703,7 @@
             style="transition: stroke-dashoffset 0.5s ease, stroke 0.3s;"/>
           <text x="44" y="50" text-anchor="middle"
             font-family="'DM Sans', sans-serif"
-            font-size="20" font-weight="600" fill="#1E1E1C"
+            font-size="20" font-weight="600"
             id="score-ring-num">—</text>
         </svg>
         <div class="score-text-wrap">
@@ -1453,6 +1548,29 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     if (btn) btn.classList.add('active');
   }
 
+  function initThemeToggle() {
+    const btn = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-toggle-icon');
+    const label = document.getElementById('theme-toggle-label');
+    if (!btn) return;
+
+    const getTheme = () => document.documentElement.getAttribute('data-theme') || 'light';
+
+    const applyTheme = (theme) => {
+      document.documentElement.setAttribute('data-theme', theme);
+      try { localStorage.setItem('oekoprofit-theme', theme); } catch (e) {}
+      const dark = theme === 'dark';
+      btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+      btn.setAttribute('aria-label', dark ? 'Hellmodus aktivieren' : 'Dark Mode aktivieren');
+      if (icon) icon.textContent = dark ? '☀️' : '🌙';
+      if (label) label.textContent = dark ? 'Hell' : 'Dark';
+    };
+
+    btn.addEventListener('click', () => applyTheme(getTheme() === 'dark' ? 'light' : 'dark'));
+    applyTheme(getTheme());
+  }
+
+  initThemeToggle();
   update();
   checkOllamaReachability();
 </script>

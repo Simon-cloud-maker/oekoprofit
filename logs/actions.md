@@ -2,6 +2,22 @@
 
 ---
 
+## [2026-05-19] Feature: optionaler Dark Mode
+
+Ziel:
+Darstellung optional auf Dark Mode umschaltbar — ohne Build-Step, im bestehenden Single-File-Frontend.
+
+Aktionen:
+- `index.html`: CSS-Variablen unter `[data-theme="dark"]`, Toggle im Header, `localStorage`-Persistenz, System-Präferenz als Fallback, frühes Theme-Script gegen Flackern.
+
+Ergebnis:
+Nutzer können per Button „Dark“ / „Hell“ wechseln; Einstellung bleibt gespeichert.
+
+Nächster Schritt:
+Auf Vercel-Deploy prüfen (Toggle, Tabs, Benchmark-Balken, KI-Antwort-Box).
+
+---
+
 ## [2026-05-19] Fix: Einzelhandel Food/Nonfood getrennt im UI
 
 Ziel:
