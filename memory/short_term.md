@@ -4,6 +4,7 @@ _Zuletzt aktualisiert: 2026-05-19_
 
 ## Aktueller Stand
 
+- **Snapshot-Verlauf:** Tab „Verlauf“ + localStorage-Snapshots (Speichern/Wiederherstellen/Löschen) in `index.html`.
 - **Recycling-Benchmark:** `recyclingquote_pct` in allen Branchen in `benchmarks.js`; Öko-Score nutzt dynamisches `k.recyclingquote_pct` (aktuell Universalwerte).
 - **Dark Mode:** Optionaler Toggle im Header (`data-theme`, `localStorage`, System-Präferenz-Fallback).
 - **Benchmark Fix:** Einzelhandel im UI getrennt (`handel_food` / `handel_nonfood` → `einzelhandel_food` / `einzelhandel_nonfood`); Nonfood hat vollständige Kennzahlen inkl. geschätztem Wasser/Abfall.

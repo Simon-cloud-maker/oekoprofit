@@ -2,6 +2,19 @@
 
 ---
 
+## [2026-05-19] Feature: Snapshot-Verlauf (localStorage)
+
+Ziel:
+Kennzahlen-Stände lokal speichern, vergleichen und wiederherstellen — ohne Backend.
+
+Aktionen:
+- `index.html`: Tab „Verlauf“, Button „Snapshot speichern“ in Dateneingabe, localStorage (`oekoprofit-snapshots`), Wiederherstellen/Löschen.
+
+Ergebnis:
+Nutzer können Öko-Score-Stände im Browser sichern und später laden; Daten bleiben auf dem Gerät.
+
+---
+
 ## [2026-05-19] Fix: Recyclingquote branchenweise aus benchmarks.js
 
 Ziel:

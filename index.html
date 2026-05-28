@@ -585,6 +585,95 @@
     }
     .upload-status.ok  { color: var(--green-600); }
     .upload-status.err { color: var(--coral-400); }
+
+    /* Snapshot / Verlauf */
+    .snapshot-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .snapshot-row button.btn-save {
+      padding: 7px 14px;
+      background: var(--green-400);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: var(--font);
+    }
+    .snapshot-row button.btn-save:hover { background: var(--green-600); }
+    .snapshot-row .save-status {
+      font-size: 0.8rem;
+      color: var(--gray-600);
+      font-family: 'DM Mono', monospace;
+    }
+    .snapshot-row .save-status.ok { color: var(--green-600); }
+
+    .snapshot-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .snapshot-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto auto;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .snapshot-item:hover { border-color: var(--green-400); background: var(--gray-50); }
+    .snap-date {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--gray-600);
+      white-space: nowrap;
+    }
+    .snap-branche {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gray-900);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .snap-score {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--gray-100);
+      color: var(--gray-900);
+      min-width: 38px;
+      text-align: center;
+    }
+    .snap-score.good   { background: var(--green-100); color: var(--green-800); }
+    .snap-score.mid    { background: #fff0cc;          color: #8a6500; }
+    .snap-score.bad    { background: #ffd9cc;          color: #8a2e10; }
+    .snap-btn {
+      font-family: var(--font);
+      font-size: 0.78rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--gray-600);
+      cursor: pointer;
+    }
+    .snap-btn.restore { background: var(--gray-900); color: #fff; border-color: var(--gray-900); }
+    .snap-btn.restore:hover { background: var(--green-600); border-color: var(--green-600); }
+    .snap-btn.delete:hover { color: var(--coral-400); border-color: var(--coral-400); }
+    .snap-empty {
+      font-size: 0.85rem;
+      color: var(--gray-400);
+      padding: 12px 4px;
+    }
+    [data-theme="dark"] .snap-score.mid { background: #4a3a00; color: #ffd96f; }
+    [data-theme="dark"] .snap-score.bad { background: #4a1a0a; color: #ff9477; }
   </style>
   <script src="benchmarks.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -622,6 +711,7 @@
     <button class="tab active" onclick="showTab('eingabe', this)">Dateneingabe</button>
     <button class="tab" onclick="showTab('benchmark', this)">Benchmark</button>
     <button class="tab" onclick="showTab('empfehlungen', this)">KI-Empfehlungen</button>
+    <button class="tab" onclick="showTab('verlauf', this)">Verlauf</button>
   </div>
 
   <!-- TAB: Eingabe -->
@@ -659,6 +749,10 @@
         <span class="slider-val"><span id="recycling-v">55</span> %</span>
       </div>
       <p id="slider-cap-hint" class="slider-cap-hint" style="display:none;"></p>
+      <div class="snapshot-row">
+        <button type="button" class="btn-save" onclick="saveSnapshot()">💾 Snapshot speichern</button>
+        <span class="save-status" id="save-status"></span>
+      </div>
     </div>
 
     <div class="metric-grid">
@@ -728,6 +822,17 @@
     </div>
     <div style="font-size:12px; color:var(--gray-400); margin-top:-0.25rem; padding: 0 0.25rem;">
       Alle Empfehlungen basieren auf anonymisierten Benchmarkdaten aus dem ÖKOPROFIT-Netzwerk (n ≈ 4.500 Betriebe).
+    </div>
+  </div>
+
+  <!-- TAB: Verlauf -->
+  <div id="tab-verlauf" style="display:none;">
+    <div class="card">
+      <div class="label">Gespeicherte Snapshots</div>
+      <div id="snapshot-list" class="snapshot-list"></div>
+    </div>
+    <div style="font-size:12px; color:var(--gray-400); margin-top:-0.25rem; padding: 0 0.25rem;">
+      Snapshots werden lokal im Browser (localStorage) gespeichert und verlassen dieses Gerät nicht.
     </div>
   </div>
 
@@ -1543,12 +1648,121 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   }
 
   function showTab(name, btn) {
-    ['eingabe','benchmark','empfehlungen'].forEach(t => {
+    ['eingabe','benchmark','empfehlungen','verlauf'].forEach(t => {
       document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
     });
     document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
     if (btn) btn.classList.add('active');
+    if (name === 'verlauf') renderSnapshots();
   }
+
+  // --- Verlauf / Snapshots ---
+  const SNAPSHOT_KEY = 'oekoprofit-snapshots';
+
+  function loadSnapshots() {
+    try {
+      const raw = localStorage.getItem(SNAPSHOT_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  }
+
+  function persistSnapshots(list) {
+    try { localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(list)); }
+    catch (e) { console.warn('Snapshot-Speicherung fehlgeschlagen:', e); }
+  }
+
+  function saveSnapshot() {
+    const vals = getVals();
+    const brancheSel = document.getElementById('branche');
+    const brancheVal = brancheSel.value;
+    const brancheLabel = brancheSel.options[brancheSel.selectedIndex].text;
+    const b = benchmarks[brancheVal];
+    const score = calcScore(vals, b);
+    const betrieb = document.getElementById('betrieb-name').textContent.trim() || '—';
+
+    const snap = {
+      id: Date.now(),
+      date: new Date().toISOString(),
+      branche: brancheVal,
+      brancheLabel,
+      betrieb,
+      vals,
+      score
+    };
+
+    const list = loadSnapshots();
+    list.unshift(snap);
+    persistSnapshots(list);
+
+    const status = document.getElementById('save-status');
+    status.textContent = `✓ Snapshot gespeichert (Score ${score})`;
+    status.classList.add('ok');
+    setTimeout(() => { status.textContent = ''; status.classList.remove('ok'); }, 3000);
+
+    renderSnapshots();
+  }
+
+  function deleteSnapshot(id) {
+    const list = loadSnapshots().filter(s => s.id !== id);
+    persistSnapshots(list);
+    renderSnapshots();
+  }
+
+  function restoreSnapshot(id) {
+    const snap = loadSnapshots().find(s => s.id === id);
+    if (!snap) return;
+
+    document.getElementById('branche').value = snap.branche;
+    document.getElementById('branche-badge').textContent = snap.brancheLabel;
+    if (snap.betrieb) document.getElementById('betrieb-name').textContent = snap.betrieb;
+
+    ['strom','gas','wasser','abfall','recycling'].forEach(k => {
+      if (snap.vals[k] == null) return;
+      const slider = document.getElementById(k);
+      const clamped = Math.min(Math.max(snap.vals[k], Number(slider.min)), Number(slider.max));
+      slider.value = clamped;
+      document.getElementById(k + '-v').textContent = clamped;
+    });
+
+    update();
+    showTab('eingabe', document.querySelector('.tabs .tab'));
+  }
+
+  function formatSnapDate(iso) {
+    const d = new Date(iso);
+    if (isNaN(d)) return iso;
+    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      + ' ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function snapScoreClass(s) {
+    if (s >= 70) return 'good';
+    if (s >= 40) return 'mid';
+    return 'bad';
+  }
+
+  function renderSnapshots() {
+    const container = document.getElementById('snapshot-list');
+    if (!container) return;
+    const list = loadSnapshots();
+
+    if (list.length === 0) {
+      container.innerHTML = '<div class="snap-empty">Noch keine Snapshots gespeichert. Im Tab <strong>Dateneingabe</strong> auf „💾 Snapshot speichern" klicken.</div>';
+      return;
+    }
+
+    container.innerHTML = list.map(s => `
+      <div class="snapshot-item">
+        <span class="snap-date">${formatSnapDate(s.date)}</span>
+        <span class="snap-branche" title="${s.betrieb ? s.betrieb + ' – ' : ''}${s.brancheLabel}">${s.brancheLabel}</span>
+        <span class="snap-score ${snapScoreClass(s.score)}" title="Öko-Score">${s.score}</span>
+        <button type="button" class="snap-btn restore" onclick="restoreSnapshot(${s.id})">Wiederherstellen</button>
+        <button type="button" class="snap-btn delete" onclick="deleteSnapshot(${s.id})" title="Löschen">✕</button>
+      </div>
+    `).join('');
+  }
+  // --- Ende Verlauf / Snapshots ---
 
   function initThemeToggle() {
     const btn = document.getElementById('theme-toggle');
