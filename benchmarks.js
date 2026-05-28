@@ -67,6 +67,12 @@ const OEKOPROFIT_BENCHMARKS = {
           p25: 80, median: 54.4, p75: 30,
           invertiert: true,
           quelle: "Statistisches Bundesamt 03/2025"
+        },
+        recyclingquote_pct: {
+          einheit: "% Recyclingquote (Gewerbeabfall)",
+          p25: 70, median: 55, p75: 40,
+          invertiert: true,
+          quelle: "Universalwert: DE-Recyclingziel 2022 (70 %); branchenspezifische Quartile noch nicht verfügbar — siehe known-issues.md"
         }
       },
       hauptverbraucher: [
@@ -130,6 +136,12 @@ const OEKOPROFIT_BENCHMARKS = {
           p25: 12, median: 20, p75: 32,
           geg_neubau_ziel: 20,
           quelle: "ÖNORM H 5059 / BMVBS"
+        },
+        recyclingquote_pct: {
+          einheit: "% Recyclingquote (Gewerbeabfall)",
+          p25: 70, median: 55, p75: 40,
+          invertiert: true,
+          quelle: "Universalwert: DE-Recyclingziel 2022 (70 %); branchenspezifische Quartile noch nicht verfügbar — siehe known-issues.md"
         }
       },
       strom_aufteilung_pct: {
@@ -172,6 +184,12 @@ const OEKOPROFIT_BENCHMARKS = {
           einheit: "% des Stroms",
           wert: 51,
           quelle: "EHI 2024/2025"
+        },
+        recyclingquote_pct: {
+          einheit: "% Recyclingquote (Gewerbeabfall)",
+          p25: 70, median: 55, p75: 40,
+          invertiert: true,
+          quelle: "Universalwert: DE-Recyclingziel 2022 (70 %); branchenspezifische Quartile noch nicht verfügbar — siehe known-issues.md"
         }
       },
       strom_aufteilung_pct: {
@@ -208,6 +226,12 @@ const OEKOPROFIT_BENCHMARKS = {
           einheit: "kg/Mitarbeiter·a",
           p25: 28, median: 58, p75: 95,
           quelle: "Schätzung Verpackungsabfall Nonfood; siehe known-issues.md"
+        },
+        recyclingquote_pct: {
+          einheit: "% Recyclingquote (Gewerbeabfall)",
+          p25: 70, median: 55, p75: 40,
+          invertiert: true,
+          quelle: "Universalwert: DE-Recyclingziel 2022 (70 %); branchenspezifische Quartile noch nicht verfügbar — siehe known-issues.md"
         }
       },
       strom_aufteilung_pct: {
@@ -263,6 +287,12 @@ const OEKOPROFIT_BENCHMARKS = {
           einheit: "% Druckluft am Gesamtstrom (Metallverarbeitung)",
           wert: 40,
           quelle: "Energieinstitut Wien"
+        },
+        recyclingquote_pct: {
+          einheit: "% Recyclingquote (Gewerbeabfall)",
+          p25: 70, median: 55, p75: 40,
+          invertiert: true,
+          quelle: "Universalwert: DE-Recyclingziel 2022 (70 %); branchenspezifische Quartile noch nicht verfügbar — siehe known-issues.md"
         }
       },
       quick_wins: [

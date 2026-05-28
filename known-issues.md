@@ -2,7 +2,7 @@
 
 ## Quartile für Gas, Wasser und Abfall pro Branche
 
-Das Dashboard berechnet den **Öko-Score** aus bis zu fünf Teilscores (Strom, Gas/Wärme, Wasser, Abfall, Recycling) mit festen Gewichten. Die zugrunde liegenden **p25 / Median / p75** müssen in `benchmarks.js` unter der jeweiligen Branche als `heizwaerme_kwh_per_m2` oder `waerme_kwh_per_m2`, `wasser_liter_per_ma_tag` und `abfall_kg_per_ma` vorliegen — **sonst** werden diese Kennzahlen beim Scoring **nicht** berücksichtigt, was zu **zu hohen Gesamtscores** führen kann.
+Das Dashboard berechnet den **Öko-Score** aus bis zu fünf Teilscores (Strom, Gas/Wärme, Wasser, Abfall, Recycling) mit festen Gewichten. Die zugrunde liegenden **p25 / Median / p75** müssen in `benchmarks.js` unter der jeweiligen Branche als `heizwaerme_kwh_per_m2` oder `waerme_kwh_per_m2`, `wasser_liter_per_ma_tag`, `abfall_kg_per_ma` und `recyclingquote_pct` vorliegen — **sonst** werden diese Kennzahlen beim Scoring **nicht** berücksichtigt, was zu **zu hohen Gesamtscores** führen kann.
 
 ### Büro / Verwaltung
 
@@ -28,7 +28,7 @@ Für **Büro** stammen die Quartile überwiegend aus nachvollziehbaren Quellen (
 
 ### Recycling
 
-Die Recyclingquote nutzt weiterhin eine **generische** Ampel (p25/median/p75) aus den Dashboard-Zielen, nicht branchenspezifische Quartile.
+Die Recyclingquote wird jetzt dynamisch aus `k.recyclingquote_pct` je Branche gelesen — konsistent zu Strom/Gas/Wasser/Abfall. Aktuell sind in **allen fünf Branchen** dieselben **Universalwerte** hinterlegt (p25 = 70 %, Median = 55 %, p75 = 40 %, invertiert), abgeleitet aus dem **DE-Recyclingziel 2022 (70 %)**. Branchenspezifische Quartile sind noch zu recherchieren und können dann je Branche in `benchmarks.js` (`recyclingquote_pct`) überschrieben werden.
 
 ---
 

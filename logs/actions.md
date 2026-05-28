@@ -2,6 +2,21 @@
 
 ---
 
+## [2026-05-19] Fix: Recyclingquote branchenweise aus benchmarks.js
+
+Ziel:
+Recycling-Teilscore konsistent zu anderen Kennzahlen aus `benchmarks.js` statt hardcodierter Werte in `index.html`.
+
+Aktionen:
+- `benchmarks.js`: `recyclingquote_pct` für alle fünf Branchen (Universalwerte DE-Ziel 2022).
+- `index.html`: Öko-Score liest `k.recyclingquote_pct` dynamisch.
+- `known-issues.md`: Recycling-Abschnitt aktualisiert.
+
+Ergebnis:
+Recycling fließt überall gleich ins Scoring ein; branchenspezifische Quartile können später je Branche überschrieben werden.
+
+---
+
 ## [2026-05-19] Feature: optionaler Dark Mode
 
 Ziel:

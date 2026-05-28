@@ -942,9 +942,11 @@
       const s = calcBenchmarkScore(lTag, k.wasser_liter_per_ma_tag);
       if (s !== null) scored.push({ s, w: 0.20 });
     }
-    // Recycling: invertiert — mehr ist besser; Ziel DE 2022: 70 %
-    const recycScore = calcBenchmarkScore(vals.recycling, { p25: 70, median: 55, p75: 40, invertiert: true });
-    if (recycScore !== null) scored.push({ s: recycScore, w: 0.15 });
+    // Recycling: invertiert — mehr ist besser; aktuell Universalwerte (DE-Ziel 2022) je Branche
+    if (k && k.recyclingquote_pct) {
+      const s = calcBenchmarkScore(vals.recycling, k.recyclingquote_pct);
+      if (s !== null) scored.push({ s, w: 0.15 });
+    }
 
     if (scored.length === 0) {
       // Legacy fallback for branches without P25/P75 data
