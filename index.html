@@ -261,8 +261,9 @@
       font-weight: 500;
     }
 
-    .bar-fill.good-bar { background: var(--green-50); color: var(--green-600); }
-    .bar-fill.bad-bar  { background: var(--coral-50); color: var(--coral-400); }
+    .bar-fill.good-bar { background: var(--green-400); color: #fff; }
+    .bar-fill.warn-bar { background: var(--amber-400); color: #fff; }
+    .bar-fill.bad-bar  { background: var(--coral-400); color: #fff; }
 
     .bar-marker {
       position: absolute;
@@ -575,9 +576,10 @@
       <div class="label">Branchenvergleich</div>
       <div id="bench-bars"></div>
       <div class="legend">
-        <span><span class="legend-dot" style="background:var(--coral-50); border:1px solid var(--coral-400);"></span>Ihr Wert</span>
-        <span><span class="legend-dot" style="background:var(--green-50); border:1px solid var(--green-400);"></span>Ihr Wert (unter Benchmark)</span>
-        <span><span class="legend-dot" style="background:var(--gray-200);"></span>Benchmark</span>
+        <span><span class="legend-dot" style="background:var(--green-400);"></span>Gut (Ampel grün)</span>
+        <span><span class="legend-dot" style="background:var(--amber-400);"></span>Mittelfeld (Ampel gelb)</span>
+        <span><span class="legend-dot" style="background:var(--coral-400);"></span>Handlungsbedarf (Ampel rot)</span>
+        <span><span class="legend-dot" style="background:var(--gray-200);"></span>Strich = Median-Benchmark</span>
       </div>
     </div>
     <div class="card">
@@ -853,6 +855,72 @@
     return s >= 75 ? 'Sehr gut' : s >= 55 ? 'Gut' : s >= 35 ? 'Ausbaufähig' : 'Handlungsbedarf';
   }
 
+  /** Quartile score for one benchmark bar (aligned with calcScore). */
+  function metricBenchmarkScore(key, val) {
+    const branchKey = BRANCH_BENCHMARK_MAP[document.getElementById('branche').value];
+    const k = OEKOPROFIT_BENCHMARKS.branchen[branchKey]?.kennzahlen;
+    if (!k) return null;
+
+    if (key === 'strom' && k.strom_kwh_per_m2) {
+      return calcBenchmarkScore(val, k.strom_kwh_per_m2);
+    }
+    const gasK = k.heizwaerme_kwh_per_m2 || k.waerme_kwh_per_m2;
+    if (key === 'gas' && gasK) {
+      return calcBenchmarkScore(val, gasK);
+    }
+    if (key === 'wasser' && k.wasser_liter_per_ma_tag) {
+      const lTag = (val * 1000) / 250;
+      return calcBenchmarkScore(lTag, k.wasser_liter_per_ma_tag);
+    }
+    if (key === 'abfall' && k.abfall_kg_per_ma) {
+      return calcBenchmarkScore(val, k.abfall_kg_per_ma);
+    }
+    if (key === 'recycling') {
+      return calcBenchmarkScore(val, { p25: 70, median: 55, p75: 40, invertiert: true });
+    }
+    return null;
+  }
+
+  function metricMedian(key, b) {
+    const branchKey = BRANCH_BENCHMARK_MAP[document.getElementById('branche').value];
+    const k = OEKOPROFIT_BENCHMARKS.branchen[branchKey]?.kennzahlen;
+    if (k) {
+      if (key === 'strom' && k.strom_kwh_per_m2) return k.strom_kwh_per_m2.median;
+      const gasK = k.heizwaerme_kwh_per_m2 || k.waerme_kwh_per_m2;
+      if (key === 'gas' && gasK) return gasK.median;
+      if (key === 'wasser' && k.wasser_liter_per_ma_tag) {
+        return Math.round((k.wasser_liter_per_ma_tag.median * 250) / 1000);
+      }
+      if (key === 'abfall' && k.abfall_kg_per_ma) return k.abfall_kg_per_ma.median;
+    }
+    const legacy = { strom: b.strom, gas: b.gas, wasser: b.wasser, abfall: b.abfall, recycling: b.recycling };
+    return legacy[key];
+  }
+
+  function barClassForMetric(key, val, bval, higher) {
+    const score = metricBenchmarkScore(key, val);
+    if (score !== null) {
+      const ampel = getAmpelColor(score);
+      if (ampel === 'green') return 'good-bar';
+      if (ampel === 'yellow') return 'warn-bar';
+      return 'bad-bar';
+    }
+    const better = higher ? val >= bval : val <= bval;
+    return better ? 'good-bar' : 'bad-bar';
+  }
+
+  function diffColorForMetric(key, val, bval, higher) {
+    const score = metricBenchmarkScore(key, val);
+    if (score !== null) {
+      const ampel = getAmpelColor(score);
+      if (ampel === 'green') return 'var(--green-600)';
+      if (ampel === 'yellow') return 'var(--amber-400)';
+      return 'var(--coral-400)';
+    }
+    const better = higher ? val >= bval : val <= bval;
+    return better ? 'var(--green-600)' : 'var(--coral-400)';
+  }
+
   function update() {
     const vals = getVals();
     const branch = document.getElementById('branche').value;
@@ -901,29 +969,29 @@
       ? 'Es besteht Verbesserungspotenzial. Die KI-Empfehlungen zeigen konkrete Hebel auf.'
       : 'Deutlicher Handlungsbedarf – mehrere Kennzahlen liegen signifikant über dem Branchendurchschnitt.';
 
-    // Benchmark bars
+    // Benchmark bars (Ampel via calcBenchmarkScore — same logic as Öko-Score)
     const metrics = [
-      { key:'strom',     label:'Stromverbrauch',  unit:'kWh/m²', val:vals.strom,     bval:b.strom,     higher:false },
-      { key:'gas',       label:'Gasverbrauch',     unit:'kWh/m²', val:vals.gas,       bval:b.gas,       higher:false },
-      { key:'wasser',    label:'Wasserverbrauch',  unit:'m³/MA',  val:vals.wasser,    bval:b.wasser,    higher:false },
-      { key:'abfall',    label:'Abfallaufkommen',  unit:'kg/MA',  val:vals.abfall,    bval:b.abfall,    higher:false },
-      { key:'recycling', label:'Recyclingquote',   unit:'%',      val:vals.recycling, bval:b.recycling, higher:true  },
+      { key:'strom',     label:'Stromverbrauch',  unit:'kWh/m²', val:vals.strom,     higher:false },
+      { key:'gas',       label:'Gasverbrauch',     unit:'kWh/m²', val:vals.gas,       higher:false },
+      { key:'wasser',    label:'Wasserverbrauch',  unit:'m³/MA',  val:vals.wasser,    higher:false },
+      { key:'abfall',    label:'Abfallaufkommen',  unit:'kg/MA',  val:vals.abfall,    higher:false },
+      { key:'recycling', label:'Recyclingquote',   unit:'%',      val:vals.recycling, higher:true  },
     ];
 
     document.getElementById('bench-bars').innerHTML = metrics.map(m => {
-      const maxV = Math.max(m.val, m.bval) * 1.25;
+      const bval = metricMedian(m.key, b);
+      const maxV = Math.max(m.val, bval, 1) * 1.25;
       const pct  = Math.round((m.val  / maxV) * 100);
-      const bpct = Math.round((m.bval / maxV) * 100);
-      const better = m.higher ? m.val >= m.bval : m.val <= m.bval;
-      const cls = better ? 'good-bar' : 'bad-bar';
-      const diff = m.higher
-        ? (m.val - m.bval > 0 ? `+${m.val - m.bval}` : `${m.val - m.bval}`)
-        : (m.val - m.bval > 0 ? `+${m.val - m.bval}` : `${m.val - m.bval}`);
+      const bpct = Math.round((bval / maxV) * 100);
+      const cls = barClassForMetric(m.key, m.val, bval, m.higher);
+      const rawDiff = m.val - bval;
+      const diffStr = rawDiff > 0 ? `+${rawDiff}` : `${rawDiff}`;
+      const diffColor = diffColorForMetric(m.key, m.val, bval, m.higher);
       return `
         <div class="bench-item">
           <div class="bench-labels">
             <span>${m.label}</span>
-            <span>Ihr Wert: ${m.val} ${m.unit} · Benchmark: ${m.bval} ${m.unit} (${diff > 0 && !m.higher ? '<span style="color:var(--coral-400)">+' + (m.val-m.bval) + '</span>' : '<span style="color:var(--green-600)">' + diff + '</span>'})</span>
+            <span>Ihr Wert: ${m.val} ${m.unit} · Benchmark: ${bval} ${m.unit} (<span style="color:${diffColor}">${diffStr}</span>)</span>
           </div>
           <div class="bar-track">
             <div class="bar-fill ${cls}" style="width:${pct}%">${m.val} ${m.unit}</div>
