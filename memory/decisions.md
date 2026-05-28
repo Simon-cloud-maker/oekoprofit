@@ -2,6 +2,26 @@
 
 ---
 
+## [2026-05-19] Entscheidung: Agentic Coding über `AGENTS.md` + `prompts/agent-runs/`
+
+Kontext:
+Personas und Stages regelten bisher manuelle LLM-Läufe. Für IDE-Agenten fehlte ein klarer Einstieg, der Kontext laden, Stage zuordnen, implementieren und Memory pflegen bündelt.
+
+Entscheidung:
+- **`AGENTS.md`** (Root) = globale Agent-Regeln und Persona→Run-Tabelle.
+- **`prompts/agent-runs/<persona>-run.md`** = ausführbarer Ablauf pro Rolle.
+- Stages/Personas bleiben unverändert die fachliche Quelle; Runs orchestrieren nur den Agenten.
+
+Alternativen verworfen:
+- Nur README erweitern (Agent findet Start nicht zuverlässig).
+- Stages in Agent-Prompts umbauen (vermischt Aufgabe und Orchestrierung).
+
+Konsequenzen:
+- Agent startet mit expliziter Run-Datei im Chat (oder über AGENTS.md in Cursor).
+- Transparenz weiterhin über `agent-transparency-contract.md`, nicht automatisch erzwungen.
+
+---
+
 ## [2026-05-13] Entscheidung: Zentraler Agent-Transparenz-Vertrag für alle Prompts/Personas
 
 Kontext:

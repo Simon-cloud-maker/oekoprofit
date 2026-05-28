@@ -38,7 +38,7 @@ _Nur stabile, wiederverwendbare Erkenntnisse. Kein ephemerer Zustand._
   - `stages/archive/` — v1-Versionen (archiviert)
   - `personas/` — 6 Rollen: system-architect, repository-scaffolder, feature-implementer, code-reviewer, domain-expert-oekoprofit, technical-writer
   - `evaluation/` — Scorecards pro Stage, Experiment-Log-Template
-  - `templates/` — Task-Template, **`agent-transparency-contract.md`** (verbindliche Moodle-/Prüfungs-Transparenz: was nach jedem Lauf in `/logs` und `/memory` dokumentiert wird)
+  - `templates/` — Task-Template, **`agent-transparency-contract.md`**, **`agent-runs/`** (Agentic-Coding-Orchestrierung)
   - `CHANGELOG.md` — Versions-Historie der Prompt-Entwicklung
 
 ### Dokumentations-Trennung (Root vs. Memory)

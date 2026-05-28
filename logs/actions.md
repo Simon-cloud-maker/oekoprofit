@@ -2,6 +2,44 @@
 
 ---
 
+## [2026-05-19] Infra: CI-Hook Agent-Transparenz
+
+Ziel:
+Memory-/Log-Pflicht bei Codeänderungen automatisch prüfen (nicht nur konventionell).
+
+Aktionen:
+- `scripts/check-agent-transparency.js` — vergleicht Git-Diff, fordert `logs/actions.md` + `memory/short_term.md` bei Trigger-Pfaden.
+- `.github/workflows/agent-transparency.yml` — läuft auf PR und Push zu `main`.
+- `npm run check:transparency` für lokale Prüfung.
+- Doku in `AGENTS.md`, `prompts/agent-runs/README.md`.
+
+Ergebnis:
+PR/Push schlägt fehl, wenn z. B. `index.html` geändert wurde ohne Session-Log — erzwingt den Contract technisch (minimal, dateibasiert).
+
+Nächster Schritt:
+Agentic-Dateien + CI + Memory-Updates in einem Commit pushen, damit der erste Lauf grün ist.
+
+---
+
+## [2026-05-19] Infra: Agentic Coding Einstieg (AGENTS.md + agent-runs)
+
+Ziel:
+Prompt-System so erweitern, dass ein IDE-Agent eine Persona-Aufgabe im Repo ausführen kann (nicht nur Text-Prompts).
+
+Aktionen:
+- `AGENTS.md` (Repo-Root): Constraints, Persona→Run-Mapping, Transparenz-Pflicht.
+- `prompts/agent-runs/`: README, Template, Runs für alle 6 Personas.
+- `prompts/README.md`: Abschnitt Agentic coding + Quick-start-Beispiel.
+- `memory/short_term.md` aktualisiert.
+
+Ergebnis:
+Agentic Coding ist **nutzbar** über expliziten Chat-Start mit Run-Datei; Enforcement bleibt konventionell (Contract am Ende des Laufs).
+
+Nächster Schritt:
+In Cursor testen: `Follow AGENTS.md and prompts/agent-runs/feature-implementer-run.md` + konkrete Task.
+
+---
+
 ## [2026-05-13] Prozess: Agent-Transparenz / Moodle-Logging im Prompt-System
 
 Ziel:

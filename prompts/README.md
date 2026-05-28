@@ -6,6 +6,7 @@ This folder is a lightweight, versioned prompt system for LLM-driven software de
 
 - `personas/`: reusable role definitions
 - `templates/`: reusable prompt building blocks (incl. `agent-transparency-contract.md` for Moodle-style run documentation)
+- `agent-runs/`: **agentic coding** entry points (orchestration for IDE agents; see repo root `AGENTS.md`)
 - `stages/`: active prompts for the 3 development stages
 - `stages/archive/`: archived prompt versions and archive table
 - `evaluation/`: scorecards and experiment logs for prompt quality
@@ -65,6 +66,23 @@ Minimum:
 Additionally, when the run produces **decisions**, **failures**, or **durable insights**, update `memory/decisions.md`, `memory/known_issues.md`, and/or `memory/long_term.md` as described in that contract.
 
 **Meta-rule:** Changes that themselves improve or define this logging behavior must also be recorded in the same files (so tooling evolves in the audit trail).
+
+## Agentic coding (IDE agents)
+
+For Cursor and similar repo agents, use **`AGENTS.md`** at the repo root and a run file under **`prompts/agent-runs/`** (see `prompts/agent-runs/README.md`).
+
+Quick start example:
+
+```
+Follow AGENTS.md and prompts/agent-runs/feature-implementer-run.md.
+
+Task: <concrete change>
+Acceptance: <done when …>
+In scope: index.html
+Out of scope: unrelated refactors
+```
+
+The agent should read persona + stage from the run file, implement in the repo, then apply `agent-transparency-contract.md`.
 
 ## Recommended Persona Set
 

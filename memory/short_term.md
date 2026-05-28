@@ -1,9 +1,12 @@
 # Short-Term Memory — Aktueller Projektstand
 
-_Zuletzt aktualisiert: 2026-05-13_
+_Zuletzt aktualisiert: 2026-05-19_
 
 ## Aktueller Stand
 
+- **Agentic Coding:** `AGENTS.md` + `prompts/agent-runs/` (6 Persona-Runs + Template).
+- **CI:** GitHub Action `agent-transparency` — bei Code/Stage/Persona-Änderungen müssen Logs im selben Commit mitkommen.
+- **Auto Git:** `npm run agent:finish` am Ende jedes Agent-Runs (Commit+Push auf Feature-Branch, `main` geschützt). Siehe `prompts/templates/git-automation-policy.md`.
 - **Agent-Transparenz (Moodle):** Verbindlicher Ablagevertrag in `prompts/templates/agent-transparency-contract.md`; eingebunden in `prompts/README.md`, `prompts/templates/task-template.md`, Stage v2 (01–03), Excel-Upload v1–v3, und alle Personas (inkl. Repository Scaffolder + Domain Expert).
 - Alle drei Stage-Prompts (01 Concept, 02 Repository, 03 Feature) sind als v2 aktiv und abgeschlossen.
 - v1-Versionen wurden archiviert unter `prompts/stages/archive/` mit `ARCHIVE_TABLE.md`.
@@ -15,7 +18,8 @@ _Zuletzt aktualisiert: 2026-05-13_
 
 ## Aktuelle ToDos
 
-- [ ] Nach nächstem Prompt-Lauf prüfen, ob neue Agenten die fünf Dateien (`actions`, `short_term`, optional `decisions` / `known_issues` / `long_term`) konsistent befüllen.
+- [ ] Ersten echten Agent-Lauf testen: Cursor mit `AGENTS.md` + `feature-implementer-run.md` und kleiner Task.
+- [ ] Nach nächstem Prompt-Lauf prüfen, ob Agenten die fünf Dateien (`actions`, `short_term`, optional `decisions` / `known_issues` / `long_term`) konsistent befüllen.
 - [ ] Drei untracked Excel-Upload-Altdateien manuell löschen (Sandbox-Rechte fehlen).
 - [ ] Branch-Wechsel: erst `feature/persona-after-task-protocol` committen, dann `feature/excel-upload` committen & pushen.
 - [ ] Scorecard v2 für Excel-Upload: Beispiel-Testdatei und Next-Steps ergänzen.
@@ -24,4 +28,4 @@ _Zuletzt aktualisiert: 2026-05-13_
 
 ## Nächster Schritt
 
-Offene Commits abschließen: Personas-Branch committen und mergen, dann Excel-Upload-Branch committen und pushen.
+Agentic-Workflow einmal durchspielen (Feature Implementer + konkrete Task-Zeile im Chat), dann optional committen.

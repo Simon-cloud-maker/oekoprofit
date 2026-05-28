@@ -1,5 +1,22 @@
 # Prompt Changelog
 
+## 2026-05-19
+
+### Added
+
+- `AGENTS.md` — Einstieg für IDE-Agenten (Constraints, Persona→Run-Mapping, Transparenz).
+- `prompts/agent-runs/` — README, `_run-template.md`, Runs für alle sechs Personas.
+
+### Changed
+
+- `prompts/README.md` — Abschnitt „Agentic coding“ mit Quick-start-Beispiel.
+
+### Rationale
+
+Schließt die Lücke zwischen versionierten Stage/Persona-Prompts und ausführbarem Agent-Workflow im Repo.
+
+---
+
 ## 2026-05-13
 
 ### Added
