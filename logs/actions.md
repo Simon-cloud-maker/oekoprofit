@@ -2,6 +2,19 @@
 
 ---
 
+## [2026-05-19] Feature: Score-Verlauf und Snapshot-Vergleich
+
+Ziel:
+Gespeicherte Snapshots visuell auswerten — Trendlinie und Kennzahlenvergleich zwischen zwei Ständen.
+
+Aktionen:
+- `index.html`: Chart.js Score-Verlauf (ab 2 Snapshots), Delta-Anzeige, Vergleichstabelle A/B im Tab „Verlauf“.
+
+Ergebnis:
+Nutzer sehen Score-Entwicklung und können zwei Snapshots nebeneinander vergleichen (lokal, localStorage).
+
+---
+
 ## [2026-05-19] Feature: Snapshot-Verlauf (localStorage)
 
 Ziel:

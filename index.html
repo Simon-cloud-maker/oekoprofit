@@ -674,9 +674,102 @@
     }
     [data-theme="dark"] .snap-score.mid { background: #4a3a00; color: #ffd96f; }
     [data-theme="dark"] .snap-score.bad { background: #4a1a0a; color: #ff9477; }
+
+    /* Trend chart + delta */
+    .trend-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .trend-delta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: var(--gray-50);
+      color: var(--gray-600);
+      white-space: nowrap;
+    }
+    .trend-delta.up   { background: var(--green-100); color: var(--green-800); }
+    .trend-delta.down { background: #ffd9cc;          color: #8a2e10; }
+    [data-theme="dark"] .trend-delta.down { background: #4a1a0a; color: #ff9477; }
+    .trend-chart-wrap {
+      position: relative;
+      height: 220px;
+      width: 100%;
+    }
+
+    /* Vergleichstabelle */
+    .cmp-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .cmp-controls label {
+      font-size: 0.75rem;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .cmp-controls select {
+      width: 100%;
+      padding: 7px 10px;
+      font-size: 0.85rem;
+      font-family: var(--font);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--gray-900);
+    }
+    .cmp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .cmp-table th, .cmp-table td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      font-family: 'DM Mono', monospace;
+    }
+    .cmp-table th {
+      font-family: var(--font);
+      font-weight: 600;
+      color: var(--gray-600);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: var(--gray-50);
+    }
+    .cmp-table td.metric {
+      font-family: var(--font);
+      font-weight: 500;
+      color: var(--gray-900);
+    }
+    .cmp-table td.num    { text-align: right; color: var(--gray-900); }
+    .cmp-table td.diff   { text-align: right; font-weight: 600; }
+    .cmp-table td.diff.better { color: var(--green-600); }
+    .cmp-table td.diff.worse  { color: var(--coral-400); }
+    .cmp-table td.diff.same   { color: var(--gray-400); }
+    .cmp-table tr.score-row td { background: var(--gray-50); font-weight: 600; }
+    [data-theme="dark"] .cmp-table th,
+    [data-theme="dark"] .cmp-table tr.score-row td { background: var(--gray-50); }
+    .cmp-branche-note {
+      font-size: 0.78rem;
+      color: var(--coral-400);
+      margin-top: 8px;
+    }
   </style>
   <script src="benchmarks.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="wrapper">
@@ -827,6 +920,30 @@
 
   <!-- TAB: Verlauf -->
   <div id="tab-verlauf" style="display:none;">
+    <div class="card" id="trend-card" style="display:none;">
+      <div class="trend-head">
+        <div class="label" style="margin:0;">Score-Verlauf</div>
+        <div id="trend-delta" class="trend-delta">—</div>
+      </div>
+      <div class="trend-chart-wrap"><canvas id="trend-chart"></canvas></div>
+    </div>
+
+    <div class="card" id="cmp-card" style="display:none;">
+      <div class="label">Vergleich zweier Snapshots</div>
+      <div class="cmp-controls">
+        <div>
+          <label for="cmp-a">Snapshot A</label>
+          <select id="cmp-a" onchange="renderComparison()"></select>
+        </div>
+        <div>
+          <label for="cmp-b">Snapshot B</label>
+          <select id="cmp-b" onchange="renderComparison()"></select>
+        </div>
+      </div>
+      <div id="cmp-table-wrap"></div>
+      <div id="cmp-branche-note" class="cmp-branche-note" style="display:none;"></div>
+    </div>
+
     <div class="card">
       <div class="label">Gespeicherte Snapshots</div>
       <div id="snapshot-list" class="snapshot-list"></div>
@@ -1749,18 +1866,187 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
 
     if (list.length === 0) {
       container.innerHTML = '<div class="snap-empty">Noch keine Snapshots gespeichert. Im Tab <strong>Dateneingabe</strong> auf „💾 Snapshot speichern" klicken.</div>';
-      return;
+    } else {
+      container.innerHTML = list.map(s => `
+        <div class="snapshot-item">
+          <span class="snap-date">${formatSnapDate(s.date)}</span>
+          <span class="snap-branche" title="${s.betrieb ? s.betrieb + ' – ' : ''}${s.brancheLabel}">${s.brancheLabel}</span>
+          <span class="snap-score ${snapScoreClass(s.score)}" title="Öko-Score">${s.score}</span>
+          <button type="button" class="snap-btn restore" onclick="restoreSnapshot(${s.id})">Wiederherstellen</button>
+          <button type="button" class="snap-btn delete" onclick="deleteSnapshot(${s.id})" title="Löschen">✕</button>
+        </div>
+      `).join('');
     }
 
-    container.innerHTML = list.map(s => `
-      <div class="snapshot-item">
-        <span class="snap-date">${formatSnapDate(s.date)}</span>
-        <span class="snap-branche" title="${s.betrieb ? s.betrieb + ' – ' : ''}${s.brancheLabel}">${s.brancheLabel}</span>
-        <span class="snap-score ${snapScoreClass(s.score)}" title="Öko-Score">${s.score}</span>
-        <button type="button" class="snap-btn restore" onclick="restoreSnapshot(${s.id})">Wiederherstellen</button>
-        <button type="button" class="snap-btn delete" onclick="deleteSnapshot(${s.id})" title="Löschen">✕</button>
-      </div>
-    `).join('');
+    renderTrendChart(list);
+    renderComparisonShell(list);
+  }
+
+  // --- Trend chart ---
+  let trendChart = null;
+
+  function renderTrendChart(list) {
+    const card = document.getElementById('trend-card');
+    if (!card) return;
+    if (list.length < 2 || typeof Chart === 'undefined') {
+      card.style.display = 'none';
+      if (trendChart) { trendChart.destroy(); trendChart = null; }
+      return;
+    }
+    card.style.display = '';
+
+    // chronological: oldest → newest
+    const chrono = [...list].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const labels = chrono.map(s => new Date(s.date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: '2-digit' }));
+    const data   = chrono.map(s => s.score);
+
+    const oldest = chrono[0];
+    const newest = chrono[chrono.length - 1];
+    const delta  = newest.score - oldest.score;
+    const oldestLabel = new Date(oldest.date).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    const deltaEl = document.getElementById('trend-delta');
+    deltaEl.classList.remove('up', 'down');
+    if (delta > 0)      { deltaEl.classList.add('up');   deltaEl.textContent = `▲ +${delta} Punkte seit ${oldestLabel}`; }
+    else if (delta < 0) { deltaEl.classList.add('down'); deltaEl.textContent = `▼ ${delta} Punkte seit ${oldestLabel}`; }
+    else                { deltaEl.textContent = `± 0 Punkte seit ${oldestLabel}`; }
+
+    const css = getComputedStyle(document.documentElement);
+    const green   = css.getPropertyValue('--green-400').trim() || '#1D9E75';
+    const greenBg = css.getPropertyValue('--green-50').trim()  || '#E1F5EE';
+    const grid    = css.getPropertyValue('--gray-100').trim()  || '#E8E7E2';
+    const text    = css.getPropertyValue('--gray-600').trim()  || '#5F5E5A';
+
+    const canvas = document.getElementById('trend-chart');
+    if (trendChart) trendChart.destroy();
+    trendChart = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Öko-Score',
+          data,
+          borderColor: green,
+          backgroundColor: greenBg,
+          fill: true,
+          tension: 0.25,
+          pointRadius: 4,
+          pointBackgroundColor: green,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 1.5,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `Score: ${ctx.parsed.y}`,
+              afterLabel: (ctx) => chrono[ctx.dataIndex].brancheLabel,
+            },
+          },
+        },
+        scales: {
+          y: { min: 0, max: 100, ticks: { color: text, stepSize: 25 }, grid: { color: grid } },
+          x: { ticks: { color: text }, grid: { display: false } },
+        },
+      },
+    });
+  }
+
+  // --- Vergleichstabelle ---
+  function renderComparisonShell(list) {
+    const card = document.getElementById('cmp-card');
+    if (!card) return;
+    if (list.length < 2) { card.style.display = 'none'; return; }
+    card.style.display = '';
+
+    const selA = document.getElementById('cmp-a');
+    const selB = document.getElementById('cmp-b');
+    const prevA = selA.value, prevB = selB.value;
+    const opts = list.map(s => `<option value="${s.id}">${formatSnapDate(s.date)} – ${s.brancheLabel} (Score ${s.score})</option>`).join('');
+    selA.innerHTML = opts;
+    selB.innerHTML = opts;
+
+    // newest snapshot first in list[0], oldest in list[list.length-1]
+    const ids = list.map(s => String(s.id));
+    selA.value = ids.includes(prevA) ? prevA : String(list[0].id);
+    selB.value = ids.includes(prevB) ? prevB : String(list[list.length - 1].id);
+    if (selA.value === selB.value && list.length >= 2) {
+      selB.value = String(list.find(s => String(s.id) !== selA.value).id);
+    }
+
+    renderComparison();
+  }
+
+  // Lower-is-better for these metrics; recycling/score = higher-is-better.
+  const CMP_METRICS = [
+    { key: 'strom',     label: 'Stromverbrauch',  unit: 'kWh/m²', higher: false },
+    { key: 'gas',       label: 'Gasverbrauch',    unit: 'kWh/m²', higher: false },
+    { key: 'wasser',    label: 'Wasserverbrauch', unit: 'm³/MA',  higher: false },
+    { key: 'abfall',    label: 'Abfallaufkommen', unit: 'kg/MA',  higher: false },
+    { key: 'recycling', label: 'Recyclingquote',  unit: '%',      higher: true  },
+  ];
+
+  function renderComparison() {
+    const wrap = document.getElementById('cmp-table-wrap');
+    const note = document.getElementById('cmp-branche-note');
+    if (!wrap) return;
+    const list = loadSnapshots();
+    const a = list.find(s => String(s.id) === document.getElementById('cmp-a').value);
+    const b = list.find(s => String(s.id) === document.getElementById('cmp-b').value);
+    if (!a || !b) { wrap.innerHTML = ''; note.style.display = 'none'; return; }
+
+    const dA = formatSnapDate(a.date), dB = formatSnapDate(b.date);
+
+    const rows = CMP_METRICS.map(m => {
+      const vA = a.vals[m.key];
+      const vB = b.vals[m.key];
+      const diff = vA - vB;
+      const better = m.higher ? diff > 0 : diff < 0;
+      const worse  = m.higher ? diff < 0 : diff > 0;
+      const cls    = diff === 0 ? 'same' : (better ? 'better' : 'worse');
+      const sign   = diff > 0 ? '+' : '';
+      return `
+        <tr>
+          <td class="metric">${m.label}</td>
+          <td class="num">${vA} ${m.unit}</td>
+          <td class="num">${vB} ${m.unit}</td>
+          <td class="diff ${cls}">${diff === 0 ? '±0' : sign + diff} ${m.unit}</td>
+        </tr>`;
+    }).join('');
+
+    const scoreDiff = a.score - b.score;
+    const scoreCls  = scoreDiff === 0 ? 'same' : (scoreDiff > 0 ? 'better' : 'worse');
+    const scoreSign = scoreDiff > 0 ? '+' : '';
+    const scoreRow = `
+      <tr class="score-row">
+        <td class="metric">Öko-Score</td>
+        <td class="num">${a.score}</td>
+        <td class="num">${b.score}</td>
+        <td class="diff ${scoreCls}">${scoreDiff === 0 ? '±0' : scoreSign + scoreDiff}</td>
+      </tr>`;
+
+    wrap.innerHTML = `
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th>Kennzahl</th>
+            <th style="text-align:right;">A · ${dA}</th>
+            <th style="text-align:right;">B · ${dB}</th>
+            <th style="text-align:right;">Δ (A − B)</th>
+          </tr>
+        </thead>
+        <tbody>${rows}${scoreRow}</tbody>
+      </table>`;
+
+    if (a.branche !== b.branche) {
+      note.textContent = `Hinweis: A (${a.brancheLabel}) und B (${b.brancheLabel}) haben unterschiedliche Branchen — Vergleich nur eingeschränkt aussagekräftig.`;
+      note.style.display = '';
+    } else {
+      note.style.display = 'none';
+    }
   }
   // --- Ende Verlauf / Snapshots ---
 

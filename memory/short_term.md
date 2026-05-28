@@ -4,6 +4,7 @@ _Zuletzt aktualisiert: 2026-05-19_
 
 ## Aktueller Stand
 
+- **Verlauf erweitert:** Score-Trend (Chart.js) + Snapshot-Vergleich A/B im Tab „Verlauf“.
 - **Snapshot-Verlauf:** Tab „Verlauf“ + localStorage-Snapshots (Speichern/Wiederherstellen/Löschen) in `index.html`.
 - **Recycling-Benchmark:** `recyclingquote_pct` in allen Branchen in `benchmarks.js`; Öko-Score nutzt dynamisches `k.recyclingquote_pct` (aktuell Universalwerte).
 - **Dark Mode:** Optionaler Toggle im Header (`data-theme`, `localStorage`, System-Präferenz-Fallback).
