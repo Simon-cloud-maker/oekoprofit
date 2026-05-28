@@ -516,7 +516,8 @@
     </div>
     <select id="branche" onchange="update()">
       <option value="gastro">Gastronomie</option>
-      <option value="handel">Einzelhandel</option>
+      <option value="handel_food">Einzelhandel (Lebensmittel)</option>
+      <option value="handel_nonfood">Einzelhandel (Nonfood)</option>
       <option value="buero">Büro / Verwaltung</option>
       <option value="produktion">Produktion</option>
     </select>
@@ -743,8 +744,10 @@
         if (brancheKey && data[brancheKey].val) {
           const b = String(data[brancheKey].val).toLowerCase();
           const brancheMap = [
-            { match: v => v.includes('gastro'),                              val: 'gastro',     label: 'Gastronomie' },
-            { match: v => v.includes('handel') || v.includes('einzel'),      val: 'handel',     label: 'Einzelhandel' },
+            { match: v => v.includes('gastro'),                              val: 'gastro',         label: 'Gastronomie' },
+            { match: v => v.includes('nonfood') || v.includes('textil') || v.includes('baumarkt') || v.includes('drogerie') || v.includes('bekleidung'), val: 'handel_nonfood', label: 'Einzelhandel (Nonfood)' },
+            { match: v => v.includes('food') || v.includes('lebensmittel') || v.includes('supermarkt') || v.includes('discounter'), val: 'handel_food', label: 'Einzelhandel (Lebensmittel)' },
+            { match: v => v.includes('handel') || v.includes('einzel'),      val: 'handel_food',    label: 'Einzelhandel (Lebensmittel)' },
             { match: v => v.includes('büro') || v.includes('buro') || v.includes('verwaltung'), val: 'buero', label: 'Büro / Verwaltung' },
             { match: v => v.includes('produktion') || v.includes('fertigung') || v.includes('industrie'), val: 'produktion', label: 'Produktion' },
           ];
@@ -777,18 +780,20 @@
   // --- Ende Excel Upload ---
 
   const benchmarks = {
-    gastro:     { strom:230, gas:80,  wasser:25, abfall:100, recycling:60, label:'Gastronomie' },
-    handel:     { strom:289, gas:89,  wasser:12, abfall:80,  recycling:65, label:'Einzelhandel' },
-    buero:      { strom:65,  gas:110, wasser:8,  abfall:60,  recycling:70, label:'Büro / Verwaltung' },
-    produktion: { strom:250, gas:150, wasser:40, abfall:200, recycling:45, label:'Produktion' },
+    gastro:          { strom:230, gas:80,  wasser:25, abfall:100, recycling:60, label:'Gastronomie' },
+    handel_food:     { strom:289, gas:89,  wasser:6,  abfall:82,  recycling:65, label:'Einzelhandel (Lebensmittel)' },
+    handel_nonfood:  { strom:75,  gas:66,  wasser:4,  abfall:58,  recycling:65, label:'Einzelhandel (Nonfood)' },
+    buero:           { strom:65,  gas:110, wasser:8,  abfall:60,  recycling:70, label:'Büro / Verwaltung' },
+    produktion:      { strom:250, gas:150, wasser:40, abfall:200, recycling:45, label:'Produktion' },
   };
 
   // Maps select values to OEKOPROFIT_BENCHMARKS.branchen keys
   const BRANCH_BENCHMARK_MAP = {
-    gastro:     'gastronomie',
-    handel:     'einzelhandel_food',
-    buero:      'buero',
-    produktion: 'produktion',
+    gastro:         'gastronomie',
+    handel_food:    'einzelhandel_food',
+    handel_nonfood: 'einzelhandel_nonfood',
+    buero:          'buero',
+    produktion:     'produktion',
   };
 
   const SLIDER_CAPS = [

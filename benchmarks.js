@@ -198,6 +198,16 @@ const OEKOPROFIT_BENCHMARKS = {
           einheit: "kWh/m²·a",
           p25: 45, median: 66, p75: 100,
           quelle: "EHI 2024"
+        },
+        wasser_liter_per_ma_tag: {
+          einheit: "l/MA·Tag",
+          p25: 7, median: 15, p75: 26,
+          quelle: "Schätzung Einzelhandel Nonfood (Sanitär, gering Prozesswasser); siehe known-issues.md"
+        },
+        abfall_kg_per_ma: {
+          einheit: "kg/Mitarbeiter·a",
+          p25: 28, median: 58, p75: 95,
+          quelle: "Schätzung Verpackungsabfall Nonfood; siehe known-issues.md"
         }
       },
       strom_aufteilung_pct: {

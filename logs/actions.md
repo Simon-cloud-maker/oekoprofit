@@ -2,6 +2,24 @@
 
 ---
 
+## [2026-05-19] Fix: Einzelhandel Food/Nonfood getrennt im UI
+
+Ziel:
+Nonfood-Betriebe (Textil, Baumarkt) nicht mehr am Food-Strombenchmark (Median ~289 kWh/m²) messen — künstlich guter Öko-Score.
+
+Aktionen:
+- `index.html`: Dropdown in „Einzelhandel (Lebensmittel)“ / „Einzelhandel (Nonfood)“ aufgeteilt; `BRANCH_BENCHMARK_MAP` mit `handel_food` / `handel_nonfood`; Legacy-`benchmarks` und Excel-Keyword-Mapping angepasst.
+- `benchmarks.js`: `einzelhandel_nonfood` um `wasser_liter_per_ma_tag` und `abfall_kg_per_ma` ergänzt.
+- `known-issues.md`: Abschnitt Nonfood dokumentiert; `prompts/stages/03-excel-upload-v3.md`: Branche-Keywords aktualisiert.
+
+Ergebnis:
+`einzelhandel_nonfood` (Strom Median 75 kWh/m²) ist im UI wählbar und für Scoring/Benchmark-Tabs erreichbar.
+
+Nächster Schritt:
+Manuell testen: Nonfood + ~80 kWh/m² Strom → Score nahe Median, nicht ~100.
+
+---
+
 ## [2026-05-19] Infra: CI-Hook Agent-Transparenz
 
 Ziel:

@@ -26,7 +26,9 @@ Feature contract:
 1. Column `Betrieb` (case-insensitive) → update the text node in `.sub` that shows "Betrieb: Muster GmbH" to "Betrieb: <value>".
 2. Column `Branche` (case-insensitive) → map to dropdown value via keyword matching (case-insensitive):
    - contains `gastro` → `gastro`
-   - contains `handel` or `einzel` → `handel`
+   - contains `nonfood`, `textil`, `baumarkt`, `drogerie`, or `bekleidung` → `handel_nonfood`
+   - contains `food`, `lebensmittel`, `supermarkt`, or `discounter` → `handel_food`
+   - contains `handel` or `einzel` → `handel_food` (fallback)
    - contains `büro` or `buro` or `verwaltung` → `buero`
    - contains `produktion` or `fertigung` or `industrie` → `produktion`
 3. If `Branche` maps successfully → set `#branche` select value, update `#branche-badge` text, call `update()`.

@@ -17,6 +17,11 @@ Für **Büro** stammen die Quartile überwiegend aus nachvollziehbaren Quellen (
 
 - **`wasser_liter_per_ma_tag`** und **`abfall_kg_per_ma`**: EHI liefert hier vor allem **Strom/Wärme pro m²**. Wasser und Abfall pro Mitarbeitenden sind für das Scoring **geschätzt** (Hygiene/Kühlung bzw. Verpackungs-/Bioabfall LEH).
 
+### Einzelhandel (Nonfood)
+
+- Im UI **eigener Dropdown-Eintrag** (`handel_nonfood` → `einzelhandel_nonfood` in `benchmarks.js`), getrennt von Lebensmittelhandel — sonst würden z. B. Baumarkt/Textil am Food-Strombenchmark (Median ~289 kWh/m²) gemessen.
+- **`wasser_liter_per_ma_tag`** und **`abfall_kg_per_ma`**: EHI-Schwerpunkt Strom/Beleuchtung; Wasser/Abfall pro MA sind **geschätzt** (Verpackung, Sanitär).
+
 ### Produktion / Fertigung (KMU)
 
 - **`strom_kwh_per_m2`**, **`waerme_kwh_per_m2`**, **`wasser_liter_per_ma_tag`**, **`abfall_kg_per_ma`**: Die Streuung zwischen Branchen (Metall, Chemie, Textil, …) ist extrem groß. Die eingetragenen Quartile sind eine **bewusst konservative Vereinfachung** für ein einheitliches Dashboard — keine Substitute für eine echte Bilanzierung vor Ort.
