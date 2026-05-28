@@ -242,8 +242,9 @@
 
     .bar-track {
       position: relative;
-      height: 22px;
-      background: var(--gray-50);
+      height: 28px;
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
       border-radius: var(--radius-sm);
       overflow: hidden;
     }
@@ -252,25 +253,38 @@
       position: absolute;
       top: 0; left: 0;
       height: 100%;
-      border-radius: var(--radius-sm);
-      transition: width 0.4s ease;
+      border-radius: calc(var(--radius-sm) - 1px);
+      transition: width 0.4s ease, background 0.25s ease;
       display: flex;
       align-items: center;
-      padding-left: 8px;
-      font-size: 11px;
-      font-weight: 500;
+      padding-left: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.12);
     }
 
-    .bar-fill.good-bar { background: var(--green-400); color: #fff; }
-    .bar-fill.warn-bar { background: var(--amber-400); color: #fff; }
-    .bar-fill.bad-bar  { background: var(--coral-400); color: #fff; }
+    .bar-fill.good-bar {
+      background: linear-gradient(180deg, #22b384 0%, var(--green-600) 100%);
+      color: #fff;
+    }
+    .bar-fill.warn-bar {
+      background: linear-gradient(180deg, #d4922a 0%, var(--amber-400) 100%);
+      color: #fff;
+    }
+    .bar-fill.bad-bar {
+      background: linear-gradient(180deg, #e86a42 0%, #c44d28 100%);
+      color: #fff;
+    }
 
     .bar-marker {
       position: absolute;
       top: 0;
-      width: 2px;
+      width: 3px;
       height: 100%;
-      background: var(--gray-200);
+      background: var(--gray-900);
+      opacity: 0.55;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
     }
 
     /* Score ring */
@@ -576,10 +590,10 @@
       <div class="label">Branchenvergleich</div>
       <div id="bench-bars"></div>
       <div class="legend">
-        <span><span class="legend-dot" style="background:var(--green-400);"></span>Gut (Ampel grün)</span>
+        <span><span class="legend-dot" style="background:var(--green-600);"></span>Gut (Ampel grün)</span>
         <span><span class="legend-dot" style="background:var(--amber-400);"></span>Mittelfeld (Ampel gelb)</span>
-        <span><span class="legend-dot" style="background:var(--coral-400);"></span>Handlungsbedarf (Ampel rot)</span>
-        <span><span class="legend-dot" style="background:var(--gray-200);"></span>Strich = Median-Benchmark</span>
+        <span><span class="legend-dot" style="background:#c44d28;"></span>Handlungsbedarf (Ampel rot)</span>
+        <span><span class="legend-dot" style="background:var(--gray-900); opacity:0.55;"></span>Strich = Median-Benchmark</span>
       </div>
     </div>
     <div class="card">
