@@ -1338,46 +1338,7 @@
         </div>`;
     }).join('');
 
-    // Recommendations
-    const recs = [];
-    if (vals.strom > b.strom * 1.1) recs.push({
-      icon: '⚡', bg: '#FAEEDA',
-      title: 'LED-Beleuchtung & Zeitschaltung',
-      desc: `Ihr Stromverbrauch (${vals.strom} kWh/m²) liegt ${Math.round(((vals.strom/b.strom)-1)*100)} % über dem Branchenschnitt. Umstieg auf LED-Beleuchtung, Bewegungsmelder und smarte Zeitschaltuhren empfohlen.`,
-      pot: `Einsparpotenzial: bis zu ${Math.round((vals.strom - b.strom) * 0.4)} kWh/m² · ca. ${Math.round((vals.strom - b.strom) * 0.4 * 0.3)} €/m²/Jahr`
-    });
-    if (vals.gas > b.gas * 1.1) recs.push({
-      icon: '🔥', bg: '#FAECE7',
-      title: 'Heizungsoptimierung & Dämmung',
-      desc: `Gasverbrauch (${vals.gas} kWh/m²) über Branchenschnitt (${b.gas} kWh/m²). Hydraulischer Abgleich, Nachtabsenkung und Fassadendämmung können den Verbrauch deutlich reduzieren.`,
-      pot: `Einsparpotenzial: ca. ${Math.round((vals.gas - b.gas) * 0.5)} kWh/m²`
-    });
-    if (vals.wasser > b.wasser * 1.1) recs.push({
-      icon: '💧', bg: '#E6F1FB',
-      title: 'Wassersparmaßnahmen',
-      desc: `Wasserverbrauch (${vals.wasser} m³/MA) über Durchschnitt (${b.wasser} m³/MA). Durchflussregler an Armaturen und eine Leckageprüfung empfohlen.`,
-      pot: `Einsparpotenzial: bis zu ${Math.round((vals.wasser - b.wasser) * 0.6)} m³/MA/Jahr`
-    });
-    if (vals.recycling < b.recycling * 0.9) recs.push({
-      icon: '♻️', bg: '#EAF3DE',
-      title: 'Trennsysteme & Schulung',
-      desc: `Recyclingquote (${vals.recycling} %) unter Branchendurchschnitt (${b.recycling} %). Farbcodiertes Trennsystem und Mitarbeitendenschulung empfohlen.`,
-      pot: `Potenzial: Steigerung auf ${b.recycling}–${Math.min(b.recycling+10,95)} %`
-    });
-    if (vals.abfall > b.abfall * 1.1) recs.push({
-      icon: '🗑️', bg: '#EAF3DE',
-      title: 'Abfallvermeidung & Beschaffung',
-      desc: `Abfallaufkommen (${vals.abfall} kg/MA) über Branchenschnitt (${b.abfall} kg/MA). Überprüfung der Einkaufsprozesse und Einführung von Mehrwegsystemen empfohlen.`,
-      pot: `Reduktionspotenzial: ca. ${Math.round((vals.abfall - b.abfall) * 0.5)} kg/MA/Jahr`
-    });
-    if (recs.length === 0) recs.push({
-      icon: '✅', bg: '#E1F5EE',
-      title: 'Ausgezeichnete Umweltbilanz',
-      desc: 'Alle Kennzahlen liegen im oder unter dem Branchendurchschnitt. Der Betrieb ist vorbildlich aufgestellt.',
-      pot: 'ÖKOPROFIT-Zertifizierung empfohlen.'
-    });
-
-    document.getElementById('rec-list').innerHTML = recs.map(r => `
+    document.getElementById('rec-list').innerHTML = buildDeterministicRecs(vals, branch).map(r => `
       <div class="rec-item">
         <div class="rec-icon" style="background:${r.bg}">${r.icon}</div>
         <div>
@@ -1386,6 +1347,97 @@
           <div class="rec-pot">${r.pot}</div>
         </div>
       </div>`).join('');
+  }
+
+  function buildDeterministicRecs(vals, branchKey) {
+    const branchDataKey = BRANCH_BENCHMARK_MAP[branchKey];
+    const benchData     = OEKOPROFIT_BENCHMARKS.branchen[branchDataKey];
+    const massnahmen    = benchData && benchData.massnahmen;
+
+    // Profil fields (available after Task-3 merge; null-safe)
+    const profilFlaeche = +( document.getElementById('profil-flaeche')?.value  || 0) || null;
+    const profilMa      = +( document.getElementById('profil-ma')?.value        || 0) || null;
+    const profilSitze   = +( document.getElementById('profil-sitzplaetze')?.value || 0) || null;
+    const profilKueche  = document.getElementById('profil-kueche')?.value  || null;
+    const profilOefen   = +( document.getElementById('profil-oefen')?.value  || 0) || null;
+
+    const betriebsgroesse = profilMa
+      ? (profilMa < 5 ? 'Kleinstbetrieb (< 5 MA)' : profilMa < 20 ? 'Kleinbetrieb' : 'Mittelbetrieb')
+      : null;
+
+    // Score per metric (reuse calcBenchmarkScore)
+    const k = benchData && benchData.kennzahlen;
+    function scoreFor(metrik) {
+      if (!k) return 50; // fallback: neutral
+      const map = { strom: k.strom_kwh_per_m2, gas: k.waerme_kwh_per_m2 || k.heizwaerme_kwh_per_m2,
+                    wasser: k.wasser_liter_per_ma_tag, abfall: k.abfall_kg_per_ma, recycling: k.recyclingquote_pct };
+      const kz = map[metrik];
+      if (!kz) return 50;
+      const rawVal = metrik === 'wasser' ? (vals.wasser * 1000) / 250 : vals[metrik];
+      return Math.round(calcBenchmarkScore(rawVal, kz) ?? 50);
+    }
+
+    // Template variable substitution
+    const b = benchmarks[branchKey] || {};
+    function diffPct(val, median) { return median ? Math.round(((val - median) / median) * 100) : 0; }
+    const tplVars = {
+      strom: vals.strom,       strom_median: b.strom || '—',
+      gas:   vals.gas,         gas_median:   b.gas   || '—',
+      wasser: vals.wasser,     wasser_median: b.wasser || '—',
+      abfall: vals.abfall,     abfall_median: b.abfall || '—',
+      recycling: vals.recycling,
+      diff_pct_strom:  diffPct(vals.strom,  b.strom),
+      diff_pct_gas:    diffPct(vals.gas,    b.gas),
+      diff_pct_wasser: diffPct(vals.wasser, b.wasser),
+      diff_pct_abfall: diffPct(vals.abfall, b.abfall),
+      flaeche: profilFlaeche || '—',
+      ma:      profilMa      || '—',
+      sitzplaetze: profilSitze || '—',
+      oefen:   profilOefen   || '—',
+      betriebsgroesse: betriebsgroesse || 'Ihr Betrieb',
+      flaeche_text:    profilFlaeche ? `${profilFlaeche} m²` : 'Ihrer Fläche',
+      sitzplaetze_text: profilSitze  ? `${profilSitze} Sitzplätzen` : 'Ihren Sitzplätzen',
+      einsparung_gas_eur: profilFlaeche && b.gas
+        ? Math.round((vals.gas - b.gas) * 0.06 * profilFlaeche * 0.12) : '—',
+      betriebsgroesse_led_tipp: betriebsgroesse === 'Kleinstbetrieb (< 5 MA)'
+        ? 'Bei Kleinstbetrieben amortisiert sich LED oft schon in 1–2 Jahren.'
+        : 'Bei mehreren Räumen lohnt sich ein Komplettangebot vom Elektrobetrieb.',
+      betriebsgroesse_abfall_tipp: betriebsgroesse === 'Kleinstbetrieb (< 5 MA)'
+        ? 'Schon kleine Portionsanpassungen oder ein Reststoff-Log können viel bewirken.'
+        : 'Strukturierte Abfallbilanz und Lieferantenaudit empfohlen.',
+    };
+
+    function render(tpl) {
+      return tpl.replace(/\{(\w+)\}/g, (_, k) => tplVars[k] !== undefined ? tplVars[k] : `{${k}}`);
+    }
+
+    if (!massnahmen || massnahmen.length === 0) {
+      // Fallback für Branchen ohne massnahmen-Definition
+      return [{ icon: 'ℹ️', bg: '#F5F5F3', title: 'Branchenspezifische Empfehlungen folgen',
+        desc: 'Für diese Branche sind noch keine detaillierten Empfehlungsregeln hinterlegt.',
+        pot: 'KI-Beratung starten für individuelle Hinweise.' }];
+    }
+
+    const recs = massnahmen.filter(m => {
+      // Profilbedingung prüfen (nur wenn Profil vorhanden)
+      if (m.nur_wenn_profil && profilKueche !== null) {
+        if (m.nur_wenn_profil.kueche && m.nur_wenn_profil.kueche !== profilKueche) return false;
+      }
+      return scoreFor(m.metrik) < m.zeige_wenn_score_unter;
+    }).map(m => ({
+      icon: m.icon, bg: m.bg,
+      title: render(m.titel),
+      desc:  render(m.desc),
+      pot:   render(m.pot),
+    }));
+
+    if (recs.length === 0) recs.push({
+      icon: '✅', bg: '#E1F5EE',
+      title: 'Ausgezeichnete Umweltbilanz',
+      desc: 'Alle Kennzahlen liegen im oder unter dem Branchendurchschnitt. Der Betrieb ist vorbildlich aufgestellt.',
+      pot: 'ÖKOPROFIT-Zertifizierung empfohlen.'
+    });
+    return recs;
   }
 
   function inlineMarkdown(text) {

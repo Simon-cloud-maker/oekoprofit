@@ -89,6 +89,126 @@ const OEKOPROFIT_BENCHMARKS = {
         { massnahme: "LED-Umrüstung", invest_eur: 3000, einsparung_pct: 50, bereich: "beleuchtung", amort_jahre: 2 },
         { massnahme: "Minibar-Abschaltung (Hotel)", invest_eur: 0, einsparung_kwh_pa: 16500, einsparung_eur_pa: 3300, co2_t_pa: 9.3 },
         { massnahme: "Wassersparende Perlatoren", invest_eur: 50, einsparung_wasser_pct: 40, amort_jahre: 0.5 }
+      ],
+      // Deterministische Empfehlungsregeln: zeige_wenn_score_unter = Ampelgrenze (Score < X → Empfehlung sichtbar)
+      // Variablen in desc/pot: {strom}, {gas}, {wasser}, {abfall}, {recycling},
+      //   {strom_median}, {gas_median}, {wasser_median}, {abfall_median},
+      //   {diff_pct_strom}, {diff_pct_gas}, {diff_pct_wasser}, {diff_pct_abfall},
+      //   {flaeche}, {ma}, {sitzplaetze}, {oefen}, {betriebsgroesse}
+      massnahmen: [
+        {
+          metrik: 'strom', zeige_wenn_score_unter: 65,
+          nur_wenn_profil: { kueche: 'ja' },
+          titel: 'Spülmaschine prüfen oder ersetzen',
+          desc: 'Ihr Strom liegt bei {strom} kWh/m² ({diff_pct_strom} % über Median {strom_median} kWh/m²). In Gastronomie-Betrieben mit Küche ist die Spülmaschine oft der größte Einzelverbraucher — ein modernes Gerät spart 40 % Wasser und Energie.',
+          pot: 'Invest: ~5.000 € · Einsparung: ~40 % Spülenergie · Amortisation: ~3 Jahre',
+          icon: '⚡', bg: '#FAEEDA',
+          quelle: 'DEHOGA Nachhaltigkeitsleitfaden'
+        },
+        {
+          metrik: 'strom', zeige_wenn_score_unter: 65,
+          titel: 'LED-Umrüstung & Bewegungsmelder',
+          desc: 'Beleuchtung macht 15–20 % des Stromverbrauchs in der Gastronomie aus. Bei {sitzplaetze_text} lohnt sich eine vollständige Umrüstung auf LED mit Bewegungsmeldern in Nebenräumen.',
+          pot: 'Invest: ~3.000 € · –50 % Beleuchtungsenergie · Amortisation: ~2 Jahre',
+          icon: '💡', bg: '#FAEEDA',
+          quelle: 'ÖKOPROFIT Praxisbeispiele'
+        },
+        {
+          metrik: 'gas', zeige_wenn_score_unter: 65,
+          titel: 'Heizung 1 °C absenken & Nachtabsenkung einrichten',
+          desc: 'Gasverbrauch {gas} kWh/m² ({diff_pct_gas} % über Median {gas_median} kWh/m²). Jedes Grad Absenkung spart ~6 % Heizkosten — bei {flaeche_text} Nutzfläche entspricht das {einsparung_gas_eur} €/Jahr.',
+          pot: 'Invest: 0 € (Thermostat-Einstellung) · sofortige Einsparung',
+          icon: '🔥', bg: '#FAECE7',
+          quelle: 'Energieinstitut der Wirtschaft'
+        },
+        {
+          metrik: 'gas', zeige_wenn_score_unter: 65,
+          titel: 'Kühlraum-Türschleier & Dichtungen',
+          desc: 'Undichte Kühlraumtüren lassen bis zu 20 % mehr Umgebungswärme ein und erhöhen den Energiebedarf dauerhaft. Dichtungscheck kostet nichts.',
+          pot: 'Türschleier: Invest ~400 € · Einsparung ~180 €/Jahr · Amortisation 2,2 Jahre',
+          icon: '❄️', bg: '#FAECE7',
+          quelle: 'ÖKOPROFIT Bayern'
+        },
+        {
+          metrik: 'wasser', zeige_wenn_score_unter: 65,
+          titel: 'Wassersparende Perlatoren & Leckagecheck',
+          desc: 'Wasserverbrauch {wasser} m³/MA liegt {diff_pct_wasser} % über Median ({wasser_median} m³/MA). Perlatoren an Spülarmaturen reduzieren den Durchfluss um 40 % — ohne Komforteinbußen.',
+          pot: 'Invest: ~50 € · –40 % Armaturenverbrauch · Amortisation: 6 Monate',
+          icon: '💧', bg: '#E6F1FB',
+          quelle: 'DEHOGA Wasserleitfaden'
+        },
+        {
+          metrik: 'recycling', zeige_wenn_score_unter: 50,
+          titel: 'Getrennte Entsorgung & Personalschulung',
+          desc: 'Recyclingquote {recycling} % liegt unter dem Ziel von ≥ 70 %. In Gastronomiebetrieben fallen Bioabfall, Verpackungen und Speiseöle an — alle separat und günstiger verwertbar.',
+          pot: 'Invest: 0–500 € (Behälter, Beschriftung) · Rechtsgrundlage: GewAbfV §3',
+          icon: '♻️', bg: '#EAF3DE',
+          quelle: 'Gewerbeabfallverordnung 2022'
+        },
+        {
+          metrik: 'abfall', zeige_wenn_score_unter: 65,
+          titel: 'Lebensmittelabfälle reduzieren',
+          desc: 'Abfall {abfall} kg/MA ({diff_pct_abfall} % über Median {abfall_median} kg/MA). {betriebsgroesse_abfall_tipp}',
+          pot: 'Portionskontrolle + Too Good To Go: bis –30 % Lebensmittelabfall · Invest: 0 €',
+          icon: '🗑️', bg: '#EAF3DE',
+          quelle: 'Berlin-Senat Modellprojekt Speisereste'
+        }
+      ]
+    },
+
+    // Bäckerei: kennzahlen + quick_wins kommen aus feat/bakery-benchmarks.
+    // Beim Merge: massnahmen-Array in den vollständigen Eintrag übernehmen.
+    baeckerei: {
+      label: "Bäckerei (Handwerksbäckerei)",
+      massnahmen: [
+        {
+          metrik: 'gas', zeige_wenn_score_unter: 65,
+          titel: 'Ofentür-Dichtungen & Abwärmenutzung',
+          desc: 'Gasverbrauch {gas} kWh/m² ({diff_pct_gas} % über Median {gas_median} kWh/m²). Backöfen verbrauchen 55–65 % Ihres Gases. Undichte Türdichtungen erhöhen den Verbrauch um bis zu 5 % — Check kostet nichts.',
+          pot: 'Dichtungen: ~200 € · –5 % Gas · Amort. 6 Monate | Abwärme für Gehraum: –15 % · ~4.000 €',
+          icon: '🔥', bg: '#FAECE7',
+          quelle: 'Energieagentur NRW Bäckerei-Leitfaden 2022'
+        },
+        {
+          metrik: 'strom', zeige_wenn_score_unter: 65,
+          titel: 'Teigmaschinen-Timer & Standby-Abschaltung',
+          desc: 'Strom {strom} kWh/m² ({diff_pct_strom} % über Median {strom_median} kWh/m²). Teigknetmaschinen laufen oft über die Produktionszeit hinaus — eine einfache Timer-Steuerung hilft.',
+          pot: 'Invest: ~150 € · ~1.800 kWh/Jahr Einsparung · ~540 €/Jahr · Amort. 3 Monate',
+          icon: '⚡', bg: '#FAEEDA',
+          quelle: 'ÖKOPROFIT Bäckerhandwerk'
+        },
+        {
+          metrik: 'strom', zeige_wenn_score_unter: 65,
+          titel: 'LED-Umrüstung Produktion & Verkauf',
+          desc: 'Beleuchtung macht 10–15 % des Stroms in Bäckereien aus. {betriebsgroesse_led_tipp}',
+          pot: 'Invest: ~2.500 € · –50 % Beleuchtungsenergie · Amort. ~2 Jahre',
+          icon: '💡', bg: '#FAEEDA',
+          quelle: 'Energieagentur NRW'
+        },
+        {
+          metrik: 'wasser', zeige_wenn_score_unter: 65,
+          titel: 'Reinigungswasser optimieren',
+          desc: 'Wasser {wasser} m³/MA liegt {diff_pct_wasser} % über Median ({wasser_median} m³/MA). Reinigungsintervalle und Düsentechnik bei Hochdruckreinigern überprüfen.',
+          pot: 'Invest: 0–500 € · –15–25 % Reinigungswasser',
+          icon: '💧', bg: '#E6F1FB',
+          quelle: 'Energieagentur NRW Bäckerei'
+        },
+        {
+          metrik: 'recycling', zeige_wenn_score_unter: 50,
+          titel: 'Mehlsäcke, Verpackungen & Teigausschuss trennen',
+          desc: 'Recyclingquote {recycling} % unter Ziel ≥ 70 %. Bäckereien erzeugen Papiersäcke, Folien und Bioabfall — alle separat erfassbar und günstiger in der Entsorgung.',
+          pot: 'Invest: 0–300 € · Nachweis GewAbfV §3 · günstigere Entsorgungskosten',
+          icon: '♻️', bg: '#EAF3DE',
+          quelle: 'Gewerbeabfallverordnung 2022'
+        },
+        {
+          metrik: 'abfall', zeige_wenn_score_unter: 65,
+          titel: 'Teigausschuss & Reststoffe reduzieren',
+          desc: 'Abfall {abfall} kg/MA ({diff_pct_abfall} % über Median {abfall_median} kg/MA). {betriebsgroesse_abfall_tipp}',
+          pot: 'Rezepturoptimierung + Reststoff-Monitoring: bis –20 % Produktionsabfall · Invest: 0 €',
+          icon: '🗑️', bg: '#EAF3DE',
+          quelle: 'Bäcker-Innung Bayern'
+        }
       ]
     },
 
