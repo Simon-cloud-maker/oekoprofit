@@ -92,6 +92,58 @@ const OEKOPROFIT_BENCHMARKS = {
       ]
     },
 
+    baeckerei: {
+      label: "Bäckerei (Handwerksbäckerei)",
+      kennzahlen: {
+        strom_kwh_per_m2: {
+          einheit: "kWh/m²·a (Produktions- + Verkaufsfläche)",
+          p25: 200, median: 290, p75: 390,
+          quelle: "Energieagentur NRW 'Energieeffizienz in Bäckereien' 2022; Wattline 2026"
+        },
+        waerme_kwh_per_m2: {
+          einheit: "kWh/m²·a (Gas/Wärme inkl. Backöfen)",
+          p25: 380, median: 530, p75: 720,
+          quelle: "Bäcker-Innung Bayern; Energieagentur NRW Bäckerei-Leitfaden 2022"
+        },
+        wasser_liter_per_ma_tag: {
+          einheit: "l/MA·Tag",
+          p25: 28, median: 52, p75: 90,
+          quelle: "Schätzung Handwerksbäckerei (Reinigung, Teigherstellung); Energieagentur NRW"
+        },
+        abfall_kg_per_ma: {
+          einheit: "kg/Mitarbeiter·a",
+          p25: 80, median: 160, p75: 280,
+          quelle: "Schätzung Verpackungs-/Reststoffeabfälle Bäckerei; Umweltbundesamt Gewerbeabfall"
+        },
+        energiekosten_anteil_umsatz_pct: {
+          einheit: "% Energiekosten am Umsatz",
+          p25: 3, median: 6, p75: 12,
+          quelle: "Zentralverband des Deutschen Bäckerhandwerks 2023; HR-Bericht Energiekrise 2022"
+        },
+        recyclingquote_pct: {
+          einheit: "% Recyclingquote (Gewerbeabfall)",
+          p25: 70, median: 55, p75: 40,
+          invertiert: true,
+          quelle: "Universalwert: DE-Recyclingziel 2022 (70 %); branchenspezifische Quartile noch nicht verfügbar — siehe known-issues.md"
+        }
+      },
+      hauptverbraucher: [
+        "Backöfen (~55–65 % des Gasverbrauchs)",
+        "Kühlung / Tiefkühlzellen",
+        "Teigknetmaschinen / Rührwerke",
+        "Beleuchtung (Produktion + Verkauf)",
+        "Druckluft / Reinigungssysteme"
+      ],
+      quick_wins: [
+        { massnahme: "Ofentür-Dichtungen erneuern", invest_eur: 200, einsparung_pct: 5, bereich: "gas_backofen", amort_jahre: 0.5, quelle: "Energieagentur NRW" },
+        { massnahme: "Abwärmenutzung Backofen (Vorwärmung Gehraum)", invest_eur: 4000, einsparung_pct: 15, bereich: "gas_backofen", amort_jahre: 3.5, quelle: "Bäcker-Innung Bayern" },
+        { massnahme: "LED-Umrüstung Produktion + Verkauf", invest_eur: 2500, einsparung_pct: 50, bereich: "beleuchtung", amort_jahre: 2 },
+        { massnahme: "Teigknetmaschinen-Timer (Nachtabschaltung)", invest_eur: 150, einsparung_kwh_pa: 1800, einsparung_eur_pa: 540, amort_jahre: 0.3 },
+        { massnahme: "Kühlzellen-Türschleier / Nachtabdeckung", invest_eur: 500, einsparung_pct: 25, bereich: "kaelte", amort_jahre: 1.5 },
+        { massnahme: "Teigausschuss-Monitoring (Reduktion Rohstoffverlust)", invest_eur: 0, bereich: "abfall", einsparung_eur_pa: 800 }
+      ]
+    },
+
     buero: {
       label: "Büro / Verwaltung",
       kennzahlen: {
