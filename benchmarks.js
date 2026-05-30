@@ -156,61 +156,8 @@ const OEKOPROFIT_BENCHMARKS = {
       ]
     },
 
-    // Bäckerei: kennzahlen + quick_wins kommen aus feat/bakery-benchmarks.
-    // Beim Merge: massnahmen-Array in den vollständigen Eintrag übernehmen.
-    baeckerei: {
-      label: "Bäckerei (Handwerksbäckerei)",
-      massnahmen: [
-        {
-          metrik: 'gas', zeige_wenn_score_unter: 65,
-          titel: 'Ofentür-Dichtungen & Abwärmenutzung',
-          desc: 'Gasverbrauch {gas} kWh/m² ({diff_pct_gas} % über Median {gas_median} kWh/m²). Backöfen verbrauchen 55–65 % Ihres Gases. Undichte Türdichtungen erhöhen den Verbrauch um bis zu 5 % — Check kostet nichts.',
-          pot: 'Dichtungen: ~200 € · –5 % Gas · Amort. 6 Monate | Abwärme für Gehraum: –15 % · ~4.000 €',
-          icon: '🔥', bg: '#FAECE7',
-          quelle: 'Energieagentur NRW Bäckerei-Leitfaden 2022'
-        },
-        {
-          metrik: 'strom', zeige_wenn_score_unter: 65,
-          titel: 'Teigmaschinen-Timer & Standby-Abschaltung',
-          desc: 'Strom {strom} kWh/m² ({diff_pct_strom} % über Median {strom_median} kWh/m²). Teigknetmaschinen laufen oft über die Produktionszeit hinaus — eine einfache Timer-Steuerung hilft.',
-          pot: 'Invest: ~150 € · ~1.800 kWh/Jahr Einsparung · ~540 €/Jahr · Amort. 3 Monate',
-          icon: '⚡', bg: '#FAEEDA',
-          quelle: 'ÖKOPROFIT Bäckerhandwerk'
-        },
-        {
-          metrik: 'strom', zeige_wenn_score_unter: 65,
-          titel: 'LED-Umrüstung Produktion & Verkauf',
-          desc: 'Beleuchtung macht 10–15 % des Stroms in Bäckereien aus. {betriebsgroesse_led_tipp}',
-          pot: 'Invest: ~2.500 € · –50 % Beleuchtungsenergie · Amort. ~2 Jahre',
-          icon: '💡', bg: '#FAEEDA',
-          quelle: 'Energieagentur NRW'
-        },
-        {
-          metrik: 'wasser', zeige_wenn_score_unter: 65,
-          titel: 'Reinigungswasser optimieren',
-          desc: 'Wasser {wasser} m³/MA liegt {diff_pct_wasser} % über Median ({wasser_median} m³/MA). Reinigungsintervalle und Düsentechnik bei Hochdruckreinigern überprüfen.',
-          pot: 'Invest: 0–500 € · –15–25 % Reinigungswasser',
-          icon: '💧', bg: '#E6F1FB',
-          quelle: 'Energieagentur NRW Bäckerei'
-        },
-        {
-          metrik: 'recycling', zeige_wenn_score_unter: 50,
-          titel: 'Mehlsäcke, Verpackungen & Teigausschuss trennen',
-          desc: 'Recyclingquote {recycling} % unter Ziel ≥ 70 %. Bäckereien erzeugen Papiersäcke, Folien und Bioabfall — alle separat erfassbar und günstiger in der Entsorgung.',
-          pot: 'Invest: 0–300 € · Nachweis GewAbfV §3 · günstigere Entsorgungskosten',
-          icon: '♻️', bg: '#EAF3DE',
-          quelle: 'Gewerbeabfallverordnung 2022'
-        },
-        {
-          metrik: 'abfall', zeige_wenn_score_unter: 65,
-          titel: 'Teigausschuss & Reststoffe reduzieren',
-          desc: 'Abfall {abfall} kg/MA ({diff_pct_abfall} % über Median {abfall_median} kg/MA). {betriebsgroesse_abfall_tipp}',
-          pot: 'Rezepturoptimierung + Reststoff-Monitoring: bis –20 % Produktionsabfall · Invest: 0 €',
-          icon: '🗑️', bg: '#EAF3DE',
-          quelle: 'Bäcker-Innung Bayern'
-        }
-      ]
-    },
+    // Bäckerei: vollständiger Eintrag (kennzahlen + quick_wins + massnahmen) auf feat/bakery-benchmarks.
+    // Dieser Branch enthält keinen baeckerei-Stub — kein Merge-Konflikt.
 
     baeckerei: {
       label: "Bäckerei (Handwerksbäckerei)",
