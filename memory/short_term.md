@@ -1,36 +1,56 @@
 # Short-Term Memory — Aktueller Projektstand
 
-_Zuletzt aktualisiert: 2026-05-19_
+_Zuletzt aktualisiert: 2026-05-30_
 
 ## Aktueller Stand
 
-- **Verlauf erweitert:** Score-Trend (Chart.js) + Snapshot-Vergleich A/B im Tab „Verlauf“.
-- **Snapshot-Verlauf:** Tab „Verlauf“ + localStorage-Snapshots (Speichern/Wiederherstellen/Löschen) in `index.html`.
-- **Recycling-Benchmark:** `recyclingquote_pct` in allen Branchen in `benchmarks.js`; Öko-Score nutzt dynamisches `k.recyclingquote_pct` (aktuell Universalwerte).
-- **Dark Mode:** Optionaler Toggle im Header (`data-theme`, `localStorage`, System-Präferenz-Fallback).
-- **Benchmark Fix:** Einzelhandel im UI getrennt (`handel_food` / `handel_nonfood` → `einzelhandel_food` / `einzelhandel_nonfood`); Nonfood hat vollständige Kennzahlen inkl. geschätztem Wasser/Abfall.
+- **Verlauf:** Score-Trend (Chart.js) + Snapshot-Vergleich A/B; localStorage-Snapshots.
+- **Recycling-Benchmark:** `recyclingquote_pct` in allen Branchen; Öko-Score nutzt dynamisches Scoring.
+- **Dark Mode:** Toggle im Header (`data-theme`, `localStorage`, System-Präferenz-Fallback).
 - **Agentic Coding:** `AGENTS.md` + `prompts/agent-runs/` (6 Persona-Runs + Template).
-- **CI:** GitHub Action `agent-transparency` — bei Code/Stage/Persona-Änderungen müssen Logs im selben Commit mitkommen.
-- **Auto Git:** `npm run agent:finish` am Ende jedes Agent-Runs (Commit+Push auf Feature-Branch, `main` geschützt). Siehe `prompts/templates/git-automation-policy.md`.
-- **Agent-Transparenz (Moodle):** Verbindlicher Ablagevertrag in `prompts/templates/agent-transparency-contract.md`; eingebunden in `prompts/README.md`, `prompts/templates/task-template.md`, Stage v2 (01–03), Excel-Upload v1–v3, und alle Personas (inkl. Repository Scaffolder + Domain Expert).
-- Alle drei Stage-Prompts (01 Concept, 02 Repository, 03 Feature) sind als v2 aktiv und abgeschlossen.
-- v1-Versionen wurden archiviert unter `prompts/stages/archive/` mit `ARCHIVE_TABLE.md`.
-- Personas (alle sechs Rollen) mit einheitlichem After-Task Protocol / Agent-Transparenz-Contract — Branch `feature/persona-after-task-protocol`, PR offen.
-- **Excel-Upload v3 implementiert** in `index.html`: Normierungslogik (v2) + Betrieb-Label + Branche-Dropdown per Keyword-Mapping. Branch: `feature/excel-upload` (noch nicht committed).
-- Prompts v1 (19/21), v2 (21/21), v3 (21/21) erstellt und bewertet.
-- KI-Backend läuft über Vercel Serverless Function (`api/ki-consulting.js`) → OpenRouter Free Tier.
-- Frontend: Single-file `index.html` (vanilla HTML/CSS/JS, kein Framework, kein Build-Step).
+- **KI-Backend:** Vercel Serverless Function (`api/ki-consulting.js`) → OpenRouter Free Tier.
+- **Frontend:** Single-file `index.html` (vanilla HTML/CSS/JS, kein Framework, kein Build-Step).
 
-## Aktuelle ToDos
+## Refokus-Entscheidung (2026-05-30, nach Professorenbesprechung)
 
-- [ ] Ersten echten Agent-Lauf testen: Cursor mit `AGENTS.md` + `feature-implementer-run.md` und kleiner Task.
-- [ ] Nach nächstem Prompt-Lauf prüfen, ob Agenten die fünf Dateien (`actions`, `short_term`, optional `decisions` / `known_issues` / `long_term`) konsistent befüllen.
-- [ ] Drei untracked Excel-Upload-Altdateien manuell löschen (Sandbox-Rechte fehlen).
-- [ ] Branch-Wechsel: erst `feature/persona-after-task-protocol` committen, dann `feature/excel-upload` committen & pushen.
-- [ ] Scorecard v2 für Excel-Upload: Beispiel-Testdatei und Next-Steps ergänzen.
-- [ ] OpenRouter API-Key in Vercel prüfen/setzen.
-- [ ] Deployment auf Vercel verifizieren.
+Das Tool fokussiert sich jetzt auf **zwei Fallbeispiele**:
+- **Gasthaus** (Gastronomie) — bereits vorhanden, verfeinert
+- **Bäckerei (Produktion)** — neu hinzugefügt
+
+## Feature-Branches (lokal, noch nicht gepusht)
+
+| Branch | Status | Was geändert wurde |
+|--------|--------|--------------------|
+| `feat/bakery-benchmarks` | ✅ committed | Bäckerei-Kennzahlen, Quick Wins, Hauptverbraucher + massnahmen-Array in `benchmarks.js` |
+| `feat/ui-focus-two-cases` | ✅ committed | Dropdown auf 2 Optionen (inkl. Label „Bäckerei (Produktion)"), Bäckerei-Mediane in UI |
+| `feat/branch-specific-inputs` | ✅ committed | Betriebsprofil-Felder, Jahreswert-Inputs (kWh/Jahr), Slider als versteckte State-Holder, `buildClaudePrompt()` mit Profil angereichert |
+| `feat/gemini-document-reader` | ✅ committed | Neue `api/document-reader.js` (Gemini 2.0 Flash), Multi-file PDF/Foto-Upload, Browser-Fallback mit User-Key, autofill-Badge |
+| `feat/deterministic-recommendations` | ✅ committed | `buildDeterministicRecs()` ersetzt generische Empfehlungslogik; Template-Variablen inkl. Betriebsgröße |
+| `feat/sharper-ai-recommendations` | ⬜ offen | Task 6 — nächste Session |
+
+## Kein Merge-Konflikt erwartet
+
+`feat/bakery-benchmarks` enthält den vollständigen `baeckerei`-Eintrag (kennzahlen + quick_wins + massnahmen).
+`feat/deterministic-recommendations` hat den Bäckerei-Stub entfernt → beim Merge kein Konflikt.
+
+## Lokales Testen (Integrations-Branch)
+
+```powershell
+git checkout main
+git checkout -b test/integration
+git merge feat/bakery-benchmarks
+git merge feat/ui-focus-two-cases
+git merge feat/branch-specific-inputs
+git merge feat/gemini-document-reader
+git merge feat/deterministic-recommendations
+python -m http.server 8080
+# Gemini API-Key im UI eingeben für Document-Upload-Test
+```
 
 ## Nächster Schritt
 
-Agentic-Workflow einmal durchspielen (Feature Implementer + konkrete Task-Zeile im Chat), dann optional committen.
+Task 6 (`feat/sharper-ai-recommendations`) implementieren:
+- Branch von `main` erstellen
+- `api/ki-consulting.js` System-Prompt um Bäckerei-Benchmarks ergänzen
+- `buildClaudePrompt()`: alle 6 Quick Wins übergeben (nicht nur 3), neuen Pflicht-Abschnitt `## Warum das für Ihren Betrieb gilt` erzwingen, Bedingungslogik für `kueche: 'nein'`
+- After-Task-Protokoll vollständig ausführen

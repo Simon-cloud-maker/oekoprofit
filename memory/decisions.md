@@ -2,6 +2,53 @@
 
 ---
 
+## [2026-05-30] Entscheidung: Slider als versteckte State-Holder (nicht entfernen)
+
+Kontext:
+Task 3 ersetzt die sichtbaren Slider durch Betriebsprofil + Jahreswert-Inputs. Excel-Import und Snapshot-Restore schreiben aber direkt auf Slider-Elemente per ID.
+
+Entscheidung:
+Slider bleiben im DOM mit `style="display:none"`. Neue Inputs schreiben über `computeFromJahreswerte()` in die Slider; `getVals()` liest weiterhin Slider aus. Kein Bruch der bestehenden Logik.
+
+Alternativen verworfen:
+- Slider komplett entfernen + Excel/Snapshot-Restore umschreiben → zu viel Änderungsrisiko für einen Feature-Branch.
+
+---
+
+## [2026-05-30] Entscheidung: Gemini 2.0 Flash für Dokumentenextraktion
+
+Kontext:
+Task 4 braucht ein LLM, das PDFs und Fotos von Versorgungsrechnungen lesen kann. Kostenfrei und ohne Server-Key testbar.
+
+Entscheidung:
+Gemini 2.0 Flash via Google AI Studio (kostenloser API-Key). Browser-Fallback: direkter CORS-fähiger Call mit User-Key. Vercel-Proxy als Produktions-Pfad.
+
+Alternativen verworfen:
+- GPT-4o Vision: kostenpflichtig, kein kostenfreier Tier.
+- Mistral Pixtral: weniger verbreitet, schlechtere PDF-Unterstützung.
+
+---
+
+## [2026-05-30] Entscheidung: memory/short_term.md auf main pflegen
+
+Kontext:
+Memory-Dateien lagen auf Feature-Branches und wurden beim Branch-Wechsel auf alte Stände zurückgesetzt. Neue Sessions branchen von main und lasen veralteten Kontext.
+
+Entscheidung:
+`memory/`- und `logs/`-Dateien werden direkt auf `main` committed (als eigener Handover-Commit), nicht auf Feature-Branches. Feature-Branches ändern nur Code-Dateien.
+
+---
+
+## [2026-05-30] Entscheidung: Bäckerei als Produktion/Handwerk (nicht als eigene Hauptbranche)
+
+Kontext:
+In benchmarks.js existiert bereits eine `produktion`-Branche (generisch). Bäckerei ist spezifischer und hat eigene Datenlage.
+
+Entscheidung:
+Eigener Eintrag `baeckerei` in `OEKOPROFIT_BENCHMARKS.branchen` mit spezifischen Quellen (Energieagentur NRW, Bäcker-Innung). Dropdown-Label: „Bäckerei (Produktion)" zur Einordnung.
+
+---
+
 ## [2026-05-19] Entscheidung: Agentic Coding über `AGENTS.md` + `prompts/agent-runs/`
 
 Kontext:
