@@ -37,18 +37,16 @@ Task 4 — `feat/gemini-document-reader`:
 
 Task 5 — `feat/deterministic-recommendations`:
 - `benchmarks.js` (`gastronomie`): 7 massnahmen-Regeln mit Score-Schwellwert, Template-Variablen, optionaler Profilbedingung
-- `benchmarks.js` (`baeckerei`): 6 massnahmen-Regeln (kanonisch auf `feat/bakery-benchmarks`)
+- `benchmarks.js` (`baeckerei`): 6 massnahmen-Regeln (kanonisch auf `feat/bakery-benchmarks`, Stub aus Task 5 entfernt)
 - `index.html`: `buildDeterministicRecs()` ersetzt generische `recs`-Logik; wertet Scores aus, substituiert Templates, passt Tipps an Betriebsgröße an
-
-Zusätzlich: Merge-Konflikt-Prävention (Bäckerei-Stub auf `feat/deterministic-recommendations` entfernt), Dropdown-Label-Fix auf `feat/ui-focus-two-cases`.
 
 **Ergebnis:**
 5 Feature-Branches committed, lokal nicht gepusht. Keine erwarteten Merge-Konflikte.
-Gemini API-Key noch ausstehend (aistudio.google.com → kostenfrei).
+`memory/short_term.md`, `memory/decisions.md` und `logs/actions.md` auf `main` aktualisiert (Handover-Commit).
 
 **Learnings:**
-- `memory/short_term.md` sollte bei Multi-Branch-Arbeit auf `main` gepflegt werden, nicht auf Feature-Branches — vermeidet Verwirrung über welche Version aktuell ist.
-- Temporäre Integrations-Branches (`test/integration`) sind ein sauberer Weg, mehrere Feature-Branches gemeinsam zu testen ohne main zu verunreinigen.
+- `memory/`- und `logs/`-Dateien sollten direkt auf `main` committed werden, nicht auf Feature-Branches — vermeidet Versionskonfusion in neuen Sessions.
+- Temporäre Integrations-Branches (`test/integration`) sind ein sauberer Weg, mehrere Feature-Branches gemeinsam zu testen ohne `main` zu verunreinigen.
 
 **Nächster Schritt:**
 Task 6 (`feat/sharper-ai-recommendations`): System-Prompt Bäckerei-Daten, alle 6 Quick Wins, betriebsspezifischer Abschnitt im KI-Output.
@@ -61,39 +59,199 @@ Ziel:
 Gespeicherte Snapshots visuell auswerten — Trendlinie und Kennzahlenvergleich zwischen zwei Ständen.
 
 Aktionen:
-- Chart.js Score-Trend im Tab „Verlauf" implementiert (Zeitachse, Tooltip mit Branchenname).
-- Snapshot-Vergleich A/B als Tabelle (Kennzahlen + Score-Diff) umgesetzt.
-- localStorage-Snapshots: Speichern, Wiederherstellen, Löschen.
+- `index.html`: Chart.js Score-Verlauf (ab 2 Snapshots), Delta-Anzeige, Vergleichstabelle A/B im Tab „Verlauf".
 
 Ergebnis:
-Verlauf-Tab funktionsfähig. Branches `feature/excel-upload` und `feature/persona-after-task-protocol` noch offen.
+Nutzer sehen Score-Entwicklung und können zwei Snapshots nebeneinander vergleichen (lokal, localStorage).
+
+---
+
+## [2026-05-19] Feature: Snapshot-Verlauf (localStorage)
+
+Ziel:
+Kennzahlen-Stände lokal speichern, vergleichen und wiederherstellen — ohne Backend.
+
+Aktionen:
+- `index.html`: Tab „Verlauf", Button „Snapshot speichern" in Dateneingabe, localStorage (`oekoprofit-snapshots`), Wiederherstellen/Löschen.
+
+Ergebnis:
+Nutzer können Öko-Score-Stände im Browser sichern und später laden; Daten bleiben auf dem Gerät.
+
+---
+
+## [2026-05-19] Fix: Recyclingquote branchenweise aus benchmarks.js
+
+Ziel:
+Recycling-Teilscore konsistent zu anderen Kennzahlen aus `benchmarks.js` statt hardcodierter Werte in `index.html`.
+
+Aktionen:
+- `benchmarks.js`: `recyclingquote_pct` für alle fünf Branchen (Universalwerte DE-Ziel 2022).
+- `index.html`: Öko-Score liest `k.recyclingquote_pct` dynamisch.
+- `known-issues.md`: Recycling-Abschnitt aktualisiert.
+
+Ergebnis:
+Recycling fließt überall gleich ins Scoring ein; branchenspezifische Quartile können später je Branche überschrieben werden.
+
+---
+
+## [2026-05-19] Feature: optionaler Dark Mode
+
+Ziel:
+Darstellung optional auf Dark Mode umschaltbar — ohne Build-Step, im bestehenden Single-File-Frontend.
+
+Aktionen:
+- `index.html`: CSS-Variablen unter `[data-theme="dark"]`, Toggle im Header, `localStorage`-Persistenz, System-Präferenz als Fallback, frühes Theme-Script gegen Flackern.
+
+Ergebnis:
+Nutzer können per Button „Dark" / „Hell" wechseln; Einstellung bleibt gespeichert.
+
+Nächster Schritt:
+Auf Vercel-Deploy prüfen (Toggle, Tabs, Benchmark-Balken, KI-Antwort-Box).
+
+---
+
+## [2026-05-19] Fix: Einzelhandel Food/Nonfood getrennt im UI
+
+Ziel:
+Nonfood-Betriebe (Textil, Baumarkt) nicht mehr am Food-Strombenchmark (Median ~289 kWh/m²) messen — künstlich guter Öko-Score.
+
+Aktionen:
+- `index.html`: Dropdown in „Einzelhandel (Lebensmittel)" / „Einzelhandel (Nonfood)" aufgeteilt; `BRANCH_BENCHMARK_MAP` mit `handel_food` / `handel_nonfood`; Legacy-`benchmarks` und Excel-Keyword-Mapping angepasst.
+- `benchmarks.js`: `einzelhandel_nonfood` um `wasser_liter_per_ma_tag` und `abfall_kg_per_ma` ergänzt.
+- `known-issues.md`: Abschnitt Nonfood dokumentiert; `prompts/stages/03-excel-upload-v3.md`: Branche-Keywords aktualisiert.
+
+Ergebnis:
+`einzelhandel_nonfood` (Strom Median 75 kWh/m²) ist im UI wählbar und für Scoring/Benchmark-Tabs erreichbar.
+
+Nächster Schritt:
+Manuell testen: Nonfood + ~80 kWh/m² Strom → Score nahe Median, nicht ~100.
+
+---
+
+## [2026-05-19] Infra: CI-Hook Agent-Transparenz
+
+Ziel:
+Memory-/Log-Pflicht bei Codeänderungen automatisch prüfen (nicht nur konventionell).
+
+Aktionen:
+- `scripts/check-agent-transparency.js` — vergleicht Git-Diff, fordert `logs/actions.md` + `memory/short_term.md` bei Trigger-Pfaden.
+- `.github/workflows/agent-transparency.yml` — läuft auf PR und Push zu `main`.
+- `npm run check:transparency` für lokale Prüfung.
+- Doku in `AGENTS.md`, `prompts/agent-runs/README.md`.
+
+Ergebnis:
+PR/Push schlägt fehl, wenn z. B. `index.html` geändert wurde ohne Session-Log — erzwingt den Contract technisch (minimal, dateibasiert).
+
+Nächster Schritt:
+Agentic-Dateien + CI + Memory-Updates in einem Commit pushen, damit der erste Lauf grün ist.
+
+---
+
+## [2026-05-19] Infra: Agentic Coding Einstieg (AGENTS.md + agent-runs)
+
+Ziel:
+Prompt-System so erweitern, dass ein IDE-Agent eine Persona-Aufgabe im Repo ausführen kann (nicht nur Text-Prompts).
+
+Aktionen:
+- `AGENTS.md` (Repo-Root): Constraints, Persona→Run-Mapping, Transparenz-Pflicht.
+- `prompts/agent-runs/`: README, Template, Runs für alle 6 Personas.
+- `prompts/README.md`: Abschnitt Agentic coding + Quick-start-Beispiel.
+- `memory/short_term.md` aktualisiert.
+
+Ergebnis:
+Agentic Coding ist **nutzbar** über expliziten Chat-Start mit Run-Datei; Enforcement bleibt konventionell (Contract am Ende des Laufs).
+
+Nächster Schritt:
+In Cursor testen: `Follow AGENTS.md and prompts/agent-runs/feature-implementer-run.md` + konkrete Task.
+
+---
+
+## [2026-05-13] Prozess: Agent-Transparenz / Moodle-Logging im Prompt-System
+
+Ziel:
+Agentenentscheidungen, Aktionen und erkannte Fehler verbindlich in `/logs` und `/memory` dokumentieren; die Einführung dieses Regelwerks selbst mitprotokollieren.
+
+Aktionen:
+- Neues Template `prompts/templates/agent-transparency-contract.md` (Pflicht-/Optional-Dateien, Meta-Regel).
+- `prompts/README.md`, `prompts/templates/task-template.md`, Stages `01-concept-v2`, `02-repository-v2`, `03-feature-v2`, `03-excel-upload-v1`–`v3` auf vollständigen Run-Log-Output abgestimmt.
+- Alle Personas: After-Task Protocol angeglichen; `repository-scaffolder` und `domain-expert-oekoprofit` nachgezogen.
+- `memory/decisions.md`, `memory/long_term.md`, `memory/short_term.md` (dieser Lauf) aktualisiert.
+
+Ergebnis:
+Einheitlicher Vertrag für coursework-taugliche Transparenz; technisches API-Prompt-Logging (`api/ki-consulting.js`) bleibt davon getrennt dokumentiert.
+
+Nächster Schritt:
+Beim nächsten Feature-Lauf die fünf Pfade unter `/logs` und `/memory` wie im Contract befüllen und „no change" nur bei wirklich leeren optionalen Dateien verwenden.
+
+---
+
+## [2026-05-12] Feature: Excel-Upload v3 – Betrieb & Branche (Persona: feature-implementer)
+
+Ziel:
+Betrieb-Label und Branche-Dropdown automatisch aus Excel-Spalten befüllen.
+
+Aktionen:
+- `prompts/stages/03-excel-upload-v3.md`: v3-Prompt erstellt.
+- `index.html`: span#betrieb-name in Header eingebaut; Branche-Keyword-Mapping in handleExcelUpload() ergänzt.
+- `prompts/evaluation/scorecard-stage-03-excel-upload-v3.md`: Scorecard ausgefüllt (21/21, 100 %).
+- `prompts/CHANGELOG.md`, `logs/actions.md`, `memory/short_term.md`: aktualisiert.
+
+Ergebnis:
+Upload setzt Betrieb-Name im Header und wählt passende Branche im Dropdown per Keyword-Matching.
+
+---
+
+## [2026-05-12] Feature: Excel-Upload v2 – Normierungslogik (Persona: feature-implementer)
+
+Ziel:
+Excel-Upload um automatische Einheitenumrechnung erweitern (absolute Verbrauchswerte → normierte Kennzahlen).
+
+Aktionen:
+- `memory/known_issues.md`: Design-Gap dokumentiert (absolute vs. normierte Werte).
+- `prompts/stages/03-excel-upload-v2.md`: v2-Prompt erstellt mit Normierungsanforderungen.
+- `index.html`: `handleExcelUpload()` ersetzt durch Keyword-Matching + Normierungslogik (MWh→kWh/m², t→kg/MA, Dezimal-Recyclingquote→%).
+- `prompts/evaluation/scorecard-stage-03-excel-upload-v2.md`: Scorecard ausgefüllt (21/21, 100 %).
+- `prompts/CHANGELOG.md`: Eintrag für v1+v2 mit Vergleichstabelle ergänzt.
+
+Ergebnis:
+Upload erkennt Spalten per Keyword, rechnet Einheiten automatisch um, zeigt übersprungene Felder im Status-Label.
 
 Nächste Schritte:
-Branch-Wechsel: erst `feature/persona-after-task-protocol` committen, dann `feature/excel-upload` committen & pushen.
+1. Lokal testen mit Münchner_Rück_Umweltkennzahlen.xlsx (`python -m http.server 8080`).
+2. Commiten und pushen auf `feature/excel-upload`.
 
 ---
 
-## [2026-05-13] Feature: Recycling-Benchmark, Dark Mode, Einzelhandel-Fix
+## [2026-05-12] Feature: Excel-Upload (Persona: feature-implementer)
 
 Ziel:
-Recyclingquote-Benchmarks je Branche ergänzen, Dark Mode Toggle hinzufügen, Einzelhandel-Trennung fixen.
+Excel-Upload-Funktion in `index.html` implementieren; Slider werden mit Werten aus der Datei vorbelegt und bleiben editierbar.
 
 Aktionen:
-- `recyclingquote_pct` mit P25/Median/P75 in alle Branchen in `benchmarks.js` eingefügt.
-- Öko-Score-Berechnung nutzt jetzt dynamisches `k.recyclingquote_pct` statt Hardcode.
-- Dark Mode: `data-theme`-Attribut, localStorage, System-Präferenz-Fallback.
-- `handel_food` / `handel_nonfood` korrekt auf `einzelhandel_food` / `einzelhandel_nonfood` gemappt.
+- `prompts/CHANGELOG.md`: 2026-04-27-Block (verfrühter Excel-Upload-Eintrag) entfernt.
+- `prompts/personas/` (4 Dateien): After-Task-Protocol-Block ergänzt (feature-implementer, technical-writer, code-reviewer, system-architect).
+- `.gitignore`: `kontext-oekoprofit.md` und `Umwelt_und_ESG-Benchmarks.pdf` hinzugefügt.
+- `prompts/stages/03-excel-upload-v1.md`: Neuer Feature-Prompt v1 erstellt.
+- `index.html`: SheetJS CDN eingebunden, Upload-UI (Button + File-Input + Status-Label) oberhalb der Slider eingefügt, `handleExcelUpload()`-Funktion implementiert.
+- `prompts/evaluation/scorecard-stage-03-excel-upload-v1.md`: Scorecard ausgefüllt (19/21, 90 %).
 
-Ergebnis: Alle vier Features committed auf main.
+Ergebnis:
+Excel-Upload funktionsfähig: Spaltenmapping (Strom/Gas/Wasser/Abfall/Recycling), Clamp auf Slider-Range, Status-Label, Sliders bleiben editierbar.
+
+Nächste Schritte:
+1. Git commit & push auf `feature/excel-upload` nach Branch-Wechsel.
+2. Scorecard v2: Beispiel-Testdatei und Next-Steps ergänzen.
 
 ---
 
-## [2026-05-08] Repository-Setup und Memory-Initialisierung
+## [2026-04-23T00:00:00] Session Checkpoint
 
 Ziel:
-Basis-Infrastruktur für agentic Coding: AGENTS.md, Persona-Runs, Memory-Dateien.
+Vollständigen Projektstand dokumentieren und Memory-/Log-System erstellen, damit ein neuer Agent sofort weiterarbeiten kann.
 
 Aktionen:
+- Projektstruktur analysiert: `index.html`, `api/ki-consulting.js`, `prompts/`-System.
+- Git-Log der letzten 10 Commits ausgewertet.
 - Alle drei Stage-Scorecards und das Prompt-CHANGELOG gelesen.
 - Verzeichnisse `memory/` und `logs/` erstellt.
 - `memory/short_term.md` erstellt (aktueller Stand, ToDos, nächster Schritt).
