@@ -390,7 +390,20 @@
       animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .doc-upload-status { font-size: 12px; color: var(--gray-600); flex: 1; }
+    .doc-upload-row label.btn {
+      display: inline-block;
+      padding: 7px 14px;
+      background: var(--green-400);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .doc-upload-row label.btn:hover { background: var(--green-600); }
+    .doc-upload-status { font-size: 0.8rem; color: var(--gray-600); font-family: 'DM Mono', monospace; }
+    .doc-upload-hint { font-size: 12px; color: var(--gray-600); white-space: nowrap; }
     .autofill-badge {
       display: inline-block;
       font-size: 10px;
@@ -664,7 +677,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 18px;
+      margin-bottom: 10px;
       flex-wrap: wrap;
     }
     .upload-row label.btn {
@@ -693,7 +706,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-top: 12px;
+      margin-top: 0;
       flex-wrap: wrap;
     }
     .snapshot-row button.btn-save {
@@ -1005,18 +1018,19 @@
         <input type="password" id="gemini-api-key" placeholder="AIza… (kostenlos: aistudio.google.com)" autocomplete="off">
       </div>
       <div class="doc-upload-row">
-        <label class="btn" for="doc-upload">📄 Rechnungen einlesen</label>
-        <input type="file" id="doc-upload" accept=".pdf,image/*" multiple onchange="handleDocumentUpload(event)">
+        <label class="btn" id="btn-rechnungen" for="doc-upload">📄 Rechnungen einlesen</label>
+        <input type="file" id="doc-upload" accept=".pdf,image/*" multiple onchange="handleDocumentUpload(event)" style="display:none;">
         <div class="doc-upload-spinner" id="doc-spinner"></div>
-        <span class="doc-upload-status" id="doc-status">PDF oder Foto (Strom, Gas, Wasser — mehrere möglich)</span>
+        <span class="doc-upload-status" id="doc-status">Keine ausgewählt</span>
+        <span class="doc-upload-hint">PDF oder Foto (Strom, Gas, Wasser — mehrere möglich)</span>
       </div>
       <div class="upload-row">
-        <label class="btn" for="excel-upload">📂 Excel importieren</label>
+        <label class="btn" id="btn-excel" for="excel-upload">📂 Excel importieren</label>
         <input type="file" id="excel-upload" accept=".xlsx" onchange="handleExcelUpload(event)">
         <span class="upload-status" id="upload-status">Noch keine Datei geladen</span>
       </div>
       <div class="snapshot-row">
-        <button type="button" class="btn-save" onclick="saveSnapshot()">💾 Snapshot speichern</button>
+        <button type="button" class="btn-save" id="btn-snapshot" onclick="saveSnapshot()">💾 Snapshot speichern</button>
         <span class="save-status" id="save-status"></span>
       </div>
     </div>
@@ -2482,6 +2496,19 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   initThemeToggle();
   update();
   checkOllamaReachability();
+
+  // Alle drei Upload-/Speichern-Buttons auf die Breite von "Rechnungen einlesen" angleichen
+  requestAnimationFrame(() => {
+    const ref = document.getElementById('btn-rechnungen');
+    if (!ref) return;
+    const w = ref.getBoundingClientRect().width + 'px';
+    ['btn-excel', 'btn-snapshot'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.style.width = w; el.style.textAlign = 'center'; }
+    });
+    ref.style.width = w;
+    ref.style.textAlign = 'center';
+  });
 </script>
 </body>
 </html>
