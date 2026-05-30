@@ -373,6 +373,53 @@
       color: var(--gray-900);
     }
 
+    /* Gemini Document Upload */
+    .doc-upload-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .doc-upload-spinner {
+      display: none;
+      width: 16px; height: 16px;
+      border: 2px solid var(--gray-100);
+      border-top-color: var(--green-600);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .doc-upload-status { font-size: 12px; color: var(--gray-600); flex: 1; }
+    .autofill-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 8px;
+      background: var(--green-50, #e6f4ef);
+      color: var(--green-600);
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .gemini-key-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .gemini-key-row label { font-size: 12px; color: var(--gray-600); white-space: nowrap; }
+    .gemini-key-row input {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      background: var(--surface);
+      color: var(--gray-900);
+      font-family: var(--font-mono);
+    }
+
     /* Benchmark bars */
     .bench-item { margin-bottom: 14px; }
     .bench-labels {
@@ -950,8 +997,19 @@
       </div>
       <p id="profil-hint" class="profil-hint" style="display:none;"></p>
 
-      <!-- Excel-Import (bleibt als Profi-Option) -->
+      <!-- Daten importieren -->
       <div class="section-divider">Daten importieren</div>
+      <!-- Rechnungs-Upload via Gemini -->
+      <div class="gemini-key-row">
+        <label for="gemini-api-key">Gemini API-Key</label>
+        <input type="password" id="gemini-api-key" placeholder="AIza… (kostenlos: aistudio.google.com)" autocomplete="off">
+      </div>
+      <div class="doc-upload-row">
+        <label class="btn" for="doc-upload">📄 Rechnungen einlesen</label>
+        <input type="file" id="doc-upload" accept=".pdf,image/*" multiple onchange="handleDocumentUpload(event)">
+        <div class="doc-upload-spinner" id="doc-spinner"></div>
+        <span class="doc-upload-status" id="doc-status">PDF oder Foto (Strom, Gas, Wasser — mehrere möglich)</span>
+      </div>
       <div class="upload-row">
         <label class="btn" for="excel-upload">📂 Excel importieren</label>
         <input type="file" id="excel-upload" accept=".xlsx" onchange="handleExcelUpload(event)">
@@ -1210,6 +1268,162 @@
     el.className = 'upload-status ' + (type || '');
   }
   // --- Ende Excel Upload ---
+
+  // --- Gemini Document Upload ---
+  async function handleDocumentUpload(event) {
+    const files = Array.from(event.target.files);
+    if (!files.length) return;
+
+    const spinner = document.getElementById('doc-spinner');
+    const status  = document.getElementById('doc-status');
+    spinner.style.display = 'block';
+    status.textContent = `${files.length} Datei(en) wird/werden verarbeitet…`;
+
+    // Encode all files as Base64
+    const encoded = await Promise.all(files.map(f => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = e => resolve({ base64: e.target.result.split(',')[1], mimeType: f.type || 'application/pdf', name: f.name });
+      reader.onerror = reject;
+      reader.readAsDataURL(f);
+    })));
+
+    let result;
+    try {
+      result = await callGeminiDocumentReader(encoded);
+    } catch (err) {
+      spinner.style.display = 'none';
+      status.textContent = 'Fehler: ' + err.message;
+      return;
+    }
+
+    spinner.style.display = 'none';
+    applyDocumentResult(result, status);
+    // Reset file input so same files can be re-uploaded if needed
+    event.target.value = '';
+  }
+
+  async function callGeminiDocumentReader(encodedFiles) {
+    const serverKey = ''; // set by Vercel env — empty means try direct browser call
+    const userKey   = document.getElementById('gemini-api-key')?.value?.trim();
+
+    const payload = { files: encodedFiles.map(f => ({ base64: f.base64, mimeType: f.mimeType })) };
+
+    // Try Vercel serverless proxy first (works in production)
+    try {
+      const res = await fetch('/api/document-reader', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) return await res.json();
+      // 500 = GEMINI_API_KEY not configured on server → fall through to browser call
+      if (res.status !== 500) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Server-Fehler ${res.status}`);
+      }
+    } catch (e) {
+      if (!e.message.includes('fetch') && !e.message.includes('Failed')) throw e;
+      // Network error (e.g. local static server) → fall through
+    }
+
+    // Direct browser call using user-provided key
+    if (!userKey) throw new Error('Bitte Gemini API-Key eingeben (aistudio.google.com → kostenfrei)');
+
+    const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+    const EXTRACTION_PROMPT = `Du analysierst Versorgungsrechnungen (Strom, Gas, Wasser) eines deutschen Gewerbebetriebs.
+Extrahiere alle vorhandenen Werte. Rechne auf Jahresbasis hoch wenn nötig (Zeitraum < 12 Monate).
+Antworte NUR mit validem JSON ohne Markdown:
+{"strom_kwh":null,"gas_kwh":null,"wasser_m3":null,"zeitraum_monate":null,"zeitraum_beschreibung":null,"konfidenz":"hoch","nicht_gefunden":[]}`;
+
+    const parts = [{ text: EXTRACTION_PROMPT },
+      ...encodedFiles.map(f => ({ inlineData: { mimeType: f.mimeType, data: f.base64 } }))];
+
+    const res = await fetch(`${GEMINI_ENDPOINT}?key=${userKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 512 },
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `Gemini-Fehler ${res.status}`);
+    }
+    const data = await res.json();
+    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const jsonStr = rawText.replace(/```json?\n?|```/g, '').trim();
+    return JSON.parse(jsonStr);
+  }
+
+  function applyDocumentResult(result, statusEl) {
+    const found = [], notFound = result.nicht_gefunden || [];
+
+    function setSlider(id, value) {
+      if (!value || isNaN(value) || value <= 0) return;
+      const slider = document.getElementById(id);
+      if (!slider) return;
+      const clamped = Math.min(Math.max(Math.round(value), Number(slider.min)), Number(slider.max));
+      slider.value = clamped;
+      document.getElementById(id + '-v').textContent = clamped;
+      // Add autofill badge to the slider label if not already present
+      const row = slider.closest('.slider-row');
+      if (row && !row.querySelector('.autofill-badge')) {
+        const lbl = row.querySelector('label');
+        if (lbl) lbl.insertAdjacentHTML('beforeend', '<span class="autofill-badge">aus Rechnung</span>');
+      }
+    }
+
+    // Convert annual kWh to kWh/m² using current slider value as proxy if no profil yet
+    const stromJahr  = result.strom_kwh;
+    const gasJahr    = result.gas_kwh;
+    const wasserJahr = result.wasser_m3;
+
+    // Try to get flaeche/ma from profil inputs (available after Task 3 merge)
+    const flaecheEl = document.getElementById('profil-flaeche');
+    const maEl      = document.getElementById('profil-ma');
+    const flaeche   = flaecheEl ? (+flaecheEl.value || null) : null;
+    const ma        = maEl      ? (+maEl.value      || null) : null;
+
+    if (stromJahr && flaeche) {
+      setSlider('strom', stromJahr / flaeche);
+      found.push('Strom');
+    } else if (stromJahr) {
+      // Store raw value in jw-strom if the jahreswerte input exists (Task 3)
+      const jwEl = document.getElementById('jw-strom');
+      if (jwEl) { jwEl.value = Math.round(stromJahr); found.push('Strom'); }
+    }
+
+    if (gasJahr && flaeche) {
+      setSlider('gas', gasJahr / flaeche);
+      found.push('Gas');
+    } else if (gasJahr) {
+      const jwEl = document.getElementById('jw-gas');
+      if (jwEl) { jwEl.value = Math.round(gasJahr); found.push('Gas'); }
+    }
+
+    if (wasserJahr && ma) {
+      setSlider('wasser', wasserJahr / ma);
+      found.push('Wasser');
+    } else if (wasserJahr) {
+      const jwEl = document.getElementById('jw-wasser');
+      if (jwEl) { jwEl.value = Math.round(wasserJahr); found.push('Wasser'); }
+    }
+
+    // If jahreswerte inputs exist, trigger their recalculation
+    if (document.getElementById('jw-strom') && typeof computeFromJahreswerte === 'function') {
+      computeFromJahreswerte();
+    } else {
+      update();
+    }
+
+    const konfidenz = result.konfidenz || 'unbekannt';
+    const zeitraum  = result.zeitraum_beschreibung ? ` (${result.zeitraum_beschreibung})` : '';
+    const foundStr  = found.length ? found.join(', ') : '—';
+    const nfStr     = notFound.length ? ` | Nicht gefunden: ${notFound.join(', ')}` : '';
+    statusEl.textContent = `✓ Erkannt: ${foundStr}${nfStr} | Konfidenz: ${konfidenz}${zeitraum} – bitte Werte prüfen`;
+  }
+  // --- Ende Gemini Document Upload ---
 
   const benchmarks = {
     gastro:          { strom:230, gas:80,  wasser:25, abfall:100, recycling:60, label:'Gastronomie' },
