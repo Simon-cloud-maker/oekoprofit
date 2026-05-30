@@ -1752,7 +1752,7 @@
     const co2 = +((vals.strom * ef.strom_de_mix_g_per_kwh / 1000) + (vals.gas * ef.erdgas_g_per_kwh / 1000)).toFixed(1);
 
     const qwLines = benchData && benchData.quick_wins
-      ? benchData.quick_wins.slice(0, 3).map(q => {
+      ? benchData.quick_wins.slice(0, 6).map(q => {
           const parts = [q.massnahme];
           if (q.invest_eur !== undefined) parts.push(`Invest: ${q.invest_eur} €`);
           if (q.amort_jahre !== undefined) parts.push(`Amort.: ${q.amort_jahre} J.`);
@@ -1774,9 +1774,12 @@
       ? (p.ma < 5 ? 'Kleinstbetrieb (< 5 MA)' : p.ma < 20 ? 'Kleinbetrieb (5–19 MA)' : 'Mittelbetrieb (≥ 20 MA)')
       : null;
     if (betriebsGroesse) profilLines.push(`Betriebsgröße: ${betriebsGroesse}`);
+    const keineKuecheHinweis = p.kueche === 'nein'
+      ? '\nHinweis: Kein Küchenbereich — keine Empfehlungen zu Spülmaschinen, Kombidämpfern oder Frittierfett.'
+      : '';
 
     return `Du bist Energie- und Nachhaltigkeitsberater fuer OEKOPROFIT-Betriebe.
-Nutze NUR die vier Bloecke unten. Kein Intro, keine Zwischenüberschrift wie "1. Tabelle" oder "Pseudo-Tabelle".
+Nutze NUR die fünf Bloecke unten. Kein Intro, keine Zwischenüberschrift wie "1. Tabelle" oder "Pseudo-Tabelle".${keineKuecheHinweis}
 
 Branche: ${b.label}
 Emissionsfaktoren: Strom ${ef.strom_de_mix_g_per_kwh} g CO₂/kWh | Erdgas ${ef.erdgas_g_per_kwh} g CO₂/kWh
@@ -1825,6 +1828,10 @@ Genau vier Zeilen mit Spiegelstrich, fortlaufend sinnvolle Schritte:
 - Zweiter Schritt …
 - Dritter Schritt …
 - Vierter Schritt …
+
+## Warum das für Ihren Betrieb gilt
+(Ein Satz je Maßnahme aus Top-3, der explizit auf Betriebsgröße oder -typ eingeht.
+Beispiel: "Als Kleinstbetrieb mit < 5 MA amortisiert sich die LED-Umrüstung bei Ihnen schon in 1–2 Jahren.")
 
 Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt gehaltvoll formulieren (~250–380 Woerter), aber die Woerterzahl NICHT angeben oder zaehlen.`;
   }
