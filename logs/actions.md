@@ -2,6 +2,26 @@
 
 ---
 
+## [2026-05-30] Task 6 — feat/sharper-ai-recommendations
+
+**Persona:** Feature Implementer
+**Stage:** 03-feature-v2
+
+**Ziel:**
+KI-Empfehlungen schärfen: Bäckerei-Benchmarks im System-Prompt ergänzen, mehr Quick Wins übergeben, küchenlose Betriebe ausfiltern, neuen betriebsspezifischen Begründungsabschnitt erzwingen.
+
+**Aktionen:**
+
+- `api/ki-consulting.js`: `BENCHMARK_SYSTEM_PROMPT` um Bäckerei Strom (P25/Median/P75 NRW 2022) und Bäckerei Gas/Wärme (Bäcker-Innung Bayern) ergänzt; drei Bäckerei-Quick-Wins (Ofentür-Dichtungen, Teigmaschinen-Timer, LED) hinzugefügt
+- `index.html` `buildClaudePrompt()`: `slice(0,3)` → `slice(0,6)` für Quick Wins
+- `index.html` `buildClaudePrompt()`: Bedingungslogik `profil.kueche === 'nein'` → Hinweis „kein Küchenbereich" in Prompt eingefügt
+- `index.html` `buildClaudePrompt()`: Neuer PFLICHT-Abschnitt `## Warum das für Ihren Betrieb gilt` (ein Satz je Top-3-Maßnahme mit Bezug auf Betriebsgröße/-typ) am Ende der Pflicht-Struktur ergänzt; Block-Anzahl von „vier" auf „fünf" korrigiert
+
+**Ergebnis:**
+Branch `feat/sharper-ai-recommendations` committed. KI-Empfehlung für Bäckerei enthält backofenspezifische Kennzahlen; Gasthaus ohne Küche erhält Hinweis gegen Spülmaschinen-Empfehlungen; Abschnitt `## Warum das für Ihren Betrieb gilt` im Output erzwungen.
+
+---
+
 ## [2026-05-30] Refokus: Gasthaus & Bäckerei — Tasks 1–5
 
 **Persona:** Feature Implementer + Domain Expert (ÖKOPROFIT)

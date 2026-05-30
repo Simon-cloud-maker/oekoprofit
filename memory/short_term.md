@@ -26,7 +26,7 @@ Das Tool fokussiert sich jetzt auf **zwei Fallbeispiele**:
 | `feat/branch-specific-inputs` | ✅ committed | Betriebsprofil-Felder, Jahreswert-Inputs (kWh/Jahr), Slider als versteckte State-Holder, `buildClaudePrompt()` mit Profil angereichert |
 | `feat/gemini-document-reader` | ✅ committed | Neue `api/document-reader.js` (Gemini 2.0 Flash), Multi-file PDF/Foto-Upload, Browser-Fallback mit User-Key, autofill-Badge |
 | `feat/deterministic-recommendations` | ✅ committed | `buildDeterministicRecs()` ersetzt generische Empfehlungslogik; Template-Variablen inkl. Betriebsgröße |
-| `feat/sharper-ai-recommendations` | ⬜ offen | Task 6 — nächste Session |
+| `feat/sharper-ai-recommendations` | ✅ committed | Bäckerei-Benchmarks im System-Prompt, 6 Quick Wins, kueche-Bedingung, neuer Abschnitt `## Warum das für Ihren Betrieb gilt` |
 
 ## Kein Merge-Konflikt erwartet
 
@@ -49,8 +49,4 @@ python -m http.server 8080
 
 ## Nächster Schritt
 
-Task 6 (`feat/sharper-ai-recommendations`) implementieren:
-- Branch von `main` erstellen
-- `api/ki-consulting.js` System-Prompt um Bäckerei-Benchmarks ergänzen
-- `buildClaudePrompt()`: alle 6 Quick Wins übergeben (nicht nur 3), neuen Pflicht-Abschnitt `## Warum das für Ihren Betrieb gilt` erzwingen, Bedingungslogik für `kueche: 'nein'`
-- After-Task-Protokoll vollständig ausführen
+Alle Branches testen (test/integration) und auf origin pushen.
