@@ -1346,11 +1346,12 @@
 
     const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta';
     const GEMINI_MODEL = 'gemini-3.1-flash-lite';
-    const EXTRACTION_PROMPT = `Du analysierst Versorgungsrechnungen (Strom, Gas, Wasser) ODER Reinigungsmittelrechnungen eines deutschen Gewerbebetriebs.
+    const EXTRACTION_PROMPT = `Du analysierst Versorgungsrechnungen (Strom, Gas, Wasser), Reinigungsmittelrechnungen ODER Entsorgungsrechnungen (Abfall) eines deutschen Gewerbebetriebs.
 Extrahiere alle vorhandenen Werte. Rechne auf Jahresbasis hoch wenn nötig (Zeitraum < 12 Monate).
-reinigungsmittel_liter: Gesamtmenge aller gelieferten Reinigungsmittel in Litern (summiere alle Einzelpositionen). Null wenn nicht vorhanden.
+reinigungsmittel_liter: Gesamtmenge Reinigungsmittel in Litern (summiere alle Positionen). Null wenn nicht vorhanden.
+abfall_kg: Gesamtgewicht aller entsorgten Abfälle in kg (wenn Tonnen: ×1000). Steht als Restmüll/Gewerbeabfall/Abfallaufkommen. Null wenn nicht vorhanden.
 Antworte NUR mit validem JSON ohne Markdown:
-{"strom_kwh":null,"gas_kwh":null,"wasser_m3":null,"reinigungsmittel_liter":null,"zeitraum_monate":null,"zeitraum_beschreibung":null,"konfidenz":"hoch","nicht_gefunden":[]}`;
+{"strom_kwh":null,"gas_kwh":null,"wasser_m3":null,"reinigungsmittel_liter":null,"abfall_kg":null,"zeitraum_monate":null,"zeitraum_beschreibung":null,"konfidenz":"hoch","nicht_gefunden":[]}`;
 
     // Upload each file via Files API first (avoids tokenizing raw base64 bytes)
     async function uploadToFilesApi(base64, mimeType) {
@@ -1462,6 +1463,12 @@ Antworte NUR mit validem JSON ohne Markdown:
     if (reinigungJahr && reinigungJahr > 0) {
       const val = ma > 0 ? Math.round(reinigungJahr / ma) : Math.round(reinigungJahr);
       if (setJahreswert('jw-reinigungsmittel', val)) found.push('Reinigungsmittel');
+    }
+
+    // Abfall (kg/Abrechnungszeitraum → kg/Jahr als Jahreswert)
+    const abfallJahr = result.abfall_kg;
+    if (abfallJahr && abfallJahr > 0) {
+      if (setJahreswert('jw-abfall', abfallJahr)) found.push('Abfall');
     }
 
     // If jahreswerte inputs exist, trigger their recalculation

@@ -25,6 +25,7 @@ Extrahiere aus den beigefügten Dokumenten alle folgenden Werte, falls vorhanden
 - gas_kwh: Gesamter Gasverbrauch im Abrechnungszeitraum in kWh (Zahl, ohne Einheit). Wenn nur m³ angegeben: multipliziere mit 10 (Schätzung Heizwert).
 - wasser_m3: Gesamter Wasserverbrauch im Abrechnungszeitraum in m³ (Zahl, ohne Einheit)
 - reinigungsmittel_liter: Gesamtmenge aller gelieferten Reinigungsmittel im Abrechnungszeitraum in Litern (Zahl, ohne Einheit). Summiere alle Einzelpositionen (Kanister × Liter/Gebinde + Flaschen × ml/1000). Steht oft als „Gesamt gelieferte Reinigungsmittel" oder „Summe Reinigungsmittel" in der Tabelle. Null wenn nicht erkennbar.
+- abfall_kg: Gesamtgewicht aller entsorgten Abfälle im Abrechnungszeitraum in Kilogramm (Zahl, ohne Einheit). Wenn nur Tonnen angegeben: multipliziere mit 1000. Steht oft als „Gesamtmenge", „Restmüll", „Gewerbeabfall" oder „Abfallaufkommen" auf Entsorgungsrechnungen. Null wenn nicht erkennbar.
 - zeitraum_monate: Länge des Abrechnungszeitraums in Monaten (Zahl)
 - zeitraum_beschreibung: Beschreibung des Zeitraums, z. B. "01.01.2024–31.12.2024"
 - konfidenz: Deine Sicherheit bei der Extraktion: "hoch", "mittel" oder "niedrig"
@@ -39,6 +40,7 @@ Antworte NUR mit einem validen JSON-Objekt, ohne Markdown-Codeblock, ohne Erklä
   "gas_kwh": null,
   "wasser_m3": null,
   "reinigungsmittel_liter": null,
+  "abfall_kg": null,
   "zeitraum_monate": null,
   "zeitraum_beschreibung": null,
   "konfidenz": "hoch",
