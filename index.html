@@ -1424,6 +1424,16 @@ Antworte NUR mit validem JSON ohne Markdown:
       if (jwEl) { jwEl.value = Math.round(wasserJahr); found.push('Wasser'); }
     }
 
+    // Reinigungsmittel (L/Abrechnungszeitraum → L/MA/Jahr)
+    const reinigungJahr = result.reinigungsmittel_liter;
+    if (reinigungJahr && reinigungJahr > 0) {
+      const jwEl = document.getElementById('jw-reinigungsmittel');
+      if (jwEl) {
+        jwEl.value = ma > 0 ? Math.round(reinigungJahr / ma) : Math.round(reinigungJahr);
+        found.push('Reinigungsmittel');
+      }
+    }
+
     // If jahreswerte inputs exist, trigger their recalculation
     if (document.getElementById('jw-strom') && typeof computeFromJahreswerte === 'function') {
       computeFromJahreswerte();

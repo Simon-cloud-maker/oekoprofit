@@ -1,6 +1,6 @@
 // Vercel Serverless Function — Gemini Document Reader
-// Liest Versorgungsrechnungen (Strom, Gas, Wasser) als PDF oder Foto
-// und extrahiert Verbrauchskennzahlen via Gemini 2.0 Flash.
+// Liest Versorgungsrechnungen (Strom, Gas, Wasser) ODER Reinigungsmittelrechnungen
+// als PDF oder Foto und extrahiert Verbrauchskennzahlen via Gemini 2.0 Flash.
 //
 // Set environment variable on Vercel:
 //   GEMINI_API_KEY
@@ -14,12 +14,13 @@
 const GEMINI_ENDPOINT =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
-const EXTRACTION_PROMPT = `Du analysierst Versorgungsrechnungen (Strom, Gas, Wasser) eines deutschen Gewerbebetriebs.
+const EXTRACTION_PROMPT = `Du analysierst Versorgungsrechnungen (Strom, Gas, Wasser) ODER Reinigungsmittelrechnungen eines deutschen Gewerbebetriebs.
 
 Extrahiere aus den beigefügten Dokumenten alle folgenden Werte, falls vorhanden:
 - strom_kwh: Gesamter Stromverbrauch im Abrechnungszeitraum in kWh (Zahl, ohne Einheit)
 - gas_kwh: Gesamter Gasverbrauch im Abrechnungszeitraum in kWh (Zahl, ohne Einheit). Wenn nur m³ angegeben: multipliziere mit 10 (Schätzung Heizwert).
 - wasser_m3: Gesamter Wasserverbrauch im Abrechnungszeitraum in m³ (Zahl, ohne Einheit)
+- reinigungsmittel_liter: Gesamtmenge aller gelieferten Reinigungsmittel im Abrechnungszeitraum in Litern (Zahl, ohne Einheit). Summiere alle Einzelpositionen (Kanister × Liter/Gebinde + Flaschen × ml/1000). Steht oft als „Gesamt gelieferte Reinigungsmittel" oder „Summe Reinigungsmittel" in der Tabelle. Null wenn nicht erkennbar.
 - zeitraum_monate: Länge des Abrechnungszeitraums in Monaten (Zahl)
 - zeitraum_beschreibung: Beschreibung des Zeitraums, z. B. "01.01.2024–31.12.2024"
 - konfidenz: Deine Sicherheit bei der Extraktion: "hoch", "mittel" oder "niedrig"
@@ -33,6 +34,7 @@ Antworte NUR mit einem validen JSON-Objekt, ohne Markdown-Codeblock, ohne Erklä
   "strom_kwh": null,
   "gas_kwh": null,
   "wasser_m3": null,
+  "reinigungsmittel_liter": null,
   "zeitraum_monate": null,
   "zeitraum_beschreibung": null,
   "konfidenz": "hoch",
