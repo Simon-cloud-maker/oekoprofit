@@ -17,6 +17,13 @@ Das Tool fokussiert sich jetzt auf **zwei Fallbeispiele**:
 - **Gasthaus** (Gastronomie) — bereits vorhanden, verfeinert
 - **Bäckerei (Produktion)** — neu hinzugefügt
 
+## Neue Branches (2026-05-31, lokal, noch nicht gepusht)
+
+| Branch | Status | Was |
+|--------|--------|-----|
+| `feat/gemini-document-reader` | ✅ mehrfach erweitert | Files API statt inline Base64; gemini-3.1-flash-lite; abfall_kg Extraktion; input-Event-Fix |
+| `feat/waste-kpi` | ✅ neu | CO2-Faktor Restmüll (0,15 kg/kg), Abfall in CO2-Berechnung, KI-Prompt-Benchmarks |
+
 ## Feature-Branches (lokal, noch nicht gepusht)
 
 | Branch | Status | Was geändert wurde |

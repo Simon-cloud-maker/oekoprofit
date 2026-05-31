@@ -2,6 +2,28 @@
 
 ---
 
+## [2026-05-31] Bugfixes Document-Reader + feat/waste-kpi: Abfall-KPI
+
+**Branches:** `feat/gemini-document-reader` (Bugfixes + abfall_kg), `feat/waste-kpi` (neu)
+
+**Probleme behoben (feat/gemini-document-reader):**
+- 501-Fallback: Browser-Direktaufruf springt jetzt auch bei HTTP 501 an (python -m http.server)
+- Browser-Fallback-Prompt fehlte `reinigungsmittel_liter`
+- Gemini Free-Tier-Quotafehler: Files API statt inline Base64 (drastisch weniger Token)
+- Modell: `gemini-3.1-flash-lite` (kostenlos, von Google empfohlen)
+- `applyDocumentResult`: `input`-Event nach Autofill fehlte → Felder sichtbar leer trotz befüllt
+- `abfall_kg` in Extraktionsprompt (Server + Browser-Fallback) und `applyDocumentResult` ergänzt
+
+**Neu (feat/waste-kpi):**
+- `benchmarks.js`: `restmuell_kg_co2_per_kg: 0.15` in `emissionFactors` (UBA 2023)
+- `index.html`: Abfall-Anteil in CO2-Berechnung (kg CO₂/m²) wenn MA + Fläche bekannt
+- `api/ki-consulting.js`: Abfall-Benchmarks Gastro/Bäckerei/Büro + Emissionsfaktor im System-Prompt
+
+**Merge:**
+- Beide Branches in `test/integration` gemergt; Konflikt in `api/ki-consulting.js` manuell aufgelöst
+
+---
+
 ## [2026-05-31] Task 8 — feat/benchmark-tab-update: Hauptverbraucher, Quick Wins, Quellenzeile
 
 **Persona:** Feature Implementer
