@@ -2075,6 +2075,21 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   initThemeToggle();
   update();
   checkOllamaReachability();
+
+  // Hide API key input fields when the server has the keys configured (e.g. on Vercel).
+  fetch('/api/config')
+    .then(r => r.json())
+    .then(cfg => {
+      if (cfg.hasGeminiKey) {
+        const el = document.getElementById('gemini-api-key');
+        if (el) el.closest('.gemini-key-row').style.display = 'none';
+      }
+      if (cfg.hasOpenrouterKey) {
+        const el = document.getElementById('openrouter-api-key');
+        if (el) el.closest('.gemini-key-row').style.display = 'none';
+      }
+    })
+    .catch(() => { /* local dev without server: keep fields visible */ });
 </script>
 </body>
 </html>
