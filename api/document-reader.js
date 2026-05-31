@@ -2,6 +2,9 @@
 // Liest Versorgungsrechnungen (Strom, Gas, Wasser) ODER Reinigungsmittelrechnungen
 // als PDF oder Foto und extrahiert Verbrauchskennzahlen via Gemini 2.0 Flash.
 //
+// Nutzt die Gemini Files API (Upload → URI-Referenz) statt inline Base64,
+// um den Input-Token-Verbrauch zu minimieren und Free-Tier-Limits einzuhalten.
+//
 // Set environment variable on Vercel:
 //   GEMINI_API_KEY
 //
@@ -9,10 +12,11 @@
 //   { files: [{ base64: string, mimeType: string }], branche: string }
 //
 // Response (JSON):
-//   { strom_kwh, gas_kwh, wasser_m3, zeitraum, konfidenz, nicht_gefunden }
+//   { strom_kwh, gas_kwh, wasser_m3, reinigungsmittel_liter, zeitraum_monate,
+//     zeitraum_beschreibung, konfidenz, nicht_gefunden }
 
-const GEMINI_ENDPOINT =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+const GEMINI_MODEL = 'gemini-2.0-flash';
 
 const EXTRACTION_PROMPT = `Du analysierst Versorgungsrechnungen (Strom, Gas, Wasser) ODER Reinigungsmittelrechnungen eines deutschen Gewerbebetriebs.
 
@@ -48,6 +52,45 @@ function corsHeaders() {
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json',
   };
+}
+
+// Upload one file via Files API, return the file URI.
+async function uploadFile(apiKey, base64, mimeType) {
+  const bytes = Buffer.from(base64, 'base64');
+  const uploadRes = await fetch(
+    `${GEMINI_BASE}/files?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        file: { displayName: 'rechnung' },
+        // inline upload via JSON with base64 — avoids multipart complexity
+        // but still separates file data from the generateContent call
+      }),
+    }
+  );
+
+  // Use the raw (resumable) upload protocol for simplicity
+  const initRes = await fetch(
+    `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: {
+        'X-Goog-Upload-Protocol': 'raw',
+        'X-Goog-Upload-Header-Content-Type': mimeType,
+        'Content-Type': mimeType,
+      },
+      body: bytes,
+    }
+  );
+  if (!initRes.ok) {
+    const err = await initRes.json().catch(() => ({}));
+    throw new Error('Files API Upload fehlgeschlagen: ' + (err?.error?.message || initRes.status));
+  }
+  const data = await initRes.json();
+  return data.file.uri;
 }
 
 module.exports = async function handler(req, res) {
@@ -86,23 +129,33 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  // Baue Gemini-Request: Text-Prompt + alle Dokumente als inlineData
+  // Upload each file via Files API and collect URIs
   const parts = [{ text: EXTRACTION_PROMPT }];
-  for (const f of files) {
-    if (!f.base64 || !f.mimeType) continue;
-    parts.push({ inlineData: { mimeType: f.mimeType, data: f.base64 } });
+  try {
+    for (const f of files) {
+      if (!f.base64 || !f.mimeType) continue;
+      const uri = await uploadFile(apiKey, f.base64, f.mimeType);
+      parts.push({ fileData: { mimeType: f.mimeType, fileUri: uri } });
+    }
+  } catch (err) {
+    res.writeHead(502, corsHeaders());
+    res.end(JSON.stringify({ error: err.message }));
+    return;
   }
 
   let geminiData;
   try {
-    const geminiRes = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 512 },
-      }),
-    });
+    const geminiRes = await fetch(
+      `${GEMINI_BASE}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 512 },
+        }),
+      }
+    );
     geminiData = await geminiRes.json();
   } catch (err) {
     res.writeHead(502, corsHeaders());

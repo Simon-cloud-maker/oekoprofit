@@ -1341,20 +1341,47 @@
       // Network error (e.g. local static server) → fall through
     }
 
-    // Direct browser call using user-provided key
+    // Direct browser call using user-provided key (Files API to minimize token usage)
     if (!userKey) throw new Error('Bitte Gemini API-Key eingeben (aistudio.google.com → kostenfrei)');
 
-    const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+    const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+    const GEMINI_MODEL = 'gemini-2.0-flash';
     const EXTRACTION_PROMPT = `Du analysierst Versorgungsrechnungen (Strom, Gas, Wasser) ODER Reinigungsmittelrechnungen eines deutschen Gewerbebetriebs.
 Extrahiere alle vorhandenen Werte. Rechne auf Jahresbasis hoch wenn nötig (Zeitraum < 12 Monate).
 reinigungsmittel_liter: Gesamtmenge aller gelieferten Reinigungsmittel in Litern (summiere alle Einzelpositionen). Null wenn nicht vorhanden.
 Antworte NUR mit validem JSON ohne Markdown:
 {"strom_kwh":null,"gas_kwh":null,"wasser_m3":null,"reinigungsmittel_liter":null,"zeitraum_monate":null,"zeitraum_beschreibung":null,"konfidenz":"hoch","nicht_gefunden":[]}`;
 
-    const parts = [{ text: EXTRACTION_PROMPT },
-      ...encodedFiles.map(f => ({ inlineData: { mimeType: f.mimeType, data: f.base64 } }))];
+    // Upload each file via Files API first (avoids tokenizing raw base64 bytes)
+    async function uploadToFilesApi(base64, mimeType) {
+      const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+      const uploadRes = await fetch(
+        `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${userKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'X-Goog-Upload-Protocol': 'raw',
+            'X-Goog-Upload-Header-Content-Type': mimeType,
+            'Content-Type': mimeType,
+          },
+          body: bytes,
+        }
+      );
+      if (!uploadRes.ok) {
+        const err = await uploadRes.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `Files-Upload Fehler ${uploadRes.status}`);
+      }
+      const data = await uploadRes.json();
+      return data.file.uri;
+    }
 
-    const res = await fetch(`${GEMINI_ENDPOINT}?key=${userKey}`, {
+    const parts = [{ text: EXTRACTION_PROMPT }];
+    for (const f of encodedFiles) {
+      const uri = await uploadToFilesApi(f.base64, f.mimeType);
+      parts.push({ fileData: { mimeType: f.mimeType, fileUri: uri } });
+    }
+
+    const res = await fetch(`${GEMINI_BASE}/models/${GEMINI_MODEL}:generateContent?key=${userKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
