@@ -68,11 +68,11 @@ const OEKOPROFIT_BENCHMARKS = {
           invertiert: true,
           quelle: "Statistisches Bundesamt 03/2025"
         },
-        recyclingquote_pct: {
-          einheit: "% Recyclingquote (Gewerbeabfall)",
-          p25: 70, median: 55, p75: 40,
-          invertiert: true,
-          quelle: "Universalwert: DE-Recyclingziel 2022 (70 %); branchenspezifische Quartile noch nicht verfügbar — siehe known-issues.md"
+        reinigungsmittel_l_per_ma: {
+          einheit: "Liter Reinigungsmittel pro Mitarbeiter und Jahr",
+          p25: 30, median: 45, p75: 70,
+          invertiert: false,
+          quelle: "Schätzwert Gastronomie: ÖKOPROFIT-Netzwerk / DEHOGA-Hygieneleitfaden"
         }
       },
       hauptverbraucher: [
@@ -485,7 +485,8 @@ const OEKOPROFIT_BENCHMARKS = {
       gebaeude_top_15pct_besser_nzeb_pct: 10,
       schwellenwert_umsatz_pct: 10,
     },
-    recyclingquote_de_2022_pct: 70,
+    reinigungsmittel_gastronomie_median_l_per_ma: 45,
+    reinigungsmittel_baeckerei_median_l_per_ma: 35,
     verwertungsquote_de_2022_pct: 82,
     strommix_ee_ziel_2030_pct: 80,
   },
