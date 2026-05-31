@@ -1716,11 +1716,14 @@ Antworte NUR mit validem JSON ohne Markdown:
     document.getElementById('branche-badge').textContent = b.label;
 
     const capHint = document.getElementById('slider-cap-hint');
-    const capped = SLIDER_CAPS.filter(c => +document.getElementById(c.id).value >= c.max);
+    const capped = SLIDER_CAPS.filter(c => {
+      const el = document.getElementById(c.id);
+      return el && +el.value >= +el.max;
+    });
     if (capped.length) {
       capHint.style.display = 'block';
       capHint.textContent = 'Hinweis: ' + capped.map(c => c.name).join(', ')
-        + ': Obergrenze des Schiebereglers erreicht. Liegt Ihr Betrieb darüber, sind die Werte nach oben begrenzt.';
+        + ': Wert liegt über der Darstellungsgrenze. Berechnung bleibt korrekt.';
     } else {
       capHint.style.display = 'none';
     }
