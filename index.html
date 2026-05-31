@@ -318,6 +318,61 @@
       border-radius: var(--radius-sm);
     }
 
+    /* Betriebsprofil & Jahreswerte */
+    .profil-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+      margin: 10px 0 4px;
+    }
+    .profil-field { display: flex; flex-direction: column; gap: 4px; }
+    .profil-field label { font-size: 12px; color: var(--gray-600); }
+    .profil-field input[type=number],
+    .profil-field select {
+      padding: 7px 10px;
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--gray-900);
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .jw-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .jw-row label { font-size: 13px; color: var(--gray-600); min-width: 130px; }
+    .jw-row input[type=number] {
+      flex: 1;
+      padding: 7px 10px;
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--gray-900);
+    }
+    .jw-unit { font-family: var(--font-mono); font-size: 12px; color: var(--gray-600); min-width: 80px; text-align: right; }
+    .profil-hint {
+      font-size: 12px;
+      color: var(--coral-400);
+      margin: 4px 0 8px;
+      padding: 7px 10px;
+      background: var(--coral-50);
+      border-radius: var(--radius-sm);
+      line-height: 1.45;
+    }
+    .section-divider { font-size: 12px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.05em; margin: 16px 0 8px; }
+    [data-theme="dark"] .profil-field input[type=number],
+    [data-theme="dark"] .profil-field select,
+    [data-theme="dark"] .jw-row input[type=number] {
+      border-color: var(--gray-100);
+      background: var(--surface);
+      color: var(--gray-900);
+    }
+
     /* Benchmark bars */
     .bench-item { margin-bottom: 14px; }
     .bench-labels {
@@ -812,38 +867,98 @@
   <!-- TAB: Eingabe -->
   <div id="tab-eingabe">
     <div class="card">
-      <div class="label">Umweltkennzahlen</div>
+      <!-- Hidden sliders: internal state for calcScore / Excel-Import / Snapshot-Restore -->
+      <input type="range" min="10"  max="500"  value="180" id="strom"     step="1" style="display:none" oninput="update()">
+      <input type="range" min="0"   max="600"  value="95"  id="gas"       step="1" style="display:none" oninput="update()">
+      <input type="range" min="1"   max="200"  value="28"  id="wasser"    step="1" style="display:none" oninput="update()">
+      <input type="range" min="10"  max="1000" value="120" id="abfall"    step="1" style="display:none" oninput="update()">
+      <input type="range" min="0"   max="100"  value="55"  id="recycling" step="1" style="display:none" oninput="update()">
+      <span id="strom-v" style="display:none">180</span>
+      <span id="gas-v"   style="display:none">95</span>
+      <span id="wasser-v"   style="display:none">28</span>
+      <span id="abfall-v"   style="display:none">120</span>
+      <span id="recycling-v" style="display:none">55</span>
+      <p id="slider-cap-hint" class="slider-cap-hint" style="display:none;"></p>
+
+      <!-- Betriebsprofil -->
+      <div class="label">Betriebsprofil</div>
+      <div class="profil-grid">
+        <div class="profil-field">
+          <label>Nutzfläche (m²)</label>
+          <input type="number" id="profil-flaeche" min="10" max="5000" placeholder="z. B. 120" oninput="computeFromJahreswerte()">
+        </div>
+        <div class="profil-field">
+          <label>Mitarbeiter (Vollzeit)</label>
+          <input type="number" id="profil-ma" min="1" max="200" placeholder="z. B. 5" oninput="computeFromJahreswerte()">
+        </div>
+        <!-- Gasthaus-spezifisch -->
+        <div class="profil-field branch-field-gastro">
+          <label>Sitzplätze</label>
+          <input type="number" id="profil-sitzplaetze" min="1" max="500" placeholder="z. B. 60">
+        </div>
+        <div class="profil-field branch-field-gastro">
+          <label>Öffnungstage / Jahr</label>
+          <input type="number" id="profil-oeffnungstage" min="1" max="365" placeholder="z. B. 300">
+        </div>
+        <div class="profil-field branch-field-gastro">
+          <label>Eigene Küche</label>
+          <select id="profil-kueche">
+            <option value="">Bitte wählen</option>
+            <option value="ja">Ja</option>
+            <option value="nein">Nein (Ausschank / Café)</option>
+          </select>
+        </div>
+        <!-- Bäckerei-spezifisch -->
+        <div class="profil-field branch-field-baeckerei">
+          <label>Anzahl Backöfen</label>
+          <input type="number" id="profil-oefen" min="1" max="20" placeholder="z. B. 3">
+        </div>
+        <div class="profil-field branch-field-baeckerei">
+          <label>Verkaufsraum vorhanden</label>
+          <select id="profil-verkauf">
+            <option value="">Bitte wählen</option>
+            <option value="ja">Ja</option>
+            <option value="nein">Nein (nur Produktion)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Jahreswerte -->
+      <div class="section-divider">Jahresverbrauch</div>
+      <div class="jw-row">
+        <label>Stromverbrauch</label>
+        <input type="number" id="jw-strom" min="0" placeholder="z. B. 28 000" oninput="computeFromJahreswerte()">
+        <span class="jw-unit">kWh / Jahr</span>
+      </div>
+      <div class="jw-row">
+        <label>Gasverbrauch</label>
+        <input type="number" id="jw-gas" min="0" placeholder="z. B. 95 000" oninput="computeFromJahreswerte()">
+        <span class="jw-unit">kWh / Jahr</span>
+      </div>
+      <div class="jw-row">
+        <label>Wasserverbrauch</label>
+        <input type="number" id="jw-wasser" min="0" placeholder="z. B. 500" oninput="computeFromJahreswerte()">
+        <span class="jw-unit">m³ / Jahr</span>
+      </div>
+      <div class="jw-row">
+        <label>Abfallaufkommen</label>
+        <input type="number" id="jw-abfall" min="0" placeholder="z. B. 2 400" oninput="computeFromJahreswerte()">
+        <span class="jw-unit">kg / Jahr</span>
+      </div>
+      <div class="jw-row">
+        <label>Recyclingquote</label>
+        <input type="number" id="jw-recycling" min="0" max="100" placeholder="z. B. 55" oninput="computeFromJahreswerte()">
+        <span class="jw-unit">%</span>
+      </div>
+      <p id="profil-hint" class="profil-hint" style="display:none;"></p>
+
+      <!-- Excel-Import (bleibt als Profi-Option) -->
+      <div class="section-divider">Daten importieren</div>
       <div class="upload-row">
         <label class="btn" for="excel-upload">📂 Excel importieren</label>
         <input type="file" id="excel-upload" accept=".xlsx" onchange="handleExcelUpload(event)">
         <span class="upload-status" id="upload-status">Noch keine Datei geladen</span>
       </div>
-      <div class="slider-row">
-        <label>Stromverbrauch</label>
-        <input type="range" min="10" max="500" value="180" id="strom" step="1" oninput="update()">
-        <span class="slider-val"><span id="strom-v">180</span> kWh/m²</span>
-      </div>
-      <div class="slider-row">
-        <label>Gasverbrauch</label>
-        <input type="range" min="0" max="600" value="95" id="gas" step="1" oninput="update()">
-        <span class="slider-val"><span id="gas-v">95</span> kWh/m²</span>
-      </div>
-      <div class="slider-row">
-        <label>Wasserverbrauch</label>
-        <input type="range" min="1" max="200" value="28" id="wasser" step="1" oninput="update()">
-        <span class="slider-val"><span id="wasser-v">28</span> m³/MA</span>
-      </div>
-      <div class="slider-row">
-        <label>Abfallaufkommen</label>
-        <input type="range" min="10" max="1000" value="120" id="abfall" step="1" oninput="update()">
-        <span class="slider-val"><span id="abfall-v">120</span> kg/MA</span>
-      </div>
-      <div class="slider-row">
-        <label>Recyclingquote</label>
-        <input type="range" min="0" max="100" value="55" id="recycling" step="1" oninput="update()">
-        <span class="slider-val"><span id="recycling-v">55</span> %</span>
-      </div>
-      <p id="slider-cap-hint" class="slider-cap-hint" style="display:none;"></p>
       <div class="snapshot-row">
         <button type="button" class="btn-save" onclick="saveSnapshot()">💾 Snapshot speichern</button>
         <span class="save-status" id="save-status"></span>
@@ -1145,6 +1260,68 @@
     };
   }
 
+  function getBetriebsProfil() {
+    return {
+      flaeche:      +document.getElementById('profil-flaeche').value || null,
+      ma:           +document.getElementById('profil-ma').value || null,
+      sitzplaetze:  +document.getElementById('profil-sitzplaetze').value || null,
+      oeffnungstage:+document.getElementById('profil-oeffnungstage').value || null,
+      kueche:       document.getElementById('profil-kueche').value || null,
+      oefen:        +document.getElementById('profil-oefen').value || null,
+      verkauf:      document.getElementById('profil-verkauf').value || null,
+    };
+  }
+
+  function computeFromJahreswerte() {
+    const p = getBetriebsProfil();
+    const hint = document.getElementById('profil-hint');
+
+    const jwStrom    = +document.getElementById('jw-strom').value    || 0;
+    const jwGas      = +document.getElementById('jw-gas').value      || 0;
+    const jwWasser   = +document.getElementById('jw-wasser').value   || 0;
+    const jwAbfall   = +document.getElementById('jw-abfall').value   || 0;
+    const jwRecycling= +document.getElementById('jw-recycling').value|| 0;
+
+    const anyJw = jwStrom || jwGas || jwWasser || jwAbfall || jwRecycling;
+
+    function setSlider(id, value) {
+      if (!value || isNaN(value) || value <= 0) return;
+      const slider = document.getElementById(id);
+      const clamped = Math.min(Math.max(Math.round(value), Number(slider.min)), Number(slider.max));
+      slider.value = clamped;
+      document.getElementById(id + '-v').textContent = clamped;
+    }
+
+    if (p.flaeche && jwStrom)  setSlider('strom',  jwStrom  / p.flaeche);
+    if (p.flaeche && jwGas)    setSlider('gas',    jwGas    / p.flaeche);
+    if (p.ma      && jwWasser) setSlider('wasser', jwWasser / p.ma);
+    if (p.ma      && jwAbfall) setSlider('abfall', jwAbfall / p.ma);
+    if (jwRecycling)           setSlider('recycling', jwRecycling);
+
+    const missing = [];
+    if (!p.flaeche && (jwStrom || jwGas))    missing.push('Nutzfläche');
+    if (!p.ma      && (jwWasser || jwAbfall)) missing.push('Mitarbeiter');
+
+    if (missing.length && anyJw) {
+      hint.style.display = 'block';
+      hint.textContent = 'Fehlend für Umrechnung: ' + missing.join(', ') + ' — bitte im Betriebsprofil eintragen.';
+    } else {
+      hint.style.display = 'none';
+    }
+
+    update();
+  }
+
+  function updateBranchUI() {
+    const branch = document.getElementById('branche').value;
+    document.querySelectorAll('.branch-field-gastro').forEach(el => {
+      el.style.display = (branch === 'gastro') ? '' : 'none';
+    });
+    document.querySelectorAll('.branch-field-baeckerei').forEach(el => {
+      el.style.display = (branch === 'baeckerei') ? '' : 'none';
+    });
+  }
+
   function calcScore(vals, b) {
     const branchKey = BRANCH_BENCHMARK_MAP[document.getElementById('branche').value];
     const benchData = OEKOPROFIT_BENCHMARKS.branchen[branchKey];
@@ -1265,6 +1442,7 @@
   }
 
   function update() {
+    updateBranchUI();
     const vals = getVals();
     const branch = document.getElementById('branche').value;
     const b = benchmarks[branch];
@@ -1588,11 +1766,26 @@
         }).join('\n')
       : '';
 
+    const p = getBetriebsProfil();
+    const profilLines = [];
+    if (p.flaeche)       profilLines.push(`Nutzfläche: ${p.flaeche} m²`);
+    if (p.ma)            profilLines.push(`Mitarbeiter: ${p.ma}`);
+    if (p.sitzplaetze)   profilLines.push(`Sitzplätze: ${p.sitzplaetze}`);
+    if (p.oeffnungstage) profilLines.push(`Öffnungstage/Jahr: ${p.oeffnungstage}`);
+    if (p.kueche)        profilLines.push(`Eigene Küche: ${p.kueche}`);
+    if (p.oefen)         profilLines.push(`Backöfen: ${p.oefen}`);
+    if (p.verkauf)       profilLines.push(`Verkaufsraum: ${p.verkauf}`);
+    const betriebsGroesse = p.ma
+      ? (p.ma < 5 ? 'Kleinstbetrieb (< 5 MA)' : p.ma < 20 ? 'Kleinbetrieb (5–19 MA)' : 'Mittelbetrieb (≥ 20 MA)')
+      : null;
+    if (betriebsGroesse) profilLines.push(`Betriebsgröße: ${betriebsGroesse}`);
+
     return `Du bist Energie- und Nachhaltigkeitsberater fuer OEKOPROFIT-Betriebe.
 Nutze NUR die vier Bloecke unten. Kein Intro, keine Zwischenüberschrift wie "1. Tabelle" oder "Pseudo-Tabelle".
 
 Branche: ${b.label}
 Emissionsfaktoren: Strom ${ef.strom_de_mix_g_per_kwh} g CO₂/kWh | Erdgas ${ef.erdgas_g_per_kwh} g CO₂/kWh
+${profilLines.length ? `\nBetriebsprofil:\n${profilLines.map(l => '- ' + l).join('\n')}` : ''}
 
 Kennzahlen des Betriebs:
 - Stromverbrauch: ${stromInfo}
