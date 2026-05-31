@@ -1021,11 +1021,15 @@
     <div class="card">
       <div class="label">KI-gestützte Empfehlungen</div>
       <div id="rec-list"><div style="font-size:13px; color:var(--gray-400);">Empfehlungen erscheinen nach Dateneingabe.</div></div>
+      <div class="gemini-key-row" style="margin-top:0.75rem;">
+        <label for="openrouter-api-key">OpenRouter API-Key (optional, lokal)</label>
+        <input type="password" id="openrouter-api-key" placeholder="sk-or-… (kostenlos: openrouter.ai/keys)" autocomplete="off">
+      </div>
       <div class="ai-controls">
         <input id="claude-api-key" class="ai-input" type="password" placeholder="(Bei Ollama nicht benoetigt)" autocomplete="off" style="display:none;">
         <button id="ai-start-btn" class="ai-btn" onclick="startAIConsulting()">KI-Beratung starten</button>
       </div>
-      <div id="ai-status" class="ai-status">Lokal via Ollama. Wenn nicht erreichbar: online via OpenRouter (free tier).</div>
+      <div id="ai-status" class="ai-status">Lokal via Ollama. Wenn nicht erreichbar: OpenRouter (Key oben oder Server-Proxy).</div>
       <div id="ai-response" class="ai-response" style="display:none;"></div>
     </div>
     <div style="font-size:12px; color:var(--gray-400); margin-top:-0.25rem; padding: 0 0.25rem;">
@@ -1902,7 +1906,41 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   }
 
   async function callOpenRouterDirect(prompt) {
-    // Calls the Vercel backend endpoint. This avoids exposing API keys in the browser.
+    const userKey = document.getElementById('openrouter-api-key')?.value?.trim();
+
+    if (userKey) {
+      // Direct browser call using the user-supplied key (local dev / testing).
+      const SYSTEM_PROMPT = `Du bist Energie- und Nachhaltigkeitsberater fuer ÖKOPROFIT-Betriebe in Deutschland.\nAntworte auf Deutsch. Gib konkrete Zahlen (kWh, t CO₂, €) und Amortisationsdauern an.`;
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userKey}`,
+          'HTTP-Referer': window.location.origin,
+        },
+        body: JSON.stringify({
+          model: 'openrouter/auto',
+          temperature: 0.3,
+          max_tokens: 2048,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: prompt },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`OpenRouter API Fehler (${response.status}): ${errText}`);
+      }
+
+      const data = await response.json();
+      const content = data?.choices?.[0]?.message?.content;
+      if (!content) throw new Error('Leere Antwort von OpenRouter erhalten.');
+      return content.trim();
+    }
+
+    // No user key: call the Vercel backend proxy.
     const response = await fetch('/api/ki-consulting', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1930,7 +1968,8 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     const prompt = buildClaudePrompt(vals, b, score);
 
     btn.disabled = true;
-    setAIStatus('KI wird angefragt ... (Ollama wenn moeglich, sonst OpenRouter)');
+    const hasUserKey = !!document.getElementById('openrouter-api-key')?.value?.trim();
+    setAIStatus(`KI wird angefragt ... (Ollama → ${hasUserKey ? 'OpenRouter direkt' : 'Server-Proxy'})`);
     setAIResponse('Analyse laeuft, bitte kurz warten ...');
 
     let localErr;
