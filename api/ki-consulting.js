@@ -19,6 +19,8 @@ Branchen-Benchmarks (P25 = gut | Median | P75 = schlecht):
 - Büro Abfall: P25 < 30 | Median 60 | P75 > 100 kg/MA·a
 - Einzelhandel Food Strom: P25 < 230 | Median 289 | P75 > 350 kWh/m²·a (EHI 2024)
 - Einzelhandel Nonfood Strom: P25 < 50 | Median 75 | P75 > 110 kWh/m²·a (EHI)
+- Bäckerei Strom: P25 < 200 | Median 290 | P75 > 390 kWh/m²·a (Energieagentur NRW 2022)
+- Bäckerei Gas/Wärme: P25 < 380 | Median 530 | P75 > 720 kWh/m²·a (Bäcker-Innung Bayern)
 
 Quick Wins mit bewährten Kennzahlen:
 - LED-Beleuchtung: –50 % Beleuchtungsenergie, Amortisation 2–3 Jahre
@@ -27,6 +29,9 @@ Quick Wins mit bewährten Kennzahlen:
 - Standby-Abschaltung Büro: –3–5 % Strom, Invest < 500 €
 - Spülmaschinen-Austausch (Gastro): –50 % Wasser, –30 % Energie, Amortisation 3 Jahre
 - Nachtabdeckungen Kühlregale: –30 % Kälteverbrauch, Amortisation 2 Jahre
+- Bäckerei Ofentür-Dichtungen: –5 % Gas, Invest 200 €, Amortisation < 1 Jahr
+- Bäckerei Teigmaschinen-Timer (Nachtabschaltung): 540 €/Jahr Einsparung, Invest 150 €
+- Bäckerei LED Produktion + Verkauf: –50 % Beleuchtungsenergie, Invest 2.500 €
 
 ÖKOPROFIT-Programmergebnisse:
 - München 25 Jahre: 730 Mio. kWh, 470.000 t CO₂, 123 Mio. € Einsparung (500 Betriebe)

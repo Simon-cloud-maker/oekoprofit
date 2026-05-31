@@ -219,6 +219,57 @@ Task 6 (`feat/sharper-ai-recommendations`): System-Prompt Bäckerei-Daten, alle 
 
 ---
 
+## [2026-05-30] Refokus: Gasthaus & Bäckerei — Tasks 1–5
+
+**Persona:** Feature Implementer + Domain Expert (ÖKOPROFIT)
+**Stage:** 03-feature-v2
+
+**Ziel:**
+Auf Empfehlung des Professors: Tool von 5 Branchen auf 2 Fallbeispiele (Gasthaus + Bäckerei) fokussieren.
+Eingaben branchenspezifisch machen, LLM-Dokumentenleser ergänzen, Empfehlungen schärfen.
+
+**Aktionen:**
+
+Task 1 — `feat/bakery-benchmarks`:
+- `benchmarks.js`: Bäckerei-Eintrag mit P25/Median/P75 für Strom, Gas, Wasser, Abfall, Recycling, Energiekosten
+- Hauptverbraucher (Backöfen, Kühlung, Teigmaschinen) und 6 Quick Wins ergänzt
+- massnahmen-Array mit 6 branchenspezifischen Empfehlungsregeln (Template-basiert) hinzugefügt
+- Quellen: Energieagentur NRW 2022, Bäcker-Innung Bayern, Zentralverband Bäckerhandwerk 2023
+
+Task 2 — `feat/ui-focus-two-cases`:
+- Dropdown auf „Gasthaus (Gastronomie)" + „Bäckerei (Produktion)" reduziert; andere Optionen `hidden`
+- Bäckerei-Mediane ins `benchmarks`-Objekt, `BRANCH_BENCHMARK_MAP` und Excel-Branchenerkennung erweitert
+
+Task 3 — `feat/branch-specific-inputs`:
+- Generische Slider durch Betriebsprofil-Sektion (Fläche, MA, Sitzplätze/Öfen) + Jahreswert-Inputs ersetzt
+- Slider bleiben hidden als State-Holder (Excel-Import und Snapshot-Restore bleiben kompatibel)
+- `computeFromJahreswerte()` rechnet kWh/Jahr ÷ m² → kWh/m²; `updateBranchUI()` blendet Felder je Branche
+- `buildClaudePrompt()` mit Betriebsprofil inkl. Betriebsgrößenklasse (Kleinst-/Klein-/Mittelbetrieb) angereichert
+
+Task 4 — `feat/gemini-document-reader`:
+- `api/document-reader.js`: Vercel Serverless Function, Gemini 2.0 Flash, JSON-Extraktion (Strom/Gas/Wasser/Zeitraum)
+- Client: Multi-file Base64-Encoding, POST an `/api/document-reader`, Fallback auf direkten Browser-Call mit User-Key
+- UI: Gemini-Key-Input, Spinner, Status-Zeile, autofill-Badge auf befüllten Feldern
+- `applyDocumentResult()` kompatibel mit Task-3-Jahreswert-Inputs und Original-Slidern
+
+Task 5 — `feat/deterministic-recommendations`:
+- `benchmarks.js` (`gastronomie`): 7 massnahmen-Regeln mit Score-Schwellwert, Template-Variablen, optionaler Profilbedingung
+- `benchmarks.js` (`baeckerei`): 6 massnahmen-Regeln (kanonisch auf `feat/bakery-benchmarks`, Stub aus Task 5 entfernt)
+- `index.html`: `buildDeterministicRecs()` ersetzt generische `recs`-Logik; wertet Scores aus, substituiert Templates, passt Tipps an Betriebsgröße an
+
+**Ergebnis:**
+5 Feature-Branches committed, lokal nicht gepusht. Keine erwarteten Merge-Konflikte.
+`memory/short_term.md`, `memory/decisions.md` und `logs/actions.md` auf `main` aktualisiert (Handover-Commit).
+
+**Learnings:**
+- `memory/`- und `logs/`-Dateien sollten direkt auf `main` committed werden, nicht auf Feature-Branches — vermeidet Versionskonfusion in neuen Sessions.
+- Temporäre Integrations-Branches (`test/integration`) sind ein sauberer Weg, mehrere Feature-Branches gemeinsam zu testen ohne `main` zu verunreinigen.
+
+**Nächster Schritt:**
+Task 6 (`feat/sharper-ai-recommendations`): System-Prompt Bäckerei-Daten, alle 6 Quick Wins, betriebsspezifischer Abschnitt im KI-Output.
+
+---
+
 ## [2026-05-19] Feature: Score-Verlauf und Snapshot-Vergleich
 
 Ziel:
