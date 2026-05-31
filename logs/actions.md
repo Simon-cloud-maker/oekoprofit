@@ -2,6 +2,27 @@
 
 ---
 
+## [2026-05-31] Bugfix feat/gemini-document-reader: Wasser-Autofill + Slider-Cap
+
+**Branch:** `feat/gemini-document-reader`
+
+**Probleme:**
+1. Wasserverbrauch wurde als erkannt gemeldet, aber `jw-wasser`-Textfeld blieb leer,
+   weil `applyDocumentResult` bei vorhandenem `ma` direkt `setSlider()` statt
+   `setJahreswert()` aufrief — der sichtbare Jahreswert-Input wurde umgangen.
+   Gleiches Problem latent für Strom und Gas (wenn `flaeche` bekannt).
+2. Irreführende "Obergrenze des Schiebereglers erreicht"-Meldung nach Autofill,
+   weil `setSlider` den Wert auf `slider.max` cappte statt das Maximum anzuheben.
+
+**Fixes:**
+- `applyDocumentResult`: Strom, Gas, Wasser immer über `setJahreswert(jw-*)` befüllen;
+  `computeFromJahreswerte()` übernimmt Umrechnung auf Slider.
+- `setSlider`: `slider.max = rounded` wenn Wert das Maximum überschreitet — kein Capping mehr.
+
+**Merge:** `feat/gemini-document-reader` → `test/integration` (konfliktfrei)
+
+---
+
 ## [2026-05-31] Bugfixes Document-Reader + feat/waste-kpi: Abfall-KPI
 
 **Branches:** `feat/gemini-document-reader` (Bugfixes + abfall_kg), `feat/waste-kpi` (neu)
