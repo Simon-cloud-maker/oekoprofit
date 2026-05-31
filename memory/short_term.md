@@ -17,21 +17,21 @@ Das Tool fokussiert sich jetzt auf **zwei Fallbeispiele**:
 - **Gasthaus** (Gastronomie) — bereits vorhanden, verfeinert
 - **Bäckerei (Produktion)** — neu hinzugefügt
 
-## Neue Branches (2026-05-31, lokal, noch nicht gepusht)
+## Neue Branches (2026-05-31)
 
 | Branch | Status | Was |
 |--------|--------|-----|
 | `feat/gemini-document-reader` | ✅ mehrfach erweitert | Files API statt inline Base64; gemini-3.1-flash-lite; abfall_kg Extraktion; input-Event-Fix |
 | `feat/waste-kpi` | ✅ neu | CO2-Faktor Restmüll (0,15 kg/kg), Abfall in CO2-Berechnung, KI-Prompt-Benchmarks |
 
-## Feature-Branches (lokal, noch nicht gepusht)
+## Feature-Branches
 
 | Branch | Status | Was geändert wurde |
 |--------|--------|--------------------|
 | `feat/bakery-benchmarks` | ✅ committed | Bäckerei-Kennzahlen, Quick Wins, Hauptverbraucher + massnahmen-Array in `benchmarks.js` |
 | `feat/ui-focus-two-cases` | ✅ committed | Dropdown auf 2 Optionen (inkl. Label „Bäckerei (Produktion)"), Bäckerei-Mediane in UI |
 | `feat/branch-specific-inputs` | ✅ committed | Betriebsprofil-Felder, Jahreswert-Inputs (kWh/Jahr), Slider als versteckte State-Holder, `buildClaudePrompt()` mit Profil angereichert |
-| `feat/gemini-document-reader` | ✅ committed | Neue `api/document-reader.js` (Gemini 2.0 Flash), Multi-file PDF/Foto-Upload, Browser-Fallback mit User-Key, autofill-Badge; **Task 4b:** Reinigungsmittel-Extraktion (`reinigungsmittel_liter`) + `applyDocumentResult()`-Block |
+| `feat/gemini-document-reader` | ✅ committed | Neue `api/document-reader.js` (gemini-3.1-flash-lite), Multi-file PDF/Foto-Upload, Browser-Fallback mit User-Key, autofill-Badge; **Reinigungsmittel-Extraktion:** (`reinigungsmittel_liter`) + `applyDocumentResult()`-Block |
 | `feat/deterministic-recommendations` | ✅ committed | `buildDeterministicRecs()` ersetzt generische Empfehlungslogik; Template-Variablen inkl. Betriebsgröße |
 | `feat/sharper-ai-recommendations` | ✅ committed | Bäckerei-Benchmarks im System-Prompt, 6 Quick Wins, kueche-Bedingung, neuer Abschnitt `## Warum das für Ihren Betrieb gilt` |
 | `feat/replace-recycling-metric` | ✅ committed | Recyclingquote → Reinigungsmittelverbrauch (L/MA/Jahr) in `benchmarks.js` (gastronomie), `index.html` (12 Stellen), `api/ki-consulting.js` |
@@ -58,5 +58,4 @@ python -m http.server 8080
 
 ## Nächster Schritt
 
-`test/integration` aufbauen (alle 8 Branches mergen), Konflikt-Auflösung für
-`baeckerei.kennzahlen` und `massnahmen`-Arrays im INT-Branch, dann lokal testen.
+Alle 9 Feature-Branches in `main` gemergt und auf `origin` gepusht. Feature-Branches können lokal archiviert werden.

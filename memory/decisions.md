@@ -5,7 +5,7 @@
 ## [2026-05-30] Entscheidung: Slider als versteckte State-Holder (nicht entfernen)
 
 Kontext:
-Task 3 ersetzt die sichtbaren Slider durch Betriebsprofil + Jahreswert-Inputs. Excel-Import und Snapshot-Restore schreiben aber direkt auf Slider-Elemente per ID.
+Branchenspezifische Eingabefelder (feat/branch-specific-inputs) ersetzt die sichtbaren Slider durch Betriebsprofil + Jahreswert-Inputs. Excel-Import und Snapshot-Restore schreiben aber direkt auf Slider-Elemente per ID.
 
 Entscheidung:
 Slider bleiben im DOM mit `style="display:none"`. Neue Inputs schreiben über `computeFromJahreswerte()` in die Slider; `getVals()` liest weiterhin Slider aus. Kein Bruch der bestehenden Logik.
@@ -15,13 +15,15 @@ Alternativen verworfen:
 
 ---
 
-## [2026-05-30] Entscheidung: Gemini 2.0 Flash für Dokumentenextraktion
+## [2026-05-30] Entscheidung: gemini-3.1-flash-lite für Dokumentenextraktion
 
 Kontext:
-Task 4 braucht ein LLM, das PDFs und Fotos von Versorgungsrechnungen lesen kann. Kostenfrei und ohne Server-Key testbar.
+Dokumentenextraktion (feat/gemini-document-reader) braucht ein LLM, das PDFs und Fotos von Versorgungsrechnungen lesen kann. Kostenfrei und ohne Server-Key testbar.
 
 Entscheidung:
-Gemini 2.0 Flash via Google AI Studio (kostenloser API-Key). Browser-Fallback: direkter CORS-fähiger Call mit User-Key. Vercel-Proxy als Produktions-Pfad.
+gemini-3.1-flash-lite via Google AI Studio (kostenloser API-Key). Browser-Fallback: direkter CORS-fähiger Call mit User-Key. Vercel-Proxy als Produktions-Pfad.
+
+_Korrektur 2026-05-31: Ursprünglich „Gemini 2.0 Flash" dokumentiert; tatsächlich verwendetes Modell ist `gemini-3.1-flash-lite`._
 
 Alternativen verworfen:
 - GPT-4o Vision: kostenpflichtig, kein kostenfreier Tier.
@@ -194,7 +196,7 @@ Ersatz durch **Reinigungsmittelverbrauch (L/MA/Jahr)**.
 
 **Begründung:**
 - HACCP-Rechnungen (CleanPro etc.) sind Jahresrechnungen mit klarer Summenzeile
-- Gemini 2.0 Flash kann diese direkt als `reinigungsmittel_liter` extrahieren
+- gemini-3.1-flash-lite kann diese direkt als `reinigungsmittel_liter` extrahieren
 - Relevant für beide Fallbeispiele (Gasthaus: Küche/Sanitär, Bäckerei: HACCP-Pflicht)
 - `invertiert: false` (niedriger = besser) → konsistente Scoring-Logik
 

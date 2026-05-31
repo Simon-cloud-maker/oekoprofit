@@ -1,5 +1,22 @@
 # Session Action Log
 
+## Feature-Übersicht (Task-Mapping)
+
+| Arbeitsbezeichnung | Branch | Beschreibung |
+|--------------------|--------|--------------|
+| Task 1 | feat/bakery-benchmarks | Bäckerei-Benchmarks |
+| Task 2 | feat/ui-focus-two-cases | UI-Fokus (Gastronomie & Büro) |
+| Task 3 | feat/branch-specific-inputs | Branchenspezifische Eingabefelder |
+| Task 4 | feat/gemini-document-reader | Dokumentenextraktion (Gemini) |
+| Task 4b | feat/gemini-document-reader | Reinigungsmittel-Extraktion |
+| Task 5 | feat/deterministic-recommendations | Deterministische Empfehlungen |
+| Task 6 | feat/sharper-ai-recommendations | Schärfere KI-Empfehlungen |
+| Task 7 | feat/replace-recycling-metric | Recyclingquote → Reinigungsmittel |
+| Task 8 | feat/benchmark-tab-update | Benchmark-Tab Überarbeitung |
+| — | feat/waste-kpi | Abfall-KPI (Gewicht) |
+
+_Die Bezeichnungen „Task 1"–„Task 8" wurden nur lokal zur Orientierung verwendet._
+
 ---
 
 ## [2026-05-31] Bugfix feat/gemini-document-reader: Wasser-Autofill + Slider-Cap
@@ -179,7 +196,7 @@ Task 3 — `feat/branch-specific-inputs`:
 - `buildClaudePrompt()` mit Betriebsprofil inkl. Betriebsgrößenklasse (Kleinst-/Klein-/Mittelbetrieb) angereichert
 
 Task 4 — `feat/gemini-document-reader`:
-- `api/document-reader.js`: Vercel Serverless Function, Gemini 2.0 Flash, JSON-Extraktion (Strom/Gas/Wasser/Zeitraum)
+- `api/document-reader.js`: Vercel Serverless Function, gemini-3.1-flash-lite, JSON-Extraktion (Strom/Gas/Wasser/Zeitraum)
 - Client: Multi-file Base64-Encoding, POST an `/api/document-reader`, Fallback auf direkten Browser-Call mit User-Key
 - UI: Gemini-Key-Input, Spinner, Status-Zeile, autofill-Badge auf befüllten Feldern
 - `applyDocumentResult()` kompatibel mit Task-3-Jahreswert-Inputs und Original-Slidern
