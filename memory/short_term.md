@@ -28,7 +28,7 @@ Das Tool fokussiert sich jetzt auf **zwei Fallbeispiele**:
 | `feat/deterministic-recommendations` | ✅ committed | `buildDeterministicRecs()` ersetzt generische Empfehlungslogik; Template-Variablen inkl. Betriebsgröße |
 | `feat/sharper-ai-recommendations` | ✅ committed | Bäckerei-Benchmarks im System-Prompt, 6 Quick Wins, kueche-Bedingung, neuer Abschnitt `## Warum das für Ihren Betrieb gilt` |
 | `feat/replace-recycling-metric` | ✅ committed | Recyclingquote → Reinigungsmittelverbrauch (L/MA/Jahr) in `benchmarks.js` (gastronomie), `index.html` (12 Stellen), `api/ki-consulting.js` |
-| `feat/benchmark-tab-update` | ⏳ ausstehend | Benchmark-Tab: Hauptverbraucher-Box, Quick-Wins-Card, Quellenzeile |
+| `feat/benchmark-tab-update` | ✅ committed | Benchmark-Tab: Hauptverbraucher-Box, Quick-Wins-Card, Quellenzeile + metrics recycling→reinigungsmittel |
 
 ## Kein Merge-Konflikt erwartet
 
@@ -51,5 +51,5 @@ python -m http.server 8080
 
 ## Nächster Schritt
 
-Task 7 (`feat/replace-recycling-metric`) und Task 8 (`feat/benchmark-tab-update`)
-implementieren, dann `test/integration` neu aufbauen (alle 8 Branches) und lokal testen.
+`test/integration` aufbauen (alle 8 Branches mergen), Konflikt-Auflösung für
+`baeckerei.kennzahlen` und `massnahmen`-Arrays im INT-Branch, dann lokal testen.

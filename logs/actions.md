@@ -2,6 +2,32 @@
 
 ---
 
+## [2026-05-31] Task 8 — feat/benchmark-tab-update: Hauptverbraucher, Quick Wins, Quellenzeile
+
+**Persona:** Feature Implementer
+**Stage:** 03-feature-v2
+
+**Ziel:**
+Benchmark-Tab an Tasks 1–7 angleichen: branchenspezifische Kontextinfos aus
+`benchmarks.js` (hauptverbraucher, quick_wins, quelle) im Tab anzeigen.
+
+**Aktionen:**
+
+- `index.html` Benchmark-Tab HTML: Hauptverbraucher-Box (Badges), Quick-Wins-Card
+  (nummerierte Liste), Quellenzeile unter Legende — alle mit `display:none` als Default
+- `index.html` `renderBenchmarkBars()`: Render-Logik für alle drei neuen Elemente
+  aus `OEKOPROFIT_BENCHMARKS.branchen[branch]`; Quick Wins unterstützen String-
+  und Objekt-Format; `metrics`-Array: `recycling` → `reinigungsmittel` (Task 7)
+
+**Ergebnis:**
+Branch `feat/benchmark-tab-update` committed.
+
+**Nächster Schritt:**
+INT-Branch (`test/integration`) aufbauen: alle 8 Branches mergen + Konflikt-Auflösung
+für baeckerei.kennzahlen und massnahmen im INT-Branch.
+
+---
+
 ## [2026-05-31] Task 7 — feat/replace-recycling-metric: Recyclingquote → Reinigungsmittelverbrauch
 
 **Persona:** Feature Implementer
