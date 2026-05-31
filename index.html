@@ -1345,7 +1345,7 @@
     if (!userKey) throw new Error('Bitte Gemini API-Key eingeben (aistudio.google.com → kostenfrei)');
 
     const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta';
-    const GEMINI_MODEL = 'gemini-2.0-flash';
+    const GEMINI_MODEL = 'gemini-3.1-flash-lite';
     const EXTRACTION_PROMPT = `Du analysierst Versorgungsrechnungen (Strom, Gas, Wasser) ODER Reinigungsmittelrechnungen eines deutschen Gewerbebetriebs.
 Extrahiere alle vorhandenen Werte. Rechne auf Jahresbasis hoch wenn nötig (Zeitraum < 12 Monate).
 reinigungsmittel_liter: Gesamtmenge aller gelieferten Reinigungsmittel in Litern (summiere alle Einzelpositionen). Null wenn nicht vorhanden.
