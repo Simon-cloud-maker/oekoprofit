@@ -175,3 +175,31 @@ Alternativen:
 Konsequenzen:
 - Bessere Lesbarkeit der KI-Empfehlungen.
 - Leicht erhöhte Komplexität im Frontend-JS.
+
+
+---
+
+## [2026-05-31] Recyclingquote → Reinigungsmittelverbrauch
+
+**Kontext:**
+Die Recyclingquote (%) wurde als 5. Umweltkennzahl genutzt, ist aber für KMU
+in der Praxis schwer zu erheben — Unternehmen kennen diese Zahl oft nicht.
+
+**Entscheidung:**
+Ersatz durch **Reinigungsmittelverbrauch (L/MA/Jahr)**.
+
+**Alternativen geprüft:**
+- Abfallkosten (€/MA/Jahr): auf Entsorgungsrechnung lesbar, aber eigener Parser nötig
+- Recyclingquote beibehalten: bleibt unverändert, da niemand die Zahl kennt
+
+**Begründung:**
+- HACCP-Rechnungen (CleanPro etc.) sind Jahresrechnungen mit klarer Summenzeile
+- Gemini 2.0 Flash kann diese direkt als `reinigungsmittel_liter` extrahieren
+- Relevant für beide Fallbeispiele (Gasthaus: Küche/Sanitär, Bäckerei: HACCP-Pflicht)
+- `invertiert: false` (niedriger = besser) → konsistente Scoring-Logik
+
+**Impact:**
+- `benchmarks.js`: gastronomie + baeckerei kennzahlen, massnahmen
+- `index.html`: 12 Stellen (Slider, Scoring, Prompt, Snapshot)
+- `api/document-reader.js`: neues Feld im Extraction-Prompt
+- `api/ki-consulting.js`: Benchmark-Werte im System-Prompt

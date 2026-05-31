@@ -27,7 +27,7 @@ Das Tool fokussiert sich jetzt auf **zwei Fallbeispiele**:
 | `feat/gemini-document-reader` | ✅ committed | Neue `api/document-reader.js` (Gemini 2.0 Flash), Multi-file PDF/Foto-Upload, Browser-Fallback mit User-Key, autofill-Badge; **Task 4b:** Reinigungsmittel-Extraktion (`reinigungsmittel_liter`) + `applyDocumentResult()`-Block |
 | `feat/deterministic-recommendations` | ✅ committed | `buildDeterministicRecs()` ersetzt generische Empfehlungslogik; Template-Variablen inkl. Betriebsgröße |
 | `feat/sharper-ai-recommendations` | ✅ committed | Bäckerei-Benchmarks im System-Prompt, 6 Quick Wins, kueche-Bedingung, neuer Abschnitt `## Warum das für Ihren Betrieb gilt` |
-| `feat/replace-recycling-metric` | ⏳ ausstehend | Recyclingquote → Reinigungsmittelverbrauch (L/MA/Jahr) in `benchmarks.js`, `index.html`, `api/ki-consulting.js` |
+| `feat/replace-recycling-metric` | ✅ committed | Recyclingquote → Reinigungsmittelverbrauch (L/MA/Jahr) in `benchmarks.js` (gastronomie), `index.html` (12 Stellen), `api/ki-consulting.js` |
 | `feat/benchmark-tab-update` | ⏳ ausstehend | Benchmark-Tab: Hauptverbraucher-Box, Quick-Wins-Card, Quellenzeile |
 
 ## Kein Merge-Konflikt erwartet

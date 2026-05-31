@@ -2,6 +2,40 @@
 
 ---
 
+## [2026-05-31] Task 7 — feat/replace-recycling-metric: Recyclingquote → Reinigungsmittelverbrauch
+
+**Persona:** Feature Implementer
+**Stage:** 03-feature-v2
+
+**Ziel:**
+Recyclingquote als Umweltkennzahl ersetzen durch Reinigungsmittelverbrauch
+(L/MA/Jahr), da Unternehmen die Recyclingquote oft nicht kennen und
+Reinigungsmittelrechnungen (HACCP) direkt durch Gemini ausgelesen werden können.
+
+**Aktionen:**
+
+- `benchmarks.js`: `recyclingquote_pct` in gastronomie.kennzahlen →
+  `reinigungsmittel_l_per_ma` (P25: 30, Median: 45, P75: 70, invertiert: false);
+  globale Konstante `recyclingquote_de_2022_pct` durch Reinigungsmittel-Mediane ersetzt
+- `index.html` (12 Stellen): Slider, Excel-Parser, getVals(), calcScore(),
+  metricBenchmarkScore(), metricMedian(), renderBenchmarkBars(),
+  buildClaudePrompt() Text + Tabelle, Snapshot-Keys, Metrik-Definitions-Array,
+  Legacy-Empfehlungslogik
+- `api/ki-consulting.js`: Reinigungsmittel-Benchmarks (Gastro + Bäckerei)
+  in BENCHMARK_SYSTEM_PROMPT ergänzt
+
+**Hinweis:**
+`baeckerei.kennzahlen` (feat/bakery-benchmarks) und `massnahmen`-Arrays
+(feat/deterministic-recommendations) werden im INT-Branch nachgezogen.
+
+**Ergebnis:**
+Branch `feat/replace-recycling-metric` committed.
+
+**Nächster Schritt:**
+Task 8 (`feat/benchmark-tab-update`): Benchmark-Tab erweitern.
+
+---
+
 ## [2026-05-31] Task 4b — feat/gemini-document-reader: Reinigungsmittel-Extraktion
 
 **Persona:** Feature Implementer
