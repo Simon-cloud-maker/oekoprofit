@@ -837,9 +837,9 @@
         <span class="slider-val"><span id="abfall-v">120</span> kg/MA</span>
       </div>
       <div class="slider-row">
-        <label>Recyclingquote</label>
-        <input type="range" min="0" max="100" value="55" id="recycling" step="1" oninput="update()">
-        <span class="slider-val"><span id="recycling-v">55</span> %</span>
+        <label>Reinigungsmittel</label>
+        <input type="range" min="0" max="200" value="30" id="reinigungsmittel" step="1" oninput="update()">
+        <span class="slider-val"><span id="reinigungsmittel-v">30</span> L/MA</span>
       </div>
       <p id="slider-cap-hint" class="slider-cap-hint" style="display:none;"></p>
       <div class="snapshot-row">
@@ -1043,11 +1043,11 @@
           } else setSlider('abfall', abfallRaw);
         }
 
-        // Recyclingquote: decimal → %
-        const recyclingKey = Object.keys(data).find(h => h.includes('recyclingquote') || (h.includes('recycl') && h.includes('%')));
-        const recyclingRaw = recyclingKey ? Number(data[recyclingKey].val) : null;
-        if (recyclingRaw !== null) {
-          setSlider('recycling', recyclingRaw < 1 ? recyclingRaw * 100 : recyclingRaw);
+        // Reinigungsmittel (L/MA/Jahr)
+        const reinigungKey = Object.keys(data).find(h => h.includes('reinigung') || h.includes('reinigungsmittel'));
+        const reinigungRaw = reinigungKey ? Number(data[reinigungKey].val) : null;
+        if (reinigungRaw !== null) {
+          setSlider('reinigungsmittel', reinigungRaw);
         }
 
         // Betrieb
@@ -1097,11 +1097,11 @@
   // --- Ende Excel Upload ---
 
   const benchmarks = {
-    gastro:          { strom:230, gas:80,  wasser:25, abfall:100, recycling:60, label:'Gastronomie' },
-    handel_food:     { strom:289, gas:89,  wasser:6,  abfall:82,  recycling:65, label:'Einzelhandel (Lebensmittel)' },
-    handel_nonfood:  { strom:75,  gas:66,  wasser:4,  abfall:58,  recycling:65, label:'Einzelhandel (Nonfood)' },
-    buero:           { strom:65,  gas:110, wasser:8,  abfall:60,  recycling:70, label:'Büro / Verwaltung' },
-    produktion:      { strom:250, gas:150, wasser:40, abfall:200, recycling:45, label:'Produktion' },
+    gastro:          { strom:230, gas:80,  wasser:25, abfall:100, reinigungsmittel:45, label:'Gasthaus (Gastronomie)' },
+    handel_food:     { strom:289, gas:89,  wasser:6,  abfall:82,  reinigungsmittel:45, label:'Einzelhandel (Lebensmittel)' },
+    handel_nonfood:  { strom:75,  gas:66,  wasser:4,  abfall:58,  reinigungsmittel:45, label:'Einzelhandel (Nonfood)' },
+    buero:           { strom:65,  gas:110, wasser:8,  abfall:60,  reinigungsmittel:20, label:'Büro / Verwaltung' },
+    produktion:      { strom:250, gas:150, wasser:40, abfall:200, reinigungsmittel:35, label:'Produktion' },
   };
 
   // Maps select values to OEKOPROFIT_BENCHMARKS.branchen keys
@@ -1136,7 +1136,7 @@
       gas:       +document.getElementById('gas').value,
       wasser:    +document.getElementById('wasser').value,
       abfall:    +document.getElementById('abfall').value,
-      recycling: +document.getElementById('recycling').value,
+      reinigungsmittel: +document.getElementById('reinigungsmittel').value,
     };
   }
 
@@ -1164,9 +1164,9 @@
       const s = calcBenchmarkScore(lTag, k.wasser_liter_per_ma_tag);
       if (s !== null) scored.push({ s, w: 0.20 });
     }
-    // Recycling: invertiert — mehr ist besser; aktuell Universalwerte (DE-Ziel 2022) je Branche
-    if (k && k.recyclingquote_pct) {
-      const s = calcBenchmarkScore(vals.recycling, k.recyclingquote_pct);
+    // Reinigungsmittel: niedriger ist besser
+    if (k && k.reinigungsmittel_l_per_ma) {
+      const s = calcBenchmarkScore(vals.reinigungsmittel, k.reinigungsmittel_l_per_ma);
       if (s !== null) scored.push({ s, w: 0.15 });
     }
 
@@ -1177,7 +1177,7 @@
         b.gas   / Math.max(vals.gas + 1, 1),
         b.wasser / Math.max(vals.wasser, 1),
         b.abfall / Math.max(vals.abfall, 1),
-        vals.recycling / Math.max(b.recycling, 1),
+        b.reinigungsmittel / Math.max(vals.reinigungsmittel, 1),
       ];
       const weights = [0.30, 0.20, 0.20, 0.15, 0.15];
       let s = 0;
@@ -1213,8 +1213,11 @@
     if (key === 'abfall' && k.abfall_kg_per_ma) {
       return calcBenchmarkScore(val, k.abfall_kg_per_ma);
     }
-    if (key === 'recycling') {
-      return calcBenchmarkScore(val, { p25: 70, median: 55, p75: 40, invertiert: true });
+    if (key === 'reinigungsmittel' && k && k.reinigungsmittel_l_per_ma) {
+      return calcBenchmarkScore(val, k.reinigungsmittel_l_per_ma);
+    }
+    if (key === 'reinigungsmittel') {
+      return calcBenchmarkScore(val, { p25: 30, median: 45, p75: 70, invertiert: false });
     }
     return null;
   }
@@ -1231,7 +1234,8 @@
       }
       if (key === 'abfall' && k.abfall_kg_per_ma) return k.abfall_kg_per_ma.median;
     }
-    const legacy = { strom: b.strom, gas: b.gas, wasser: b.wasser, abfall: b.abfall, recycling: b.recycling };
+    if (key === 'reinigungsmittel' && k && k.reinigungsmittel_l_per_ma) return k.reinigungsmittel_l_per_ma.median;
+    const legacy = { strom: b.strom, gas: b.gas, wasser: b.wasser, abfall: b.abfall, reinigungsmittel: b.reinigungsmittel };
     return legacy[key];
   }
 
@@ -1268,7 +1272,7 @@
     document.getElementById('gas-v').textContent      = vals.gas;
     document.getElementById('wasser-v').textContent   = vals.wasser;
     document.getElementById('abfall-v').textContent   = vals.abfall;
-    document.getElementById('recycling-v').textContent= vals.recycling;
+    document.getElementById('reinigungsmittel-v').textContent= vals.reinigungsmittel;
     document.getElementById('branche-badge').textContent = b.label;
 
     const capHint = document.getElementById('slider-cap-hint');
@@ -1313,7 +1317,7 @@
       { key:'gas',       label:'Gasverbrauch',     unit:'kWh/m²', val:vals.gas,       higher:false },
       { key:'wasser',    label:'Wasserverbrauch',  unit:'m³/MA',  val:vals.wasser,    higher:false },
       { key:'abfall',    label:'Abfallaufkommen',  unit:'kg/MA',  val:vals.abfall,    higher:false },
-      { key:'recycling', label:'Recyclingquote',   unit:'%',      val:vals.recycling, higher:true  },
+      { key:'reinigungsmittel', label:'Reinigungsmittel', unit:'L/MA', val:vals.reinigungsmittel, higher:false },
     ];
 
     document.getElementById('bench-bars').innerHTML = metrics.map(m => {
@@ -1358,11 +1362,11 @@
       desc: `Wasserverbrauch (${vals.wasser} m³/MA) über Durchschnitt (${b.wasser} m³/MA). Durchflussregler an Armaturen und eine Leckageprüfung empfohlen.`,
       pot: `Einsparpotenzial: bis zu ${Math.round((vals.wasser - b.wasser) * 0.6)} m³/MA/Jahr`
     });
-    if (vals.recycling < b.recycling * 0.9) recs.push({
-      icon: '♻️', bg: '#EAF3DE',
-      title: 'Trennsysteme & Schulung',
-      desc: `Recyclingquote (${vals.recycling} %) unter Branchendurchschnitt (${b.recycling} %). Farbcodiertes Trennsystem und Mitarbeitendenschulung empfohlen.`,
-      pot: `Potenzial: Steigerung auf ${b.recycling}–${Math.min(b.recycling+10,95)} %`
+    if (vals.reinigungsmittel > b.reinigungsmittel * 1.1) recs.push({
+      icon: '🧴', bg: '#EAF3DE',
+      title: 'Reinigungsmittelverbrauch senken',
+      desc: `Verbrauch (${vals.reinigungsmittel} L/MA) über Branchendurchschnitt (${b.reinigungsmittel} L/MA). Dosierhilfen und Konzentrate statt Fertiglösungen empfohlen.`,
+      pot: `Einsparpotenzial: −${Math.round((vals.reinigungsmittel - b.reinigungsmittel) * 0.6)} L/MA durch Dosieroptimierung`
     });
     if (vals.abfall > b.abfall * 1.1) recs.push({
       icon: '🗑️', bg: '#EAF3DE',
@@ -1594,7 +1598,7 @@ Kennzahlen des Betriebs:
 - Gasverbrauch: ${gasInfo}
 - Wasserverbrauch: ${vals.wasser} m³/MA·a (Median: ${b.wasser})
 - Abfallaufkommen: ${vals.abfall} kg/MA (Median: ${b.abfall})
-- Recyclingquote: ${vals.recycling}% (Ziel DE: ≥ 70 %)
+- Reinigungsmittelverbrauch: ${vals.reinigungsmittel} L/MA (Median: ${b.reinigungsmittel})
 - CO₂-Äquivalent (Scope 1+2): ${co2} kg/m²·a
 - Oeко-Score gesamt: ${score}/100
 ${qwLines ? `\nBranchenspezifische Quick Wins (ÖKOPROFIT-Datenbasis):\n${qwLines}` : ''}
@@ -1615,7 +1619,7 @@ PFLICHT-Struktur (Copy-Muster exakt einhalten, Zahlen/Ampel mit echten Daten fü
 | Gas | … kWh/m²·a | … | … % | … |
 | Wasser | … m³/MA·a | … | … % | … |
 | Abfall | … kg/MA | … | … % | … |
-| Recycling | … % | … | … % | … |
+| Reinigungsmittel | … L/MA | … | … % | … |
 
 ## Kurzfazit
 Zwei bis drei vollstaendige Saetze in normalem Absatz (keine Nummerierung).
@@ -1834,7 +1838,7 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     document.getElementById('branche-badge').textContent = snap.brancheLabel;
     if (snap.betrieb) document.getElementById('betrieb-name').textContent = snap.betrieb;
 
-    ['strom','gas','wasser','abfall','recycling'].forEach(k => {
+    ['strom','gas','wasser','abfall','reinigungsmittel'].forEach(k => {
       if (snap.vals[k] == null) return;
       const slider = document.getElementById(k);
       const clamped = Math.min(Math.max(snap.vals[k], Number(slider.min)), Number(slider.max));
@@ -1980,13 +1984,13 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     renderComparison();
   }
 
-  // Lower-is-better for these metrics; recycling/score = higher-is-better.
+  // Lower-is-better for these metrics (inkl. reinigungsmittel); score = higher-is-better.
   const CMP_METRICS = [
     { key: 'strom',     label: 'Stromverbrauch',  unit: 'kWh/m²', higher: false },
     { key: 'gas',       label: 'Gasverbrauch',    unit: 'kWh/m²', higher: false },
     { key: 'wasser',    label: 'Wasserverbrauch', unit: 'm³/MA',  higher: false },
     { key: 'abfall',    label: 'Abfallaufkommen', unit: 'kg/MA',  higher: false },
-    { key: 'recycling', label: 'Recyclingquote',  unit: '%',      higher: true  },
+    { key: 'reinigungsmittel', label: 'Reinigungsmittel', unit: 'L/MA', higher: false },
   ];
 
   function renderComparison() {

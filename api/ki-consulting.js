@@ -20,6 +20,11 @@ Branchen-Benchmarks (P25 = gut | Median | P75 = schlecht):
 - Einzelhandel Food Strom: P25 < 230 | Median 289 | P75 > 350 kWh/m²·a (EHI 2024)
 - Einzelhandel Nonfood Strom: P25 < 50 | Median 75 | P75 > 110 kWh/m²·a (EHI)
 
+Reinigungsmittel-Benchmarks (Liter/Mitarbeiter/Jahr):
+- Gastronomie: P25 ≤ 30 L/MA (gut) | Median 45 L/MA | P75 ≥ 70 L/MA (schlecht)
+- Bäckerei: P25 ≤ 20 L/MA (gut) | Median 35 L/MA | P75 ≥ 55 L/MA (schlecht)
+- Reduktionspotenziale: Dosierhilfen (−20–30 %), Konzentrate statt Fertiglösungen (−30–40 %), Schulung
+
 Quick Wins mit bewährten Kennzahlen:
 - LED-Beleuchtung: –50 % Beleuchtungsenergie, Amortisation 2–3 Jahre
 - Druckluft-Leckageortung: bis –30 %, Amortisation < 1 Jahr
