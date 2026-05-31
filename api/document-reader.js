@@ -12,7 +12,7 @@
 //   { strom_kwh, gas_kwh, wasser_m3, zeitraum, konfidenz, nicht_gefunden }
 
 const GEMINI_ENDPOINT =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 const EXTRACTION_PROMPT = `Du analysierst Versorgungsrechnungen (Strom, Gas, Wasser) ODER Reinigungsmittelrechnungen eines deutschen Gewerbebetriebs.
 
