@@ -1331,7 +1331,8 @@
       });
       if (res.ok) return await res.json();
       // 500 = GEMINI_API_KEY not configured on server → fall through to browser call
-      if (res.status !== 500) {
+      // 501 = static dev server (python -m http.server) doesn't support POST → fall through
+      if (res.status !== 500 && res.status !== 501) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error || `Server-Fehler ${res.status}`);
       }
@@ -1344,10 +1345,11 @@
     if (!userKey) throw new Error('Bitte Gemini API-Key eingeben (aistudio.google.com → kostenfrei)');
 
     const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-    const EXTRACTION_PROMPT = `Du analysierst Versorgungsrechnungen (Strom, Gas, Wasser) eines deutschen Gewerbebetriebs.
+    const EXTRACTION_PROMPT = `Du analysierst Versorgungsrechnungen (Strom, Gas, Wasser) ODER Reinigungsmittelrechnungen eines deutschen Gewerbebetriebs.
 Extrahiere alle vorhandenen Werte. Rechne auf Jahresbasis hoch wenn nötig (Zeitraum < 12 Monate).
+reinigungsmittel_liter: Gesamtmenge aller gelieferten Reinigungsmittel in Litern (summiere alle Einzelpositionen). Null wenn nicht vorhanden.
 Antworte NUR mit validem JSON ohne Markdown:
-{"strom_kwh":null,"gas_kwh":null,"wasser_m3":null,"zeitraum_monate":null,"zeitraum_beschreibung":null,"konfidenz":"hoch","nicht_gefunden":[]}`;
+{"strom_kwh":null,"gas_kwh":null,"wasser_m3":null,"reinigungsmittel_liter":null,"zeitraum_monate":null,"zeitraum_beschreibung":null,"konfidenz":"hoch","nicht_gefunden":[]}`;
 
     const parts = [{ text: EXTRACTION_PROMPT },
       ...encodedFiles.map(f => ({ inlineData: { mimeType: f.mimeType, data: f.base64 } }))];
