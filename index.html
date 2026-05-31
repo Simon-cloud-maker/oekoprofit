@@ -872,12 +872,21 @@
     <div class="card">
       <div class="label">Branchenvergleich</div>
       <div id="bench-bars"></div>
-      <div class="legend">
+      <div id="bench-hauptverbraucher" style="display:none; margin-top:14px;">
+        <div style="font-size:12px; font-weight:600; color:var(--gray-600); margin-bottom:6px;">Hauptverbraucher in Ihrer Branche</div>
+        <div id="bench-hv-list" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+      </div>
+      <div class="legend" style="margin-top:12px;">
         <span><span class="legend-dot" style="background:var(--green-600);"></span>Gut (Ampel grün)</span>
         <span><span class="legend-dot" style="background:var(--amber-400);"></span>Mittelfeld (Ampel gelb)</span>
         <span><span class="legend-dot" style="background:#c44d28;"></span>Handlungsbedarf (Ampel rot)</span>
         <span><span class="legend-dot" style="background:var(--gray-900); opacity:0.55;"></span>Strich = Median-Benchmark</span>
       </div>
+      <div id="bench-quelle" style="display:none; font-size:11px; color:var(--gray-400); margin-top:8px;"></div>
+    </div>
+    <div class="card" id="bench-quickwins-card" style="display:none;">
+      <div class="label">Branchentypische Quick Wins</div>
+      <ol id="bench-qw-list" style="padding-left:1.2em; margin-top:8px; font-size:13px; color:var(--gray-600); line-height:1.8;"></ol>
     </div>
     <div class="card">
       <div class="score-wrap">
@@ -1313,8 +1322,34 @@
       { key:'gas',       label:'Gasverbrauch',     unit:'kWh/m²', val:vals.gas,       higher:false },
       { key:'wasser',    label:'Wasserverbrauch',  unit:'m³/MA',  val:vals.wasser,    higher:false },
       { key:'abfall',    label:'Abfallaufkommen',  unit:'kg/MA',  val:vals.abfall,    higher:false },
-      { key:'recycling', label:'Recyclingquote',   unit:'%',      val:vals.recycling, higher:true  },
+      { key:'reinigungsmittel', label:'Reinigungsmittel', unit:'L/MA', val:vals.reinigungsmittel, higher:false },
     ];
+
+    // Hauptverbraucher, Quick Wins, Quellenzeile aus benchmarks.js
+    const branchKey = BRANCH_BENCHMARK_MAP[document.getElementById('branche').value];
+    const bData = OEKOPROFIT_BENCHMARKS.branchen[branchKey];
+    const hvWrap = document.getElementById('bench-hauptverbraucher');
+    const hvList = document.getElementById('bench-hv-list');
+    if (bData && bData.hauptverbraucher && bData.hauptverbraucher.length) {
+      hvList.innerHTML = bData.hauptverbraucher.map(h => `<span class="badge">${h}</span>`).join('');
+      hvWrap.style.display = '';
+    } else { hvWrap.style.display = 'none'; }
+
+    const qwCard = document.getElementById('bench-quickwins-card');
+    const qwList = document.getElementById('bench-qw-list');
+    if (bData && bData.quick_wins && bData.quick_wins.length) {
+      qwList.innerHTML = bData.quick_wins.map(q => {
+        const text = typeof q === 'string' ? q : q.massnahme;
+        return `<li>${text}</li>`;
+      }).join('');
+      qwCard.style.display = '';
+    } else { qwCard.style.display = 'none'; }
+
+    const quelleEl = document.getElementById('bench-quelle');
+    if (bData && bData.kennzahlen && bData.kennzahlen.strom_kwh_per_m2 && bData.kennzahlen.strom_kwh_per_m2.quelle) {
+      quelleEl.textContent = 'Benchmark-Daten: ' + bData.kennzahlen.strom_kwh_per_m2.quelle;
+      quelleEl.style.display = '';
+    } else { quelleEl.style.display = 'none'; }
 
     document.getElementById('bench-bars').innerHTML = metrics.map(m => {
       const bval = metricMedian(m.key, b);
