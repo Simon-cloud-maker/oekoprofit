@@ -1,6 +1,6 @@
 # Short-Term Memory — Aktueller Projektstand
 
-_Zuletzt aktualisiert: 2026-05-30_
+_Zuletzt aktualisiert: 2026-05-31_
 
 ## Aktueller Stand
 
@@ -24,9 +24,11 @@ Das Tool fokussiert sich jetzt auf **zwei Fallbeispiele**:
 | `feat/bakery-benchmarks` | ✅ committed | Bäckerei-Kennzahlen, Quick Wins, Hauptverbraucher + massnahmen-Array in `benchmarks.js` |
 | `feat/ui-focus-two-cases` | ✅ committed | Dropdown auf 2 Optionen (inkl. Label „Bäckerei (Produktion)"), Bäckerei-Mediane in UI |
 | `feat/branch-specific-inputs` | ✅ committed | Betriebsprofil-Felder, Jahreswert-Inputs (kWh/Jahr), Slider als versteckte State-Holder, `buildClaudePrompt()` mit Profil angereichert |
-| `feat/gemini-document-reader` | ✅ committed | Neue `api/document-reader.js` (Gemini 2.0 Flash), Multi-file PDF/Foto-Upload, Browser-Fallback mit User-Key, autofill-Badge |
+| `feat/gemini-document-reader` | ✅ committed | Neue `api/document-reader.js` (Gemini 2.0 Flash), Multi-file PDF/Foto-Upload, Browser-Fallback mit User-Key, autofill-Badge; **Task 4b:** Reinigungsmittel-Extraktion (`reinigungsmittel_liter`) + `applyDocumentResult()`-Block |
 | `feat/deterministic-recommendations` | ✅ committed | `buildDeterministicRecs()` ersetzt generische Empfehlungslogik; Template-Variablen inkl. Betriebsgröße |
 | `feat/sharper-ai-recommendations` | ✅ committed | Bäckerei-Benchmarks im System-Prompt, 6 Quick Wins, kueche-Bedingung, neuer Abschnitt `## Warum das für Ihren Betrieb gilt` |
+| `feat/replace-recycling-metric` | ⏳ ausstehend | Recyclingquote → Reinigungsmittelverbrauch (L/MA/Jahr) in `benchmarks.js`, `index.html`, `api/ki-consulting.js` |
+| `feat/benchmark-tab-update` | ⏳ ausstehend | Benchmark-Tab: Hauptverbraucher-Box, Quick-Wins-Card, Quellenzeile |
 
 ## Kein Merge-Konflikt erwartet
 
@@ -49,4 +51,5 @@ python -m http.server 8080
 
 ## Nächster Schritt
 
-Alle Branches testen (test/integration) und auf origin pushen.
+Task 7 (`feat/replace-recycling-metric`) und Task 8 (`feat/benchmark-tab-update`)
+implementieren, dann `test/integration` neu aufbauen (alle 8 Branches) und lokal testen.

@@ -2,6 +2,32 @@
 
 ---
 
+## [2026-05-31] Task 4b — feat/gemini-document-reader: Reinigungsmittel-Extraktion
+
+**Persona:** Feature Implementer
+**Stage:** 03-feature-v2
+
+**Ziel:**
+Gemini Document Reader um Reinigungsmittelrechnungen erweitern, damit neben
+Energie- auch Reinigungsmittelrechnungen (HACCP) ausgelesen werden können.
+
+**Aktionen:**
+
+- `api/document-reader.js`: `EXTRACTION_PROMPT` auf Reinigungsmittelrechnungen
+  geöffnet; neues Feld `reinigungsmittel_liter` im JSON-Schema + Beispiel-Output
+- `index.html` `applyDocumentResult()`: Reinigungsmittel-Block nach wasser_m3
+  ergänzt (L/Jahr ÷ MA → L/MA/Jahr; defensiver if-Check für Branch-Isolation)
+
+**Ergebnis:**
+Branch `feat/gemini-document-reader` committet. Gemini kann jetzt PDFs wie
+`05_bakery_reinigung.pdf` (180 L) und `12_gasthaus_reinigung.pdf` (280 L)
+auswerten und das Feld `jw-reinigungsmittel` befüllen (sobald Task 7 gemergt).
+
+**Nächster Schritt:**
+Task 7 (`feat/replace-recycling-metric`): Recyclingquote durch Reinigungsmittelverbrauch ersetzen.
+
+---
+
 ## [2026-05-30] Task 6 — feat/sharper-ai-recommendations
 
 **Persona:** Feature Implementer
