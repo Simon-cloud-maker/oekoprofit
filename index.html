@@ -373,6 +373,66 @@
       color: var(--gray-900);
     }
 
+    /* Gemini Document Upload */
+    .doc-upload-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .doc-upload-spinner {
+      display: none;
+      width: 16px; height: 16px;
+      border: 2px solid var(--gray-100);
+      border-top-color: var(--green-600);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .doc-upload-row label.btn {
+      display: inline-block;
+      padding: 7px 14px;
+      background: var(--green-400);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .doc-upload-row label.btn:hover { background: var(--green-600); }
+    .doc-upload-status { font-size: 0.8rem; color: var(--gray-600); font-family: 'DM Mono', monospace; }
+    .doc-upload-hint { font-size: 12px; color: var(--gray-600); white-space: nowrap; }
+    .autofill-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 8px;
+      background: var(--green-50, #e6f4ef);
+      color: var(--green-600);
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .gemini-key-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .gemini-key-row label { font-size: 12px; color: var(--gray-600); white-space: nowrap; }
+    .gemini-key-row input {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      background: var(--surface);
+      color: var(--gray-900);
+      font-family: var(--font-mono);
+    }
+
     /* Benchmark bars */
     .bench-item { margin-bottom: 14px; }
     .bench-labels {
@@ -617,7 +677,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 18px;
+      margin-bottom: 10px;
       flex-wrap: wrap;
     }
     .upload-row label.btn {
@@ -646,7 +706,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-top: 12px;
+      margin-top: 0;
       flex-wrap: wrap;
     }
     .snapshot-row button.btn-save {
@@ -872,12 +932,12 @@
       <input type="range" min="0"   max="600"  value="95"  id="gas"       step="1" style="display:none" oninput="update()">
       <input type="range" min="1"   max="200"  value="28"  id="wasser"    step="1" style="display:none" oninput="update()">
       <input type="range" min="10"  max="1000" value="120" id="abfall"    step="1" style="display:none" oninput="update()">
-      <input type="range" min="0"   max="100"  value="55"  id="recycling" step="1" style="display:none" oninput="update()">
+      <input type="range" min="0"   max="200"  value="30"  id="reinigungsmittel" step="1" style="display:none" oninput="update()">
       <span id="strom-v" style="display:none">180</span>
       <span id="gas-v"   style="display:none">95</span>
       <span id="wasser-v"   style="display:none">28</span>
       <span id="abfall-v"   style="display:none">120</span>
-      <span id="recycling-v" style="display:none">55</span>
+      <span id="reinigungsmittel-v" style="display:none">30</span>
       <p id="slider-cap-hint" class="slider-cap-hint" style="display:none;"></p>
 
       <!-- Betriebsprofil -->
@@ -946,21 +1006,33 @@
         <span class="jw-unit">kg / Jahr</span>
       </div>
       <div class="jw-row">
-        <label>Recyclingquote</label>
-        <input type="number" id="jw-recycling" min="0" max="100" placeholder="z. B. 55" oninput="computeFromJahreswerte()">
-        <span class="jw-unit">%</span>
+        <label>Reinigungsmittel</label>
+        <input type="number" id="jw-reinigungsmittel" min="0" max="500" placeholder="z. B. 35" oninput="computeFromJahreswerte()">
+        <span class="jw-unit">L/MA</span>
       </div>
       <p id="profil-hint" class="profil-hint" style="display:none;"></p>
 
-      <!-- Excel-Import (bleibt als Profi-Option) -->
+      <!-- Daten importieren -->
       <div class="section-divider">Daten importieren</div>
+      <!-- Rechnungs-Upload via Gemini -->
+      <div class="gemini-key-row">
+        <label for="gemini-api-key">Gemini API-Key</label>
+        <input type="password" id="gemini-api-key" placeholder="AIza… (kostenlos: aistudio.google.com)" autocomplete="off">
+      </div>
+      <div class="doc-upload-row">
+        <label class="btn" id="btn-rechnungen" for="doc-upload">📄 Rechnungen einlesen</label>
+        <input type="file" id="doc-upload" accept=".pdf,image/*" multiple onchange="handleDocumentUpload(event)" style="display:none;">
+        <div class="doc-upload-spinner" id="doc-spinner"></div>
+        <span class="doc-upload-status" id="doc-status">Keine ausgewählt</span>
+        <span class="doc-upload-hint">PDF oder Foto (Strom, Gas, Wasser — mehrere möglich)</span>
+      </div>
       <div class="upload-row">
-        <label class="btn" for="excel-upload">📂 Excel importieren</label>
+        <label class="btn" id="btn-excel" for="excel-upload">📂 Excel importieren</label>
         <input type="file" id="excel-upload" accept=".xlsx" onchange="handleExcelUpload(event)">
         <span class="upload-status" id="upload-status">Noch keine Datei geladen</span>
       </div>
       <div class="snapshot-row">
-        <button type="button" class="btn-save" onclick="saveSnapshot()">💾 Snapshot speichern</button>
+        <button type="button" class="btn-save" id="btn-snapshot" onclick="saveSnapshot()">💾 Snapshot speichern</button>
         <span class="save-status" id="save-status"></span>
       </div>
     </div>
@@ -989,12 +1061,21 @@
     <div class="card">
       <div class="label">Branchenvergleich</div>
       <div id="bench-bars"></div>
-      <div class="legend">
+      <div id="bench-hauptverbraucher" style="display:none; margin-top:14px;">
+        <div style="font-size:12px; font-weight:600; color:var(--gray-600); margin-bottom:6px;">Hauptverbraucher in Ihrer Branche</div>
+        <div id="bench-hv-list" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+      </div>
+      <div class="legend" style="margin-top:12px;">
         <span><span class="legend-dot" style="background:var(--green-600);"></span>Gut (Ampel grün)</span>
         <span><span class="legend-dot" style="background:var(--amber-400);"></span>Mittelfeld (Ampel gelb)</span>
         <span><span class="legend-dot" style="background:#c44d28;"></span>Handlungsbedarf (Ampel rot)</span>
         <span><span class="legend-dot" style="background:var(--gray-900); opacity:0.55;"></span>Strich = Median-Benchmark</span>
       </div>
+      <div id="bench-quelle" style="display:none; font-size:11px; color:var(--gray-400); margin-top:8px;"></div>
+    </div>
+    <div class="card" id="bench-quickwins-card" style="display:none;">
+      <div class="label">Branchentypische Quick Wins</div>
+      <ol id="bench-qw-list" style="padding-left:1.2em; margin-top:8px; font-size:13px; color:var(--gray-600); line-height:1.8;"></ol>
     </div>
     <div class="card">
       <div class="score-wrap">
@@ -1023,11 +1104,15 @@
     <div class="card">
       <div class="label">KI-gestützte Empfehlungen</div>
       <div id="rec-list"><div style="font-size:13px; color:var(--gray-400);">Empfehlungen erscheinen nach Dateneingabe.</div></div>
+      <div class="gemini-key-row" style="margin-top:0.75rem;">
+        <label for="openrouter-api-key">OpenRouter API-Key (optional, lokal)</label>
+        <input type="password" id="openrouter-api-key" placeholder="sk-or-… (kostenlos: openrouter.ai/keys)" autocomplete="off">
+      </div>
       <div class="ai-controls">
         <input id="claude-api-key" class="ai-input" type="password" placeholder="(Bei Ollama nicht benoetigt)" autocomplete="off" style="display:none;">
         <button id="ai-start-btn" class="ai-btn" onclick="startAIConsulting()">KI-Beratung starten</button>
       </div>
-      <div id="ai-status" class="ai-status">Lokal via Ollama. Wenn nicht erreichbar: online via OpenRouter (free tier).</div>
+      <div id="ai-status" class="ai-status">Lokal via Ollama. Wenn nicht erreichbar: OpenRouter (Key oben oder Server-Proxy).</div>
       <div id="ai-response" class="ai-response" style="display:none;"></div>
     </div>
     <div style="font-size:12px; color:var(--gray-400); margin-top:-0.25rem; padding: 0 0.25rem;">
@@ -1117,9 +1202,10 @@
         function setSlider(id, value) {
           if (value === null || isNaN(value)) return;
           const slider = document.getElementById(id);
-          const clamped = Math.min(Math.max(Math.round(value), Number(slider.min)), Number(slider.max));
-          slider.value = clamped;
-          document.getElementById(id + '-v').textContent = clamped;
+          const rounded = Math.max(Math.round(value), Number(slider.min));
+          if (rounded > Number(slider.max)) slider.max = rounded;
+          slider.value = rounded;
+          document.getElementById(id + '-v').textContent = rounded;
           filled++;
         }
 
@@ -1160,11 +1246,11 @@
           } else setSlider('abfall', abfallRaw);
         }
 
-        // Recyclingquote: decimal → %
-        const recyclingKey = Object.keys(data).find(h => h.includes('recyclingquote') || (h.includes('recycl') && h.includes('%')));
-        const recyclingRaw = recyclingKey ? Number(data[recyclingKey].val) : null;
-        if (recyclingRaw !== null) {
-          setSlider('recycling', recyclingRaw < 1 ? recyclingRaw * 100 : recyclingRaw);
+        // Reinigungsmittel (L/MA/Jahr)
+        const reinigungKey = Object.keys(data).find(h => h.includes('reinigung') || h.includes('reinigungsmittel'));
+        const reinigungRaw = reinigungKey ? Number(data[reinigungKey].val) : null;
+        if (reinigungRaw !== null) {
+          setSlider('reinigungsmittel', reinigungRaw);
         }
 
         // Betrieb
@@ -1214,13 +1300,207 @@
   }
   // --- Ende Excel Upload ---
 
+  // --- Gemini Document Upload ---
+  async function handleDocumentUpload(event) {
+    const files = Array.from(event.target.files);
+    if (!files.length) return;
+
+    const spinner = document.getElementById('doc-spinner');
+    const status  = document.getElementById('doc-status');
+    spinner.style.display = 'block';
+    status.textContent = `${files.length} Datei(en) wird/werden verarbeitet…`;
+
+    // Encode all files as Base64
+    const encoded = await Promise.all(files.map(f => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = e => resolve({ base64: e.target.result.split(',')[1], mimeType: f.type || 'application/pdf', name: f.name });
+      reader.onerror = reject;
+      reader.readAsDataURL(f);
+    })));
+
+    let result;
+    try {
+      result = await callGeminiDocumentReader(encoded);
+    } catch (err) {
+      spinner.style.display = 'none';
+      status.textContent = 'Fehler: ' + err.message;
+      return;
+    }
+
+    spinner.style.display = 'none';
+    applyDocumentResult(result, status);
+    // Reset file input so same files can be re-uploaded if needed
+    event.target.value = '';
+  }
+
+  async function callGeminiDocumentReader(encodedFiles) {
+    const serverKey = ''; // set by Vercel env — empty means try direct browser call
+    const userKey   = document.getElementById('gemini-api-key')?.value?.trim();
+
+    const payload = { files: encodedFiles.map(f => ({ base64: f.base64, mimeType: f.mimeType })) };
+
+    // Try Vercel serverless proxy first (works in production)
+    try {
+      const res = await fetch('/api/document-reader', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) return await res.json();
+      // 500 = GEMINI_API_KEY not configured on server → fall through to browser call
+      // 501 = static dev server (python -m http.server) doesn't support POST → fall through
+      if (res.status !== 500 && res.status !== 501) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Server-Fehler ${res.status}`);
+      }
+    } catch (e) {
+      if (!e.message.includes('fetch') && !e.message.includes('Failed')) throw e;
+      // Network error (e.g. local static server) → fall through
+    }
+
+    // Direct browser call using user-provided key (Files API to minimize token usage)
+    if (!userKey) throw new Error('Bitte Gemini API-Key eingeben (aistudio.google.com → kostenfrei)');
+
+    const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+    const GEMINI_MODEL = 'gemini-3.1-flash-lite';
+    const EXTRACTION_PROMPT = `Du analysierst Versorgungsrechnungen (Strom, Gas, Wasser), Reinigungsmittelrechnungen ODER Entsorgungsrechnungen (Abfall) eines deutschen Gewerbebetriebs.
+Extrahiere alle vorhandenen Werte. Rechne auf Jahresbasis hoch wenn nötig (Zeitraum < 12 Monate).
+reinigungsmittel_liter: Gesamtmenge Reinigungsmittel in Litern (summiere alle Positionen). Null wenn nicht vorhanden.
+abfall_kg: Gesamtgewicht aller entsorgten Abfälle in kg (wenn Tonnen: ×1000). Steht als Restmüll/Gewerbeabfall/Abfallaufkommen. Null wenn nicht vorhanden.
+Antworte NUR mit validem JSON ohne Markdown:
+{"strom_kwh":null,"gas_kwh":null,"wasser_m3":null,"reinigungsmittel_liter":null,"abfall_kg":null,"zeitraum_monate":null,"zeitraum_beschreibung":null,"konfidenz":"hoch","nicht_gefunden":[]}`;
+
+    // Upload each file via Files API first (avoids tokenizing raw base64 bytes)
+    async function uploadToFilesApi(base64, mimeType) {
+      const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+      const uploadRes = await fetch(
+        `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${userKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'X-Goog-Upload-Protocol': 'raw',
+            'X-Goog-Upload-Header-Content-Type': mimeType,
+            'Content-Type': mimeType,
+          },
+          body: bytes,
+        }
+      );
+      if (!uploadRes.ok) {
+        const err = await uploadRes.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `Files-Upload Fehler ${uploadRes.status}`);
+      }
+      const data = await uploadRes.json();
+      return data.file.uri;
+    }
+
+    const parts = [{ text: EXTRACTION_PROMPT }];
+    for (const f of encodedFiles) {
+      const uri = await uploadToFilesApi(f.base64, f.mimeType);
+      parts.push({ fileData: { mimeType: f.mimeType, fileUri: uri } });
+    }
+
+    const res = await fetch(`${GEMINI_BASE}/models/${GEMINI_MODEL}:generateContent?key=${userKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 512 },
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `Gemini-Fehler ${res.status}`);
+    }
+    const data = await res.json();
+    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const jsonStr = rawText.replace(/```json?\n?|```/g, '').trim();
+    return JSON.parse(jsonStr);
+  }
+
+  function applyDocumentResult(result, statusEl) {
+    const found = [], notFound = result.nicht_gefunden || [];
+
+    // Fix 2: slider.max wird dynamisch angehoben statt Wert zu cappen,
+    // damit hohe Realwerte nicht stumm abgeschnitten werden.
+    function setSlider(id, value) {
+      if (!value || isNaN(value) || value <= 0) return;
+      const slider = document.getElementById(id);
+      if (!slider) return;
+      const rounded = Math.max(Math.round(value), Number(slider.min));
+      if (rounded > Number(slider.max)) slider.max = rounded;
+      slider.value = rounded;
+      document.getElementById(id + '-v').textContent = rounded;
+      const row = slider.closest('.slider-row');
+      if (row && !row.querySelector('.autofill-badge')) {
+        const lbl = row.querySelector('label');
+        if (lbl) lbl.insertAdjacentHTML('beforeend', '<span class="autofill-badge">aus Rechnung</span>');
+      }
+    }
+
+    const stromJahr  = result.strom_kwh;
+    const gasJahr    = result.gas_kwh;
+    const wasserJahr = result.wasser_m3;
+
+    const maEl = document.getElementById('profil-ma');
+    const ma   = maEl ? (+maEl.value || null) : null;
+
+    function setJahreswert(id, value) {
+      const jwEl = document.getElementById(id);
+      if (!jwEl || !value || isNaN(value) || value <= 0) return false;
+      jwEl.value = Math.round(value);
+      jwEl.dispatchEvent(new Event('input', { bubbles: true }));
+      return true;
+    }
+
+    // Fix 1: immer jw-* Jahreswertfelder befüllen (sichtbar für den Nutzer),
+    // computeFromJahreswerte() übernimmt die Umrechnung auf den Slider.
+    if (stromJahr) {
+      if (setJahreswert('jw-strom', stromJahr)) found.push('Strom');
+    }
+
+    if (gasJahr) {
+      if (setJahreswert('jw-gas', gasJahr)) found.push('Gas');
+    }
+
+    if (wasserJahr) {
+      if (setJahreswert('jw-wasser', wasserJahr)) found.push('Wasser');
+    }
+
+    // Reinigungsmittel (L/Abrechnungszeitraum → L/MA/Jahr)
+    const reinigungJahr = result.reinigungsmittel_liter;
+    if (reinigungJahr && reinigungJahr > 0) {
+      const val = ma > 0 ? Math.round(reinigungJahr / ma) : Math.round(reinigungJahr);
+      if (setJahreswert('jw-reinigungsmittel', val)) found.push('Reinigungsmittel');
+    }
+
+    // Abfall (kg/Abrechnungszeitraum → kg/Jahr als Jahreswert)
+    const abfallJahr = result.abfall_kg;
+    if (abfallJahr && abfallJahr > 0) {
+      if (setJahreswert('jw-abfall', abfallJahr)) found.push('Abfall');
+    }
+
+    // If jahreswerte inputs exist, trigger their recalculation
+    if (document.getElementById('jw-strom') && typeof computeFromJahreswerte === 'function') {
+      computeFromJahreswerte();
+    } else {
+      update();
+    }
+
+    const konfidenz = result.konfidenz || 'unbekannt';
+    const zeitraum  = result.zeitraum_beschreibung ? ` (${result.zeitraum_beschreibung})` : '';
+    const foundStr  = found.length ? found.join(', ') : '—';
+    const nfStr     = notFound.length ? ` | Nicht gefunden: ${notFound.join(', ')}` : '';
+    statusEl.textContent = `✓ Erkannt: ${foundStr}${nfStr} | Konfidenz: ${konfidenz}${zeitraum} – bitte Werte prüfen`;
+  }
+  // --- Ende Gemini Document Upload ---
+
   const benchmarks = {
-    gastro:          { strom:230, gas:80,  wasser:25, abfall:100, recycling:60, label:'Gasthaus (Gastronomie)' },
-    baeckerei:       { strom:290, gas:530, wasser:52, abfall:160, recycling:55, label:'Bäckerei (Produktion)' },
-    handel_food:     { strom:289, gas:89,  wasser:6,  abfall:82,  recycling:65, label:'Einzelhandel (Lebensmittel)' },
-    handel_nonfood:  { strom:75,  gas:66,  wasser:4,  abfall:58,  recycling:65, label:'Einzelhandel (Nonfood)' },
-    buero:           { strom:65,  gas:110, wasser:8,  abfall:60,  recycling:70, label:'Büro / Verwaltung' },
-    produktion:      { strom:250, gas:150, wasser:40, abfall:200, recycling:45, label:'Produktion' },
+    gastro:          { strom:230, gas:80,  wasser:25, abfall:100, reinigungsmittel:45, label:'Gasthaus (Gastronomie)' },
+    baeckerei:       { strom:290, gas:530, wasser:52, abfall:160, reinigungsmittel:35, label:'Bäckerei (Produktion)' },
+    handel_food:     { strom:289, gas:89,  wasser:6,  abfall:82,  reinigungsmittel:45, label:'Einzelhandel (Lebensmittel)' },
+    handel_nonfood:  { strom:75,  gas:66,  wasser:4,  abfall:58,  reinigungsmittel:45, label:'Einzelhandel (Nonfood)' },
+    buero:           { strom:65,  gas:110, wasser:8,  abfall:60,  reinigungsmittel:20, label:'Büro / Verwaltung' },
+    produktion:      { strom:250, gas:150, wasser:40, abfall:200, reinigungsmittel:35, label:'Produktion' },
   };
 
   // Maps select values to OEKOPROFIT_BENCHMARKS.branchen keys
@@ -1256,7 +1536,7 @@
       gas:       +document.getElementById('gas').value,
       wasser:    +document.getElementById('wasser').value,
       abfall:    +document.getElementById('abfall').value,
-      recycling: +document.getElementById('recycling').value,
+      reinigungsmittel: +document.getElementById('reinigungsmittel').value,
     };
   }
 
@@ -1280,23 +1560,25 @@
     const jwGas      = +document.getElementById('jw-gas').value      || 0;
     const jwWasser   = +document.getElementById('jw-wasser').value   || 0;
     const jwAbfall   = +document.getElementById('jw-abfall').value   || 0;
-    const jwRecycling= +document.getElementById('jw-recycling').value|| 0;
+    const jwReinigung= +document.getElementById('jw-reinigungsmittel').value|| 0;
 
-    const anyJw = jwStrom || jwGas || jwWasser || jwAbfall || jwRecycling;
+    const anyJw = jwStrom || jwGas || jwWasser || jwAbfall || jwReinigung;
 
     function setSlider(id, value) {
       if (!value || isNaN(value) || value <= 0) return;
       const slider = document.getElementById(id);
-      const clamped = Math.min(Math.max(Math.round(value), Number(slider.min)), Number(slider.max));
-      slider.value = clamped;
-      document.getElementById(id + '-v').textContent = clamped;
+      const rounded = Math.max(Math.round(value), Number(slider.min));
+      if (rounded > Number(slider.max)) slider.max = rounded;
+      slider.value = rounded;
+      document.getElementById(id + '-v').textContent = rounded;
     }
 
     if (p.flaeche && jwStrom)  setSlider('strom',  jwStrom  / p.flaeche);
     if (p.flaeche && jwGas)    setSlider('gas',    jwGas    / p.flaeche);
     if (p.ma      && jwWasser) setSlider('wasser', jwWasser / p.ma);
     if (p.ma      && jwAbfall) setSlider('abfall', jwAbfall / p.ma);
-    if (jwRecycling)           setSlider('recycling', jwRecycling);
+    if (p.ma && jwReinigung)   setSlider('reinigungsmittel', jwReinigung / p.ma);
+    else if (jwReinigung)      setSlider('reinigungsmittel', jwReinigung);
 
     const missing = [];
     if (!p.flaeche && (jwStrom || jwGas))    missing.push('Nutzfläche');
@@ -1346,9 +1628,9 @@
       const s = calcBenchmarkScore(lTag, k.wasser_liter_per_ma_tag);
       if (s !== null) scored.push({ s, w: 0.20 });
     }
-    // Recycling: invertiert — mehr ist besser; aktuell Universalwerte (DE-Ziel 2022) je Branche
-    if (k && k.recyclingquote_pct) {
-      const s = calcBenchmarkScore(vals.recycling, k.recyclingquote_pct);
+    // Reinigungsmittel: niedriger ist besser
+    if (k && k.reinigungsmittel_l_per_ma) {
+      const s = calcBenchmarkScore(vals.reinigungsmittel, k.reinigungsmittel_l_per_ma);
       if (s !== null) scored.push({ s, w: 0.15 });
     }
 
@@ -1359,7 +1641,7 @@
         b.gas   / Math.max(vals.gas + 1, 1),
         b.wasser / Math.max(vals.wasser, 1),
         b.abfall / Math.max(vals.abfall, 1),
-        vals.recycling / Math.max(b.recycling, 1),
+        b.reinigungsmittel / Math.max(vals.reinigungsmittel, 1),
       ];
       const weights = [0.30, 0.20, 0.20, 0.15, 0.15];
       let s = 0;
@@ -1395,8 +1677,11 @@
     if (key === 'abfall' && k.abfall_kg_per_ma) {
       return calcBenchmarkScore(val, k.abfall_kg_per_ma);
     }
-    if (key === 'recycling') {
-      return calcBenchmarkScore(val, { p25: 70, median: 55, p75: 40, invertiert: true });
+    if (key === 'reinigungsmittel' && k && k.reinigungsmittel_l_per_ma) {
+      return calcBenchmarkScore(val, k.reinigungsmittel_l_per_ma);
+    }
+    if (key === 'reinigungsmittel') {
+      return calcBenchmarkScore(val, { p25: 30, median: 45, p75: 70, invertiert: false });
     }
     return null;
   }
@@ -1413,7 +1698,8 @@
       }
       if (key === 'abfall' && k.abfall_kg_per_ma) return k.abfall_kg_per_ma.median;
     }
-    const legacy = { strom: b.strom, gas: b.gas, wasser: b.wasser, abfall: b.abfall, recycling: b.recycling };
+    if (key === 'reinigungsmittel' && k && k.reinigungsmittel_l_per_ma) return k.reinigungsmittel_l_per_ma.median;
+    const legacy = { strom: b.strom, gas: b.gas, wasser: b.wasser, abfall: b.abfall, reinigungsmittel: b.reinigungsmittel };
     return legacy[key];
   }
 
@@ -1451,21 +1737,18 @@
     document.getElementById('gas-v').textContent      = vals.gas;
     document.getElementById('wasser-v').textContent   = vals.wasser;
     document.getElementById('abfall-v').textContent   = vals.abfall;
-    document.getElementById('recycling-v').textContent= vals.recycling;
+    document.getElementById('reinigungsmittel-v').textContent= vals.reinigungsmittel;
     document.getElementById('branche-badge').textContent = b.label;
 
-    const capHint = document.getElementById('slider-cap-hint');
-    const capped = SLIDER_CAPS.filter(c => +document.getElementById(c.id).value >= c.max);
-    if (capped.length) {
-      capHint.style.display = 'block';
-      capHint.textContent = 'Hinweis: ' + capped.map(c => c.name).join(', ')
-        + ': Obergrenze des Schiebereglers erreicht. Liegt Ihr Betrieb darüber, sind die Werte nach oben begrenzt.';
-    } else {
-      capHint.style.display = 'none';
-    }
+    document.getElementById('slider-cap-hint').style.display = 'none';
 
     const ef = OEKOPROFIT_BENCHMARKS.emissionFactors;
-    const co2 = +((vals.strom * ef.strom_de_mix_g_per_kwh / 1000) + (vals.gas * ef.erdgas_g_per_kwh / 1000)).toFixed(1);
+    const _ma      = +(document.getElementById('profil-ma')?.value)     || 0;
+    const _flaeche = +(document.getElementById('profil-flaeche')?.value) || 0;
+    const abfallCo2PerM2 = (_ma && _flaeche)
+      ? (vals.abfall * _ma / _flaeche) * ef.restmuell_kg_co2_per_kg
+      : 0;
+    const co2 = +((vals.strom * ef.strom_de_mix_g_per_kwh / 1000) + (vals.gas * ef.erdgas_g_per_kwh / 1000) + abfallCo2PerM2).toFixed(1);
     const energy = vals.strom + vals.gas;
     const score = calcScore(vals, b);
     const sl = scoreLabel(score);
@@ -1496,8 +1779,34 @@
       { key:'gas',       label:'Gasverbrauch',     unit:'kWh/m²', val:vals.gas,       higher:false },
       { key:'wasser',    label:'Wasserverbrauch',  unit:'m³/MA',  val:vals.wasser,    higher:false },
       { key:'abfall',    label:'Abfallaufkommen',  unit:'kg/MA',  val:vals.abfall,    higher:false },
-      { key:'recycling', label:'Recyclingquote',   unit:'%',      val:vals.recycling, higher:true  },
+      { key:'reinigungsmittel', label:'Reinigungsmittel', unit:'L/MA', val:vals.reinigungsmittel, higher:false },
     ];
+
+    // Hauptverbraucher, Quick Wins, Quellenzeile aus benchmarks.js
+    const branchKey = BRANCH_BENCHMARK_MAP[document.getElementById('branche').value];
+    const bData = OEKOPROFIT_BENCHMARKS.branchen[branchKey];
+    const hvWrap = document.getElementById('bench-hauptverbraucher');
+    const hvList = document.getElementById('bench-hv-list');
+    if (bData && bData.hauptverbraucher && bData.hauptverbraucher.length) {
+      hvList.innerHTML = bData.hauptverbraucher.map(h => `<span class="badge">${h}</span>`).join('');
+      hvWrap.style.display = '';
+    } else { hvWrap.style.display = 'none'; }
+
+    const qwCard = document.getElementById('bench-quickwins-card');
+    const qwList = document.getElementById('bench-qw-list');
+    if (bData && bData.quick_wins && bData.quick_wins.length) {
+      qwList.innerHTML = bData.quick_wins.map(q => {
+        const text = typeof q === 'string' ? q : q.massnahme;
+        return `<li>${text}</li>`;
+      }).join('');
+      qwCard.style.display = '';
+    } else { qwCard.style.display = 'none'; }
+
+    const quelleEl = document.getElementById('bench-quelle');
+    if (bData && bData.kennzahlen && bData.kennzahlen.strom_kwh_per_m2 && bData.kennzahlen.strom_kwh_per_m2.quelle) {
+      quelleEl.textContent = 'Benchmark-Daten: ' + bData.kennzahlen.strom_kwh_per_m2.quelle;
+      quelleEl.style.display = '';
+    } else { quelleEl.style.display = 'none'; }
 
     document.getElementById('bench-bars').innerHTML = metrics.map(m => {
       const bval = metricMedian(m.key, b);
@@ -1521,46 +1830,7 @@
         </div>`;
     }).join('');
 
-    // Recommendations
-    const recs = [];
-    if (vals.strom > b.strom * 1.1) recs.push({
-      icon: '⚡', bg: '#FAEEDA',
-      title: 'LED-Beleuchtung & Zeitschaltung',
-      desc: `Ihr Stromverbrauch (${vals.strom} kWh/m²) liegt ${Math.round(((vals.strom/b.strom)-1)*100)} % über dem Branchenschnitt. Umstieg auf LED-Beleuchtung, Bewegungsmelder und smarte Zeitschaltuhren empfohlen.`,
-      pot: `Einsparpotenzial: bis zu ${Math.round((vals.strom - b.strom) * 0.4)} kWh/m² · ca. ${Math.round((vals.strom - b.strom) * 0.4 * 0.3)} €/m²/Jahr`
-    });
-    if (vals.gas > b.gas * 1.1) recs.push({
-      icon: '🔥', bg: '#FAECE7',
-      title: 'Heizungsoptimierung & Dämmung',
-      desc: `Gasverbrauch (${vals.gas} kWh/m²) über Branchenschnitt (${b.gas} kWh/m²). Hydraulischer Abgleich, Nachtabsenkung und Fassadendämmung können den Verbrauch deutlich reduzieren.`,
-      pot: `Einsparpotenzial: ca. ${Math.round((vals.gas - b.gas) * 0.5)} kWh/m²`
-    });
-    if (vals.wasser > b.wasser * 1.1) recs.push({
-      icon: '💧', bg: '#E6F1FB',
-      title: 'Wassersparmaßnahmen',
-      desc: `Wasserverbrauch (${vals.wasser} m³/MA) über Durchschnitt (${b.wasser} m³/MA). Durchflussregler an Armaturen und eine Leckageprüfung empfohlen.`,
-      pot: `Einsparpotenzial: bis zu ${Math.round((vals.wasser - b.wasser) * 0.6)} m³/MA/Jahr`
-    });
-    if (vals.recycling < b.recycling * 0.9) recs.push({
-      icon: '♻️', bg: '#EAF3DE',
-      title: 'Trennsysteme & Schulung',
-      desc: `Recyclingquote (${vals.recycling} %) unter Branchendurchschnitt (${b.recycling} %). Farbcodiertes Trennsystem und Mitarbeitendenschulung empfohlen.`,
-      pot: `Potenzial: Steigerung auf ${b.recycling}–${Math.min(b.recycling+10,95)} %`
-    });
-    if (vals.abfall > b.abfall * 1.1) recs.push({
-      icon: '🗑️', bg: '#EAF3DE',
-      title: 'Abfallvermeidung & Beschaffung',
-      desc: `Abfallaufkommen (${vals.abfall} kg/MA) über Branchenschnitt (${b.abfall} kg/MA). Überprüfung der Einkaufsprozesse und Einführung von Mehrwegsystemen empfohlen.`,
-      pot: `Reduktionspotenzial: ca. ${Math.round((vals.abfall - b.abfall) * 0.5)} kg/MA/Jahr`
-    });
-    if (recs.length === 0) recs.push({
-      icon: '✅', bg: '#E1F5EE',
-      title: 'Ausgezeichnete Umweltbilanz',
-      desc: 'Alle Kennzahlen liegen im oder unter dem Branchendurchschnitt. Der Betrieb ist vorbildlich aufgestellt.',
-      pot: 'ÖKOPROFIT-Zertifizierung empfohlen.'
-    });
-
-    document.getElementById('rec-list').innerHTML = recs.map(r => `
+    document.getElementById('rec-list').innerHTML = buildDeterministicRecs(vals, branch).map(r => `
       <div class="rec-item">
         <div class="rec-icon" style="background:${r.bg}">${r.icon}</div>
         <div>
@@ -1569,6 +1839,97 @@
           <div class="rec-pot">${r.pot}</div>
         </div>
       </div>`).join('');
+  }
+
+  function buildDeterministicRecs(vals, branchKey) {
+    const branchDataKey = BRANCH_BENCHMARK_MAP[branchKey];
+    const benchData     = OEKOPROFIT_BENCHMARKS.branchen[branchDataKey];
+    const massnahmen    = benchData && benchData.massnahmen;
+
+    // Profil fields (available after Task-3 merge; null-safe)
+    const profilFlaeche = +( document.getElementById('profil-flaeche')?.value  || 0) || null;
+    const profilMa      = +( document.getElementById('profil-ma')?.value        || 0) || null;
+    const profilSitze   = +( document.getElementById('profil-sitzplaetze')?.value || 0) || null;
+    const profilKueche  = document.getElementById('profil-kueche')?.value  || null;
+    const profilOefen   = +( document.getElementById('profil-oefen')?.value  || 0) || null;
+
+    const betriebsgroesse = profilMa
+      ? (profilMa < 5 ? 'Kleinstbetrieb (< 5 MA)' : profilMa < 20 ? 'Kleinbetrieb' : 'Mittelbetrieb')
+      : null;
+
+    // Score per metric (reuse calcBenchmarkScore)
+    const k = benchData && benchData.kennzahlen;
+    function scoreFor(metrik) {
+      if (!k) return 50; // fallback: neutral
+      const map = { strom: k.strom_kwh_per_m2, gas: k.waerme_kwh_per_m2 || k.heizwaerme_kwh_per_m2,
+                    wasser: k.wasser_liter_per_ma_tag, abfall: k.abfall_kg_per_ma, reinigungsmittel: k.reinigungsmittel_l_per_ma };
+      const kz = map[metrik];
+      if (!kz) return 50;
+      const rawVal = metrik === 'wasser' ? (vals.wasser * 1000) / 250 : vals[metrik];
+      return Math.round(calcBenchmarkScore(rawVal, kz) ?? 50);
+    }
+
+    // Template variable substitution
+    const b = benchmarks[branchKey] || {};
+    function diffPct(val, median) { return median ? Math.round(((val - median) / median) * 100) : 0; }
+    const tplVars = {
+      strom: vals.strom,       strom_median: b.strom || '—',
+      gas:   vals.gas,         gas_median:   b.gas   || '—',
+      wasser: vals.wasser,     wasser_median: b.wasser || '—',
+      abfall: vals.abfall,     abfall_median: b.abfall || '—',
+      reinigungsmittel: vals.reinigungsmittel,
+      diff_pct_strom:  diffPct(vals.strom,  b.strom),
+      diff_pct_gas:    diffPct(vals.gas,    b.gas),
+      diff_pct_wasser: diffPct(vals.wasser, b.wasser),
+      diff_pct_abfall: diffPct(vals.abfall, b.abfall),
+      flaeche: profilFlaeche || '—',
+      ma:      profilMa      || '—',
+      sitzplaetze: profilSitze || '—',
+      oefen:   profilOefen   || '—',
+      betriebsgroesse: betriebsgroesse || 'Ihr Betrieb',
+      flaeche_text:    profilFlaeche ? `${profilFlaeche} m²` : 'Ihrer Fläche',
+      sitzplaetze_text: profilSitze  ? `${profilSitze} Sitzplätzen` : 'Ihren Sitzplätzen',
+      einsparung_gas_eur: profilFlaeche && b.gas
+        ? Math.round((vals.gas - b.gas) * 0.06 * profilFlaeche * 0.12) : '—',
+      betriebsgroesse_led_tipp: betriebsgroesse === 'Kleinstbetrieb (< 5 MA)'
+        ? 'Bei Kleinstbetrieben amortisiert sich LED oft schon in 1–2 Jahren.'
+        : 'Bei mehreren Räumen lohnt sich ein Komplettangebot vom Elektrobetrieb.',
+      betriebsgroesse_abfall_tipp: betriebsgroesse === 'Kleinstbetrieb (< 5 MA)'
+        ? 'Schon kleine Portionsanpassungen oder ein Reststoff-Log können viel bewirken.'
+        : 'Strukturierte Abfallbilanz und Lieferantenaudit empfohlen.',
+    };
+
+    function render(tpl) {
+      return tpl.replace(/\{(\w+)\}/g, (_, k) => tplVars[k] !== undefined ? tplVars[k] : `{${k}}`);
+    }
+
+    if (!massnahmen || massnahmen.length === 0) {
+      // Fallback für Branchen ohne massnahmen-Definition
+      return [{ icon: 'ℹ️', bg: '#F5F5F3', title: 'Branchenspezifische Empfehlungen folgen',
+        desc: 'Für diese Branche sind noch keine detaillierten Empfehlungsregeln hinterlegt.',
+        pot: 'KI-Beratung starten für individuelle Hinweise.' }];
+    }
+
+    const recs = massnahmen.filter(m => {
+      // Profilbedingung prüfen (nur wenn Profil vorhanden)
+      if (m.nur_wenn_profil && profilKueche !== null) {
+        if (m.nur_wenn_profil.kueche && m.nur_wenn_profil.kueche !== profilKueche) return false;
+      }
+      return scoreFor(m.metrik) < m.zeige_wenn_score_unter;
+    }).map(m => ({
+      icon: m.icon, bg: m.bg,
+      title: render(m.titel),
+      desc:  render(m.desc),
+      pot:   render(m.pot),
+    }));
+
+    if (recs.length === 0) recs.push({
+      icon: '✅', bg: '#E1F5EE',
+      title: 'Ausgezeichnete Umweltbilanz',
+      desc: 'Alle Kennzahlen liegen im oder unter dem Branchendurchschnitt. Der Betrieb ist vorbildlich aufgestellt.',
+      pot: 'ÖKOPROFIT-Zertifizierung empfohlen.'
+    });
+    return recs;
   }
 
   function inlineMarkdown(text) {
@@ -1754,10 +2115,15 @@
       ? `${vals.gas} kWh/m²·a (P25: ${gasK.p25} | Median: ${gasK.median} | P75: ${gasK.p75})`
       : `${vals.gas} kWh/m²·a (Median: ${b.gas})`;
 
-    const co2 = +((vals.strom * ef.strom_de_mix_g_per_kwh / 1000) + (vals.gas * ef.erdgas_g_per_kwh / 1000)).toFixed(1);
+    const _ma2      = +(document.getElementById('profil-ma')?.value)     || 0;
+    const _flaeche2 = +(document.getElementById('profil-flaeche')?.value) || 0;
+    const abfallCo2PerM2Prompt = (_ma2 && _flaeche2)
+      ? (vals.abfall * _ma2 / _flaeche2) * ef.restmuell_kg_co2_per_kg
+      : 0;
+    const co2 = +((vals.strom * ef.strom_de_mix_g_per_kwh / 1000) + (vals.gas * ef.erdgas_g_per_kwh / 1000) + abfallCo2PerM2Prompt).toFixed(1);
 
     const qwLines = benchData && benchData.quick_wins
-      ? benchData.quick_wins.slice(0, 3).map(q => {
+      ? benchData.quick_wins.slice(0, 6).map(q => {
           const parts = [q.massnahme];
           if (q.invest_eur !== undefined) parts.push(`Invest: ${q.invest_eur} €`);
           if (q.amort_jahre !== undefined) parts.push(`Amort.: ${q.amort_jahre} J.`);
@@ -1779,9 +2145,12 @@
       ? (p.ma < 5 ? 'Kleinstbetrieb (< 5 MA)' : p.ma < 20 ? 'Kleinbetrieb (5–19 MA)' : 'Mittelbetrieb (≥ 20 MA)')
       : null;
     if (betriebsGroesse) profilLines.push(`Betriebsgröße: ${betriebsGroesse}`);
+    const keineKuecheHinweis = p.kueche === 'nein'
+      ? '\nHinweis: Kein Küchenbereich — keine Empfehlungen zu Spülmaschinen, Kombidämpfern oder Frittierfett.'
+      : '';
 
     return `Du bist Energie- und Nachhaltigkeitsberater fuer OEKOPROFIT-Betriebe.
-Nutze NUR die vier Bloecke unten. Kein Intro, keine Zwischenüberschrift wie "1. Tabelle" oder "Pseudo-Tabelle".
+Nutze NUR die fünf Bloecke unten. Kein Intro, keine Zwischenüberschrift wie "1. Tabelle" oder "Pseudo-Tabelle".${keineKuecheHinweis}
 
 Branche: ${b.label}
 Emissionsfaktoren: Strom ${ef.strom_de_mix_g_per_kwh} g CO₂/kWh | Erdgas ${ef.erdgas_g_per_kwh} g CO₂/kWh
@@ -1792,7 +2161,7 @@ Kennzahlen des Betriebs:
 - Gasverbrauch: ${gasInfo}
 - Wasserverbrauch: ${vals.wasser} m³/MA·a (Median: ${b.wasser})
 - Abfallaufkommen: ${vals.abfall} kg/MA (Median: ${b.abfall})
-- Recyclingquote: ${vals.recycling}% (Ziel DE: ≥ 70 %)
+- Reinigungsmittelverbrauch: ${vals.reinigungsmittel} L/MA (Median: ${b.reinigungsmittel})
 - CO₂-Äquivalent (Scope 1+2): ${co2} kg/m²·a
 - Oeко-Score gesamt: ${score}/100
 ${qwLines ? `\nBranchenspezifische Quick Wins (ÖKOPROFIT-Datenbasis):\n${qwLines}` : ''}
@@ -1813,7 +2182,7 @@ PFLICHT-Struktur (Copy-Muster exakt einhalten, Zahlen/Ampel mit echten Daten fü
 | Gas | … kWh/m²·a | … | … % | … |
 | Wasser | … m³/MA·a | … | … % | … |
 | Abfall | … kg/MA | … | … % | … |
-| Recycling | … % | … | … % | … |
+| Reinigungsmittel | … L/MA | … | … % | … |
 
 ## Kurzfazit
 Zwei bis drei vollstaendige Saetze in normalem Absatz (keine Nummerierung).
@@ -1830,6 +2199,10 @@ Genau vier Zeilen mit Spiegelstrich, fortlaufend sinnvolle Schritte:
 - Zweiter Schritt …
 - Dritter Schritt …
 - Vierter Schritt …
+
+## Warum das für Ihren Betrieb gilt
+(Ein Satz je Maßnahme aus Top-3, der explizit auf Betriebsgröße oder -typ eingeht.
+Beispiel: "Als Kleinstbetrieb mit < 5 MA amortisiert sich die LED-Umrüstung bei Ihnen schon in 1–2 Jahren.")
 
 Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt gehaltvoll formulieren (~250–380 Woerter), aber die Woerterzahl NICHT angeben oder zaehlen.`;
   }
@@ -1900,7 +2273,41 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   }
 
   async function callOpenRouterDirect(prompt) {
-    // Calls the Vercel backend endpoint. This avoids exposing API keys in the browser.
+    const userKey = document.getElementById('openrouter-api-key')?.value?.trim();
+
+    if (userKey) {
+      // Direct browser call using the user-supplied key (local dev / testing).
+      const SYSTEM_PROMPT = `Du bist Energie- und Nachhaltigkeitsberater fuer ÖKOPROFIT-Betriebe in Deutschland.\nAntworte auf Deutsch. Gib konkrete Zahlen (kWh, t CO₂, €) und Amortisationsdauern an.`;
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userKey}`,
+          'HTTP-Referer': window.location.origin,
+        },
+        body: JSON.stringify({
+          model: 'openrouter/auto',
+          temperature: 0.3,
+          max_tokens: 2048,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: prompt },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`OpenRouter API Fehler (${response.status}): ${errText}`);
+      }
+
+      const data = await response.json();
+      const content = data?.choices?.[0]?.message?.content;
+      if (!content) throw new Error('Leere Antwort von OpenRouter erhalten.');
+      return content.trim();
+    }
+
+    // No user key: call the Vercel backend proxy.
     const response = await fetch('/api/ki-consulting', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1928,7 +2335,8 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     const prompt = buildClaudePrompt(vals, b, score);
 
     btn.disabled = true;
-    setAIStatus('KI wird angefragt ... (Ollama wenn moeglich, sonst OpenRouter)');
+    const hasUserKey = !!document.getElementById('openrouter-api-key')?.value?.trim();
+    setAIStatus(`KI wird angefragt ... (Ollama → ${hasUserKey ? 'OpenRouter direkt' : 'Server-Proxy'})`);
     setAIResponse('Analyse laeuft, bitte kurz warten ...');
 
     let localErr;
@@ -2032,7 +2440,7 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     document.getElementById('branche-badge').textContent = snap.brancheLabel;
     if (snap.betrieb) document.getElementById('betrieb-name').textContent = snap.betrieb;
 
-    ['strom','gas','wasser','abfall','recycling'].forEach(k => {
+    ['strom','gas','wasser','abfall','reinigungsmittel'].forEach(k => {
       if (snap.vals[k] == null) return;
       const slider = document.getElementById(k);
       const clamped = Math.min(Math.max(snap.vals[k], Number(slider.min)), Number(slider.max));
@@ -2178,13 +2586,13 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     renderComparison();
   }
 
-  // Lower-is-better for these metrics; recycling/score = higher-is-better.
+  // Lower-is-better for these metrics (inkl. reinigungsmittel); score = higher-is-better.
   const CMP_METRICS = [
     { key: 'strom',     label: 'Stromverbrauch',  unit: 'kWh/m²', higher: false },
     { key: 'gas',       label: 'Gasverbrauch',    unit: 'kWh/m²', higher: false },
     { key: 'wasser',    label: 'Wasserverbrauch', unit: 'm³/MA',  higher: false },
     { key: 'abfall',    label: 'Abfallaufkommen', unit: 'kg/MA',  higher: false },
-    { key: 'recycling', label: 'Recyclingquote',  unit: '%',      higher: true  },
+    { key: 'reinigungsmittel', label: 'Reinigungsmittel', unit: 'L/MA', higher: false },
   ];
 
   function renderComparison() {
@@ -2274,20 +2682,18 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   update();
   checkOllamaReachability();
 
-  // Hide API key input fields when the server has the keys configured (e.g. on Vercel).
-  fetch('/api/config')
-    .then(r => r.json())
-    .then(cfg => {
-      if (cfg.hasGeminiKey) {
-        const el = document.getElementById('gemini-api-key');
-        if (el) el.closest('.gemini-key-row').style.display = 'none';
-      }
-      if (cfg.hasOpenrouterKey) {
-        const el = document.getElementById('openrouter-api-key');
-        if (el) el.closest('.gemini-key-row').style.display = 'none';
-      }
-    })
-    .catch(() => { /* local dev without server: keep fields visible */ });
+  // Alle drei Upload-/Speichern-Buttons auf die Breite von "Rechnungen einlesen" angleichen
+  requestAnimationFrame(() => {
+    const ref = document.getElementById('btn-rechnungen');
+    if (!ref) return;
+    const w = ref.getBoundingClientRect().width + 'px';
+    ['btn-excel', 'btn-snapshot'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.style.width = w; el.style.textAlign = 'center'; }
+    });
+    ref.style.width = w;
+    ref.style.textAlign = 'center';
+  });
 </script>
 </body>
 </html>
