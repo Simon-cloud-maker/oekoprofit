@@ -791,11 +791,13 @@
         <span id="theme-toggle-label">Dark</span>
       </button>
       <select id="branche" onchange="update()">
-        <option value="gastro">Gastronomie</option>
-        <option value="handel_food">Einzelhandel (Lebensmittel)</option>
-        <option value="handel_nonfood">Einzelhandel (Nonfood)</option>
-        <option value="buero">Büro / Verwaltung</option>
-        <option value="produktion">Produktion</option>
+        <option value="gastro">Gasthaus (Gastronomie)</option>
+        <option value="baeckerei">Bäckerei (Produktion)</option>
+        <!-- weitere Branchen folgen in späteren Ausbaustufen -->
+        <option value="handel_food" hidden>Einzelhandel (Lebensmittel)</option>
+        <option value="handel_nonfood" hidden>Einzelhandel (Nonfood)</option>
+        <option value="buero" hidden>Büro / Verwaltung</option>
+        <option value="produktion" hidden>Produktion</option>
       </select>
     </div>
   </div>
@@ -1061,7 +1063,8 @@
         if (brancheKey && data[brancheKey].val) {
           const b = String(data[brancheKey].val).toLowerCase();
           const brancheMap = [
-            { match: v => v.includes('gastro'),                              val: 'gastro',         label: 'Gastronomie' },
+            { match: v => v.includes('gastro'),                              val: 'gastro',         label: 'Gasthaus (Gastronomie)' },
+            { match: v => v.includes('bäckerei') || v.includes('baeckerei') || v.includes('backer') || v.includes('bakery'), val: 'baeckerei', label: 'Bäckerei' },
             { match: v => v.includes('nonfood') || v.includes('textil') || v.includes('baumarkt') || v.includes('drogerie') || v.includes('bekleidung'), val: 'handel_nonfood', label: 'Einzelhandel (Nonfood)' },
             { match: v => v.includes('food') || v.includes('lebensmittel') || v.includes('supermarkt') || v.includes('discounter'), val: 'handel_food', label: 'Einzelhandel (Lebensmittel)' },
             { match: v => v.includes('handel') || v.includes('einzel'),      val: 'handel_food',    label: 'Einzelhandel (Lebensmittel)' },
@@ -1097,7 +1100,8 @@
   // --- Ende Excel Upload ---
 
   const benchmarks = {
-    gastro:          { strom:230, gas:80,  wasser:25, abfall:100, recycling:60, label:'Gastronomie' },
+    gastro:          { strom:230, gas:80,  wasser:25, abfall:100, recycling:60, label:'Gasthaus (Gastronomie)' },
+    baeckerei:       { strom:290, gas:530, wasser:52, abfall:160, recycling:55, label:'Bäckerei (Produktion)' },
     handel_food:     { strom:289, gas:89,  wasser:6,  abfall:82,  recycling:65, label:'Einzelhandel (Lebensmittel)' },
     handel_nonfood:  { strom:75,  gas:66,  wasser:4,  abfall:58,  recycling:65, label:'Einzelhandel (Nonfood)' },
     buero:           { strom:65,  gas:110, wasser:8,  abfall:60,  recycling:70, label:'Büro / Verwaltung' },
@@ -1107,6 +1111,7 @@
   // Maps select values to OEKOPROFIT_BENCHMARKS.branchen keys
   const BRANCH_BENCHMARK_MAP = {
     gastro:         'gastronomie',
+    baeckerei:      'baeckerei',
     handel_food:    'einzelhandel_food',
     handel_nonfood: 'einzelhandel_nonfood',
     buero:          'buero',
