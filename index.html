@@ -1403,14 +1403,16 @@ Antworte NUR mit validem JSON ohne Markdown:
   function applyDocumentResult(result, statusEl) {
     const found = [], notFound = result.nicht_gefunden || [];
 
+    // Fix 2: slider.max wird dynamisch angehoben statt Wert zu cappen,
+    // damit hohe Realwerte nicht stumm abgeschnitten werden.
     function setSlider(id, value) {
       if (!value || isNaN(value) || value <= 0) return;
       const slider = document.getElementById(id);
       if (!slider) return;
-      const clamped = Math.min(Math.max(Math.round(value), Number(slider.min)), Number(slider.max));
-      slider.value = clamped;
-      document.getElementById(id + '-v').textContent = clamped;
-      // Add autofill badge to the slider label if not already present
+      const rounded = Math.max(Math.round(value), Number(slider.min));
+      if (rounded > Number(slider.max)) slider.max = rounded;
+      slider.value = rounded;
+      document.getElementById(id + '-v').textContent = rounded;
       const row = slider.closest('.slider-row');
       if (row && !row.querySelector('.autofill-badge')) {
         const lbl = row.querySelector('label');
@@ -1418,16 +1420,12 @@ Antworte NUR mit validem JSON ohne Markdown:
       }
     }
 
-    // Convert annual kWh to kWh/m² using current slider value as proxy if no profil yet
     const stromJahr  = result.strom_kwh;
     const gasJahr    = result.gas_kwh;
     const wasserJahr = result.wasser_m3;
 
-    // Try to get flaeche/ma from profil inputs (available after Task 3 merge)
-    const flaecheEl = document.getElementById('profil-flaeche');
-    const maEl      = document.getElementById('profil-ma');
-    const flaeche   = flaecheEl ? (+flaecheEl.value || null) : null;
-    const ma        = maEl      ? (+maEl.value      || null) : null;
+    const maEl = document.getElementById('profil-ma');
+    const ma   = maEl ? (+maEl.value || null) : null;
 
     function setJahreswert(id, value) {
       const jwEl = document.getElementById(id);
@@ -1437,24 +1435,17 @@ Antworte NUR mit validem JSON ohne Markdown:
       return true;
     }
 
-    if (stromJahr && flaeche) {
-      setSlider('strom', stromJahr / flaeche);
-      found.push('Strom');
-    } else if (stromJahr) {
+    // Fix 1: immer jw-* Jahreswertfelder befüllen (sichtbar für den Nutzer),
+    // computeFromJahreswerte() übernimmt die Umrechnung auf den Slider.
+    if (stromJahr) {
       if (setJahreswert('jw-strom', stromJahr)) found.push('Strom');
     }
 
-    if (gasJahr && flaeche) {
-      setSlider('gas', gasJahr / flaeche);
-      found.push('Gas');
-    } else if (gasJahr) {
+    if (gasJahr) {
       if (setJahreswert('jw-gas', gasJahr)) found.push('Gas');
     }
 
-    if (wasserJahr && ma) {
-      setSlider('wasser', wasserJahr / ma);
-      found.push('Wasser');
-    } else if (wasserJahr) {
+    if (wasserJahr) {
       if (setJahreswert('jw-wasser', wasserJahr)) found.push('Wasser');
     }
 
