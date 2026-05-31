@@ -1428,39 +1428,40 @@ Antworte NUR mit validem JSON ohne Markdown:
     const flaeche   = flaecheEl ? (+flaecheEl.value || null) : null;
     const ma        = maEl      ? (+maEl.value      || null) : null;
 
+    function setJahreswert(id, value) {
+      const jwEl = document.getElementById(id);
+      if (!jwEl || !value || isNaN(value) || value <= 0) return false;
+      jwEl.value = Math.round(value);
+      jwEl.dispatchEvent(new Event('input', { bubbles: true }));
+      return true;
+    }
+
     if (stromJahr && flaeche) {
       setSlider('strom', stromJahr / flaeche);
       found.push('Strom');
     } else if (stromJahr) {
-      // Store raw value in jw-strom if the jahreswerte input exists (Task 3)
-      const jwEl = document.getElementById('jw-strom');
-      if (jwEl) { jwEl.value = Math.round(stromJahr); found.push('Strom'); }
+      if (setJahreswert('jw-strom', stromJahr)) found.push('Strom');
     }
 
     if (gasJahr && flaeche) {
       setSlider('gas', gasJahr / flaeche);
       found.push('Gas');
     } else if (gasJahr) {
-      const jwEl = document.getElementById('jw-gas');
-      if (jwEl) { jwEl.value = Math.round(gasJahr); found.push('Gas'); }
+      if (setJahreswert('jw-gas', gasJahr)) found.push('Gas');
     }
 
     if (wasserJahr && ma) {
       setSlider('wasser', wasserJahr / ma);
       found.push('Wasser');
     } else if (wasserJahr) {
-      const jwEl = document.getElementById('jw-wasser');
-      if (jwEl) { jwEl.value = Math.round(wasserJahr); found.push('Wasser'); }
+      if (setJahreswert('jw-wasser', wasserJahr)) found.push('Wasser');
     }
 
     // Reinigungsmittel (L/Abrechnungszeitraum → L/MA/Jahr)
     const reinigungJahr = result.reinigungsmittel_liter;
     if (reinigungJahr && reinigungJahr > 0) {
-      const jwEl = document.getElementById('jw-reinigungsmittel');
-      if (jwEl) {
-        jwEl.value = ma > 0 ? Math.round(reinigungJahr / ma) : Math.round(reinigungJahr);
-        found.push('Reinigungsmittel');
-      }
+      const val = ma > 0 ? Math.round(reinigungJahr / ma) : Math.round(reinigungJahr);
+      if (setJahreswert('jw-reinigungsmittel', val)) found.push('Reinigungsmittel');
     }
 
     // If jahreswerte inputs exist, trigger their recalculation
