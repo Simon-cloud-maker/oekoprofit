@@ -1282,7 +1282,12 @@
     }
 
     const ef = OEKOPROFIT_BENCHMARKS.emissionFactors;
-    const co2 = +((vals.strom * ef.strom_de_mix_g_per_kwh / 1000) + (vals.gas * ef.erdgas_g_per_kwh / 1000)).toFixed(1);
+    const _ma      = +(document.getElementById('profil-ma')?.value)     || 0;
+    const _flaeche = +(document.getElementById('profil-flaeche')?.value) || 0;
+    const abfallCo2PerM2 = (_ma && _flaeche)
+      ? (vals.abfall * _ma / _flaeche) * ef.restmuell_kg_co2_per_kg
+      : 0;
+    const co2 = +((vals.strom * ef.strom_de_mix_g_per_kwh / 1000) + (vals.gas * ef.erdgas_g_per_kwh / 1000) + abfallCo2PerM2).toFixed(1);
     const energy = vals.strom + vals.gas;
     const score = calcScore(vals, b);
     const sl = scoreLabel(score);
@@ -1571,7 +1576,12 @@
       ? `${vals.gas} kWh/m²·a (P25: ${gasK.p25} | Median: ${gasK.median} | P75: ${gasK.p75})`
       : `${vals.gas} kWh/m²·a (Median: ${b.gas})`;
 
-    const co2 = +((vals.strom * ef.strom_de_mix_g_per_kwh / 1000) + (vals.gas * ef.erdgas_g_per_kwh / 1000)).toFixed(1);
+    const _ma2      = +(document.getElementById('profil-ma')?.value)     || 0;
+    const _flaeche2 = +(document.getElementById('profil-flaeche')?.value) || 0;
+    const abfallCo2PerM2Prompt = (_ma2 && _flaeche2)
+      ? (vals.abfall * _ma2 / _flaeche2) * ef.restmuell_kg_co2_per_kg
+      : 0;
+    const co2 = +((vals.strom * ef.strom_de_mix_g_per_kwh / 1000) + (vals.gas * ef.erdgas_g_per_kwh / 1000) + abfallCo2PerM2Prompt).toFixed(1);
 
     const qwLines = benchData && benchData.quick_wins
       ? benchData.quick_wins.slice(0, 3).map(q => {

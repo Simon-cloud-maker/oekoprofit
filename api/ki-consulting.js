@@ -17,8 +17,11 @@ Branchen-Benchmarks (P25 = gut | Median | P75 = schlecht):
 - Büro Heizwärme: P25 < 75 | Median 110 | P75 > 150 kWh/m²·a
 - Büro Wasser: P25 < 15 | Median 22 | P75 > 35 l/MA·Tag (BNB)
 - Büro Abfall: P25 < 30 | Median 60 | P75 > 100 kg/MA·a
+- Gastronomie Abfall: P25 < 95 | Median 185 | P75 > 310 kg/MA·a
+- Bäckerei Abfall: P25 < 80 | Median 160 | P75 > 280 kg/MA·a
 - Einzelhandel Food Strom: P25 < 230 | Median 289 | P75 > 350 kWh/m²·a (EHI 2024)
 - Einzelhandel Nonfood Strom: P25 < 50 | Median 75 | P75 > 110 kWh/m²·a (EHI)
+- Abfall Emissionsfaktor Restmüll: 0,15 kg CO₂/kg (UBA 2023, Verbrennung+Deponie)
 
 Quick Wins mit bewährten Kennzahlen:
 - LED-Beleuchtung: –50 % Beleuchtungsenergie, Amortisation 2–3 Jahre

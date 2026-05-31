@@ -13,6 +13,7 @@ const OEKOPROFIT_BENCHMARKS = {
     heizoel_g_per_kwh: 266,
     fernwaerme_g_per_kwh: 280,
     ee_anteil_strommix_2024_pct: 54.4,
+    restmuell_kg_co2_per_kg: 0.15, // Gewerbe-Restmüll (Verbrennung+Deponie gemischt), UBA 2023
   },
 
   branchen: {
