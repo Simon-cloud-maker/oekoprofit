@@ -1,6 +1,6 @@
 # Short-Term Memory — Aktueller Projektstand
 
-_Zuletzt aktualisiert: 2026-05-31_
+_Zuletzt aktualisiert: 2026-06-01_
 
 ## Aktueller Stand
 
@@ -22,7 +22,7 @@ Das Tool fokussiert sich jetzt auf **zwei Fallbeispiele**:
 | Branch | Status | Was |
 |--------|--------|-----|
 | `feat/gemini-document-reader` | ✅ mehrfach erweitert | Files API statt inline Base64; gemini-3.1-flash-lite; abfall_kg Extraktion; input-Event-Fix |
-| `feat/waste-kpi` | ✅ neu | CO2-Faktor Restmüll (0,15 kg/kg), Abfall in CO2-Berechnung, KI-Prompt-Benchmarks |
+| `feat/waste-kpi` | ✅ bereit für Merge | CO2-Faktor Restmüll (0,15 kg/kg), Abfall in CO2-Berechnung, KI-Prompt-Benchmarks |
 
 ## Feature-Branches
 
@@ -58,4 +58,4 @@ python -m http.server 8080
 
 ## Nächster Schritt
 
-Alle 9 Feature-Branches in `main` gemergt und auf `origin` gepusht. Feature-Branches können lokal archiviert werden.
+`feat/waste-kpi` in `main` mergen — Abfall-KPI (Restmüll CO2-Faktor, Score-Integration, KI-Prompt) ist fertig und getestet. Danach alle Feature-Branches lokal archivieren.

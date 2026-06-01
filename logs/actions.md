@@ -40,6 +40,21 @@ _Die Bezeichnungen „Task 1"–„Task 8" wurden nur lokal zur Orientierung ver
 
 ---
 
+## [2026-06-01] feat/waste-kpi: Abfall-KPI in Score, CO2 und KI-Prompt integriert
+
+**Branch:** `feat/waste-kpi`  
+**Ziel:** Abfallaufkommen (Restmüll in kg) als vollwertigen Umwelt-KPI einbinden.
+
+**Hauptaktionen:**
+- `benchmarks.js`: CO2-Emissionsfaktor `restmuell_kg_co2_per_kg = 0.15` ergänzt.
+- `index.html`: Abfall-Anteil in die CO2-Berechnung (kg CO2/m²) aufgenommen, sofern MA + Fläche bekannt.
+- `api/ki-consulting.js`: Abfall-Benchmarks (Gastronomie, Bäckerei, Büro) in den KI-System-Prompt eingefügt.
+
+**Ergebnis:** Restmüll fließt jetzt in Öko-Score, CO2-Ausweisung und KI-Empfehlungen ein.  
+**Nächster Schritt:** Branch in `main` mergen.
+
+---
+
 ## [2026-05-31] Bugfixes Document-Reader + feat/waste-kpi: Abfall-KPI
 
 **Branches:** `feat/gemini-document-reader` (Bugfixes + abfall_kg), `feat/waste-kpi` (neu)
