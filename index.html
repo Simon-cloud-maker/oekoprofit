@@ -922,7 +922,7 @@
 
   <div class="tabs">
     <button class="tab active" onclick="showTab('eingabe', this)">Dateneingabe</button>
-    <button class="tab" onclick="showTab('benchmark', this)">Benchmark</button>
+    <button class="tab" onclick="showTab('benchmark', this)">Benchmark-Vergleich</button>
     <button class="tab" onclick="showTab('empfehlungen', this)">KI-Empfehlungen</button>
     <button class="tab" onclick="showTab('verlauf', this)">Verlauf</button>
   </div>
@@ -1009,7 +1009,7 @@
         <span class="jw-unit">kg / Jahr</span>
       </div>
       <div class="jw-row">
-        <label>Reinigungsmittel (gesamt)</label>
+        <label>Reinigungsmittel</label>
         <input type="number" id="jw-reinigungsmittel" min="0" placeholder="z. B. 175" oninput="computeFromJahreswerte()">
         <span class="jw-unit">L / Jahr</span>
       </div>
@@ -1072,7 +1072,10 @@
         <span class="legend-badge" style="background:var(--green-600);">Gut</span>
         <span class="legend-badge" style="background:var(--amber-400);">Mittelfeld</span>
         <span class="legend-badge" style="background:#c44d28;">Handlungsbedarf</span>
-        <span class="legend-badge" style="background:var(--gray-900);opacity:0.55;">Median-Benchmark</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;">
+          <span style="display:inline-block;width:3px;height:16px;background:var(--gray-900);opacity:0.55;box-shadow:0 0 0 1px rgba(255,255,255,0.35);border-radius:1px;"></span>
+          Median-Benchmark
+        </span>
       </div>
       <div id="bench-quelle" style="display:none; font-size:11px; color:var(--gray-400); margin-top:8px;"></div>
     </div>
@@ -1729,14 +1732,21 @@ Antworte NUR mit validem JSON ohne Markdown:
     return better ? 'var(--green-600)' : 'var(--coral-400)';
   }
 
-  // Gibt zurück welche jw-Felder der Nutzer befüllt hat (pro Metrik-Key)
+  // Gibt pro Metrik zurück: hasVal (Jahreswert eingegeben?), convOk (Umrechnungsbasis vorhanden?),
+  // convLabel (Name des fehlenden Profilfelds), ready (Balken kann befüllt werden)
   function getInputState() {
+    const flaeche = !!document.getElementById('profil-flaeche')?.value;
+    const ma      = !!document.getElementById('profil-ma')?.value;
+    const make = (id, convOk, convLabel) => {
+      const hasVal = !!document.getElementById(id)?.value;
+      return { hasVal, convOk, convLabel, ready: hasVal && convOk };
+    };
     return {
-      strom:            !!document.getElementById('jw-strom')?.value,
-      gas:              !!document.getElementById('jw-gas')?.value,
-      wasser:           !!document.getElementById('jw-wasser')?.value,
-      abfall:           !!document.getElementById('jw-abfall')?.value,
-      reinigungsmittel: !!document.getElementById('jw-reinigungsmittel')?.value,
+      strom:            make('jw-strom',            flaeche, 'Nutzfläche'),
+      gas:              make('jw-gas',              flaeche, 'Nutzfläche'),
+      wasser:           make('jw-wasser',           ma,      'Mitarbeiter'),
+      abfall:           make('jw-abfall',           ma,      'Mitarbeiter'),
+      reinigungsmittel: make('jw-reinigungsmittel', ma,      'Mitarbeiter'),
     };
   }
 
@@ -1773,24 +1783,27 @@ Antworte NUR mit validem JSON ohne Markdown:
 
     // Score ring
     const inputState = getInputState();
-    const allInputsPresent = Object.values(inputState).every(Boolean);
+    const allInputsPresent = Object.values(inputState).every(s => s.ready);
     const arc = document.getElementById('score-arc');
     if (!allInputsPresent) {
-      const missingLabels = {
+      const metricLabels = {
         strom:            'Stromverbrauch',
         gas:              'Gasverbrauch',
         wasser:           'Wasserverbrauch',
         abfall:           'Abfallaufkommen',
-        reinigungsmittel: 'Reinigungsmittel (gesamt)',
+        reinigungsmittel: 'Reinigungsmittel',
       };
       const missingItems = Object.entries(inputState)
-        .filter(([, v]) => !v)
-        .map(([k]) => `<li>${missingLabels[k]}</li>`)
+        .filter(([, s]) => !s.ready)
+        .map(([k, s]) => {
+          if (!s.hasVal) return `<li>${metricLabels[k]}</li>`;
+          return `<li>${metricLabels[k]} <span style="color:var(--gray-500)">(für Umrechnung benötigt: ${s.convLabel})</span></li>`;
+        })
         .join('');
       arc.setAttribute('stroke-dashoffset', 226);
       arc.setAttribute('stroke', '#E8E7E2');
       document.getElementById('score-ring-num').textContent   = '—';
-      document.getElementById('score-ring-title').textContent  = 'Öko-Score: —/100 — —';
+      document.getElementById('score-ring-title').textContent  = 'Öko-Score: —/100';
       document.getElementById('score-ring-desc').innerHTML     =
         'Bitte stellen Sie noch folgende Betriebsdaten bereit, um Ihren Öko-Score zu sehen:' +
         `<ul style="margin:4px 0 0 16px;padding:0;">${missingItems}</ul>`;
@@ -1845,13 +1858,14 @@ Antworte NUR mit validem JSON ohne Markdown:
     } else { quelleEl.style.display = 'none'; }
 
     document.getElementById('bench-bars').innerHTML = metrics.map(m => {
-      const bval = metricMedian(m.key, b);
-      const hasVal = inputState[m.key];
+      const bval    = metricMedian(m.key, b);
+      const state   = inputState[m.key];
       // Median-Marker-Position immer relativ zum Benchmark-Wert
       const markerBase = Math.max(bval, 1) * 1.25;
       const bpct = Math.round((bval / markerBase) * 100);
-      if (!hasVal) {
-        // Leere Zeile: nur Label + Median-Strich, kein Balken
+
+      if (!state.hasVal) {
+        // Kein Jahreswert eingegeben — leerer Track + Median-Strich
         return `
           <div class="bench-item">
             <div class="bench-labels">
@@ -1863,12 +1877,29 @@ Antworte NUR mit validem JSON ohne Markdown:
             </div>
           </div>`;
       }
-      const maxV = Math.max(m.val, bval, 1) * 1.25;
-      const pct  = Math.round((m.val  / maxV) * 100);
-      const bpct2 = Math.round((bval / maxV) * 100);
-      const cls = barClassForMetric(m.key, m.val, bval, m.higher);
-      const rawDiff = m.val - bval;
-      const diffStr = rawDiff > 0 ? `+${rawDiff}` : `${rawDiff}`;
+
+      if (!state.convOk) {
+        // Jahreswert vorhanden, aber Umrechnungsbasis fehlt — leerer Track + Fehlerhinweis
+        return `
+          <div class="bench-item">
+            <div class="bench-labels">
+              <span>${m.label}</span>
+              <span style="color:var(--gray-400);font-style:italic;">Umrechnung ausstehend</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-marker" style="left:${bpct}%"></div>
+            </div>
+            <p class="profil-hint" style="display:block;margin-top:4px;">Fehlend für Umrechnung: ${state.convLabel} — bitte im Betriebsprofil eintragen.</p>
+          </div>`;
+      }
+
+      // Vollständig — befüllter Balken
+      const maxV  = Math.max(m.val, bval, 1) * 1.25;
+      const pct   = Math.round((m.val  / maxV) * 100);
+      const bpct2 = Math.round((bval   / maxV) * 100);
+      const cls   = barClassForMetric(m.key, m.val, bval, m.higher);
+      const rawDiff  = m.val - bval;
+      const diffStr  = rawDiff > 0 ? `+${rawDiff}` : `${rawDiff}`;
       const diffColor = diffColorForMetric(m.key, m.val, bval, m.higher);
       return `
         <div class="bench-item">
