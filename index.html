@@ -1857,7 +1857,7 @@ Antworte NUR mit validem JSON ohne Markdown:
     } else { qwCard.style.display = 'none'; }
 
     const quelleEl = document.getElementById('bench-quelle');
-    if (bData && bData.kennzahlen && bData.kennzahlen.strom_kwh_per_m2 && bData.kennzahlen.strom_kwh_per_m2.quelle) {
+    if (anyReady && bData && bData.kennzahlen && bData.kennzahlen.strom_kwh_per_m2 && bData.kennzahlen.strom_kwh_per_m2.quelle) {
       quelleEl.textContent = 'Benchmark-Daten: ' + bData.kennzahlen.strom_kwh_per_m2.quelle;
       quelleEl.style.display = '';
     } else { quelleEl.style.display = 'none'; }
@@ -1869,29 +1869,27 @@ Antworte NUR mit validem JSON ohne Markdown:
       const markerBase = Math.max(bval, 1) * 1.25;
       const bpct = Math.round((bval / markerBase) * 100);
 
-      const markerHtml = anyReady ? `<div class="bar-marker" style="left:${bpct}%"></div>` : '';
-
       if (!state.hasVal) {
-        // Kein Jahreswert eingegeben — leerer Track (ggf. mit Median-Strich)
+        // Kein Jahreswert eingegeben — leerer Track, kein Median-Strich
         return `
           <div class="bench-item">
             <div class="bench-labels">
               <span>${m.label}</span>
               <span style="color:var(--gray-400);font-style:italic;">Noch kein Wert eingegeben</span>
             </div>
-            <div class="bar-track">${markerHtml}</div>
+            <div class="bar-track"></div>
           </div>`;
       }
 
       if (!state.convOk) {
-        // Jahreswert vorhanden, aber Umrechnungsbasis fehlt — leerer Track + Fehlerhinweis
+        // Jahreswert vorhanden, aber Umrechnungsbasis fehlt — leerer Track, kein Median-Strich
         return `
           <div class="bench-item">
             <div class="bench-labels">
               <span>${m.label}</span>
               <span style="color:var(--gray-400);font-style:italic;">Umrechnung ausstehend</span>
             </div>
-            <div class="bar-track">${markerHtml}</div>
+            <div class="bar-track"></div>
             <p class="profil-hint" style="display:block;margin-top:4px;">Fehlend für Umrechnung: ${state.convLabel} — bitte im Betriebsprofil eintragen.</p>
           </div>`;
       }
