@@ -20,26 +20,26 @@ _Die Bezeichnungen „Task 1"–„Task 8" wurden nur lokal zur Orientierung ver
 
 ---
 
-## [2026-06-04] Task 9 — feat/gastro-data-refresh: Gastro-Daten-Refresh & UX-Verbesserungen
+## [2026-06-04] feat/gastro-data-refresh: Gastro-Quellen-Refresh & UX-Verbesserungen
 
 **Branch:** `feat/gastro-data-refresh`
 **Persona:** Feature Implementer
 **Stage:** 03-feature-v2
 
-**Ziel:** Reinigungsmittel-Input vereinfachen (Gesamtliter statt L/MA), Benchmark-Balken und Score-Kreis erst bei Nutzereingabe befüllen, veraltete Gastronomie-Quellen aktualisieren, Quick Wins verbessern, Legende modernisieren.
+**Ziel:** Reinigungsmittel-Input vereinfachen (Gesamtliter statt L/MA), Benchmark-Balken pro Metrik individuell befüllen, Score-Ring erst bei vollständiger Datenbasis anzeigen, veraltete Gastronomie-Quellen aktualisieren, Quick Wins verbessern, Legende modernisieren.
 
 **Aktionen:**
 - `benchmarks.js`: `strom_kwh_per_m2`-Quelle → DEHOGA 2023 / dena 2022; `wasser_liter_per_gedeck`-Quelle → DEHOGA 2021; `energiekosten_anteil_umsatz_pct`-Quelle → DEHOGA Zahlenspiegel 2023
 - `benchmarks.js`: Quick Win „Minibar-Abschaltung (Hotel)" ersetzt durch „Speisereste-App (Too Good To Go / ResQ)" + „Außenbeleuchtung: Zeitschalter & LED"
-- `index.html`: Reinigungsmittel-Input umgestellt auf L/Jahr (Gesamtliter); Label, Unit (`L / Jahr`), Placeholder (`z. B. 175`) angepasst
-- `index.html`: `applyDocumentResult()` — Gemini schreibt jetzt Gesamtliter ins Feld (keine Vor-Division mehr)
+- `index.html`: Reinigungsmittel-Input auf L/Jahr (Gesamtliter) umgestellt; Label, Unit (`L / Jahr`), Placeholder (`z. B. 175`) angepasst
+- `index.html`: `applyDocumentResult()` — Gemini schreibt Gesamtliter ins Feld (keine Vor-Division mehr)
 - `index.html`: Missing-Hint in `computeFromJahreswerte()` um `jwReinigung` erweitert
-- `index.html`: Neue Hilfsfunktion `hasUserInput()` — prüft ob ein jw-*-Feld befüllt ist
-- `index.html`: Score-Ring zeigt leeren grauen Kreis + „—" + Erklärungstext solange keine Eingabe vorhanden
-- `index.html`: Benchmark-Balken zeigen Placeholder-Text statt Default-Werten solange keine Eingabe vorhanden; verschwinden automatisch beim Löschen der Eingabe
-- `index.html`: Legende umgestellt auf Badge-Stil (Text zentriert im farbigen Quadrat); „Ampel grün/gelb/rot" und „Strich =" entfernt
+- `index.html`: `hasUserInput()` → `getInputState()` (Map pro Metrik-Key); ermöglicht pro-Metrik-Sichtbarkeit
+- `index.html`: Benchmark-Balken werden pro Metrik individuell befüllt/geleert — nur Metriken mit Nutzereingabe zeigen einen Balken; ohne Eingabe: leere Bar-Track + Median-Strich + kursiver Hinweistext
+- `index.html`: Score-Ring bleibt leer (grauer Kreis, „—") bis alle 5 Kennzahlen eingegeben sind; zeigt Stichpunktliste der fehlenden Eingaben
+- `index.html`: Legende als farbige Badges (schwarze Schrift, Text im Quadrat zentriert); „Ampel"-Zusätze und „Strich =" entfernt
 
-**Ergebnis:** Nutzerführung im Eingabe- und Benchmark-Tab klarer; keine irreführenden Default-Balken mehr; Quellenangaben aktuell; Quick Wins branchenspezifisch und korrekt.
+**Ergebnis:** Nutzerführung im Benchmark-Tab klarer; pro-Metrik-Feedback ohne Rauschen durch Default-Werte; Quellenangaben aktuell; Quick Wins branchenspezifisch korrekt.
 
 **Nächster Schritt:** Lokal testen (`python -m http.server 8080`), dann PR `feat/gastro-data-refresh` → `main`.
 

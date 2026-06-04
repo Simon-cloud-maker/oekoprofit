@@ -541,7 +541,7 @@
       justify-content: center;
       padding: 3px 10px;
       border-radius: 3px;
-      color: #fff;
+      color: #000;
       font-size: 11px;
       font-weight: 500;
     }
@@ -1729,9 +1729,15 @@ Antworte NUR mit validem JSON ohne Markdown:
     return better ? 'var(--green-600)' : 'var(--coral-400)';
   }
 
-  function hasUserInput() {
-    return ['jw-strom','jw-gas','jw-wasser','jw-abfall','jw-reinigungsmittel']
-      .some(id => !!document.getElementById(id)?.value);
+  // Gibt zurück welche jw-Felder der Nutzer befüllt hat (pro Metrik-Key)
+  function getInputState() {
+    return {
+      strom:            !!document.getElementById('jw-strom')?.value,
+      gas:              !!document.getElementById('jw-gas')?.value,
+      wasser:           !!document.getElementById('jw-wasser')?.value,
+      abfall:           !!document.getElementById('jw-abfall')?.value,
+      reinigungsmittel: !!document.getElementById('jw-reinigungsmittel')?.value,
+    };
   }
 
   function update() {
@@ -1766,14 +1772,28 @@ Antworte NUR mit validem JSON ohne Markdown:
     document.getElementById('wasser-tag-num').textContent = wasserLiterProMaTag;
 
     // Score ring
+    const inputState = getInputState();
+    const allInputsPresent = Object.values(inputState).every(Boolean);
     const arc = document.getElementById('score-arc');
-    if (!hasUserInput()) {
+    if (!allInputsPresent) {
+      const missingLabels = {
+        strom:            'Stromverbrauch',
+        gas:              'Gasverbrauch',
+        wasser:           'Wasserverbrauch',
+        abfall:           'Abfallaufkommen',
+        reinigungsmittel: 'Reinigungsmittel (gesamt)',
+      };
+      const missingItems = Object.entries(inputState)
+        .filter(([, v]) => !v)
+        .map(([k]) => `<li>${missingLabels[k]}</li>`)
+        .join('');
       arc.setAttribute('stroke-dashoffset', 226);
       arc.setAttribute('stroke', '#E8E7E2');
-      document.getElementById('score-ring-num').textContent  = '—';
-      document.getElementById('score-ring-title').textContent = 'Öko-Score: —/100 — —';
-      document.getElementById('score-ring-desc').textContent  =
-        'Bitte geben Sie Betriebsdaten ein, um den Öko-Score Ihres Unternehmens zu sehen.';
+      document.getElementById('score-ring-num').textContent   = '—';
+      document.getElementById('score-ring-title').textContent  = 'Öko-Score: —/100 — —';
+      document.getElementById('score-ring-desc').innerHTML     =
+        'Bitte stellen Sie noch folgende Betriebsdaten bereit, um Ihren Öko-Score zu sehen:' +
+        `<ul style="margin:4px 0 0 16px;padding:0;">${missingItems}</ul>`;
     } else {
       const offset = Math.round(226 - (score / 100) * 226);
       arc.setAttribute('stroke-dashoffset', offset);
@@ -1824,33 +1844,44 @@ Antworte NUR mit validem JSON ohne Markdown:
       quelleEl.style.display = '';
     } else { quelleEl.style.display = 'none'; }
 
-    if (!hasUserInput()) {
-      document.getElementById('bench-bars').innerHTML =
-        '<p style="color:var(--gray-500);font-size:13px;padding:12px 0;">' +
-        'Geben Sie Ihre Jahreswerte im Tab „Eingabe" ein, um den Vergleich zu sehen.</p>';
-    } else {
-      document.getElementById('bench-bars').innerHTML = metrics.map(m => {
-        const bval = metricMedian(m.key, b);
-        const maxV = Math.max(m.val, bval, 1) * 1.25;
-        const pct  = Math.round((m.val  / maxV) * 100);
-        const bpct = Math.round((bval / maxV) * 100);
-        const cls = barClassForMetric(m.key, m.val, bval, m.higher);
-        const rawDiff = m.val - bval;
-        const diffStr = rawDiff > 0 ? `+${rawDiff}` : `${rawDiff}`;
-        const diffColor = diffColorForMetric(m.key, m.val, bval, m.higher);
+    document.getElementById('bench-bars').innerHTML = metrics.map(m => {
+      const bval = metricMedian(m.key, b);
+      const hasVal = inputState[m.key];
+      // Median-Marker-Position immer relativ zum Benchmark-Wert
+      const markerBase = Math.max(bval, 1) * 1.25;
+      const bpct = Math.round((bval / markerBase) * 100);
+      if (!hasVal) {
+        // Leere Zeile: nur Label + Median-Strich, kein Balken
         return `
           <div class="bench-item">
             <div class="bench-labels">
               <span>${m.label}</span>
-              <span>Ihr Wert: ${m.val} ${m.unit} · Benchmark: ${bval} ${m.unit} (<span style="color:${diffColor}">${diffStr}</span>)</span>
+              <span style="color:var(--gray-400);font-style:italic;">Noch kein Wert eingegeben</span>
             </div>
             <div class="bar-track">
-              <div class="bar-fill ${cls}" style="width:${pct}%">${m.val} ${m.unit}</div>
               <div class="bar-marker" style="left:${bpct}%"></div>
             </div>
           </div>`;
-      }).join('');
-    }
+      }
+      const maxV = Math.max(m.val, bval, 1) * 1.25;
+      const pct  = Math.round((m.val  / maxV) * 100);
+      const bpct2 = Math.round((bval / maxV) * 100);
+      const cls = barClassForMetric(m.key, m.val, bval, m.higher);
+      const rawDiff = m.val - bval;
+      const diffStr = rawDiff > 0 ? `+${rawDiff}` : `${rawDiff}`;
+      const diffColor = diffColorForMetric(m.key, m.val, bval, m.higher);
+      return `
+        <div class="bench-item">
+          <div class="bench-labels">
+            <span>${m.label}</span>
+            <span>Ihr Wert: ${m.val} ${m.unit} · Benchmark: ${bval} ${m.unit} (<span style="color:${diffColor}">${diffStr}</span>)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill ${cls}" style="width:${pct}%">${m.val} ${m.unit}</div>
+            <div class="bar-marker" style="left:${bpct2}%"></div>
+          </div>
+        </div>`;
+    }).join('');
 
     document.getElementById('rec-list').innerHTML = buildDeterministicRecs(vals, branch).map(r => `
       <div class="rec-item">
