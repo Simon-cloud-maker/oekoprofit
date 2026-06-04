@@ -30,10 +30,10 @@ _Zuletzt aktualisiert: 2026-06-04_
 
 ## Aktueller Branch
 
-`feat/gastro-data-refresh` — bereit zum Merge in `main`.
+`fix/det-recs-missing-input` — Bug: Deterministische Empfehlungen wurden anhand von Default-Slider-Werten angezeigt, auch wenn noch kein Jahreswert eingegeben wurde.
 
-Änderungen: Gastronomie-Quellen aktualisiert (DEHOGA 2023), Quick Wins verbessert, Reinigungsmittel-Input auf L/Jahr, pro-Metrik-Balken mit Umrechnungs-Guard, Score-Ring mit Fehlerliste, Legende modernisiert, Tab „Benchmark-Vergleich".
+**Fix:** In `buildDeterministicRecs()` wird nun `getInputState()` aufgerufen; der `massnahmen.filter()` prüft als erste Bedingung `inputState[m.metrik]?.ready`. Empfehlungen ohne vorliegenden Nutzerwert werden unterdrückt. Fallback-Text differenziert zwischen „keine Daten" und „alle Werte gut".
 
 ## Nächster Schritt
 
-`feat/gastro-data-refresh` in `main` mergen (lokal), dann auf origin pushen und PR erstellen.
+`fix/det-recs-missing-input` testen, committen und PR → `main` erstellen.

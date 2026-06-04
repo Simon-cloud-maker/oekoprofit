@@ -2,6 +2,20 @@
 
 ---
 
+## [2026-06-04] Entscheidung: Deterministische Empfehlungen erfordern inputState.ready
+
+Kontext:
+`buildDeterministicRecs()` nutzte `calcBenchmarkScore(vals[metrik], ...)` zur Filterung. `vals` wird aus versteckten Slidern gelesen, die immer Default-Werte haben — auch wenn der Nutzer noch keinen Jahreswert eingegeben hat. Dadurch erschienen Empfehlungen (z. B. „Reinigungswasser optimieren") obwohl die Kennzahl noch gar nicht bereitgestellt wurde.
+
+Entscheidung:
+Im `massnahmen.filter()` wird als erste Bedingung `getInputState()[m.metrik]?.ready` geprüft. Nur wenn Jahreswert (`hasVal`) **und** Umrechnungsbasis (`convOk`) vorliegen, wird die Score-Prüfung überhaupt ausgeführt. `getInputState()` liest aus den `jw-*`-Inputs und den Profil-Feldern — nicht aus den Slidern.
+
+Alternativen verworfen:
+- Slider-Defaults auf 0 setzen → würde andere Logik (CO2-Berechnung, Score-Ring) brechen.
+- Eigene `ready`-Map aufbauen → redundant zu `getInputState()`, die dies bereits korrekt tut.
+
+---
+
 ## [2026-05-30] Entscheidung: Slider als versteckte State-Holder (nicht entfernen)
 
 Kontext:

@@ -46,6 +46,28 @@ _Die Bezeichnungen „Task 1"–„Task 8" wurden nur lokal zur Orientierung ver
 
 ---
 
+## [2026-06-04] fix/det-recs-missing-input: Empfehlungen nur bei vorliegender Kennzahl
+
+**Branch:** `fix/det-recs-missing-input`
+**Persona:** Feature Implementer
+**Stage:** 03-feature-v2
+
+**Ziel:** Verhindern, dass deterministische Empfehlungen für Kennzahlen angezeigt werden, die der Nutzer noch nicht eingegeben hat.
+
+**Bug:** `buildDeterministicRecs()` filterte `massnahmen` nur per Score-Schwelle. Der Score basiert auf den versteckten Slider-Werten, die immer Default-Werte tragen — auch wenn noch kein Jahreswert im `jw-*`-Input eingegeben wurde. Dadurch erschienen z. B. Wasser-Empfehlungen trotz fehlendem Wasserverbrauch-Input.
+
+**Aktionen:**
+- `index.html`: In `buildDeterministicRecs()` wird `getInputState()` aufgerufen; `massnahmen.filter()` prüft als erste Bedingung `inputState[m.metrik]?.ready`
+- `index.html`: Fallback-Text wenn `recs.length === 0` unterscheidet: (a) kein einziger Wert ready → Hinweistext, (b) mindestens ein Wert ready, alle Scores gut → „Ausgezeichnete Umweltbilanz"
+- `memory/decisions.md`: Architekturentscheidung dokumentiert
+- `memory/short_term.md`: Branch und Status aktualisiert
+
+**Ergebnis:** Deterministische Empfehlungen erscheinen nur noch, wenn der Nutzer den entsprechenden Jahreswert (und die nötige Umrechnungsbasis) bereitgestellt hat.
+
+**Nächster Schritt:** Lokal testen, committen, PR → `main`.
+
+---
+
 ## [2026-05-31] Bugfix feat/gemini-document-reader: Wasser-Autofill + Slider-Cap
 
 **Branch:** `feat/gemini-document-reader`

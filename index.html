@@ -1995,7 +1995,11 @@ Antworte NUR mit validem JSON ohne Markdown:
         pot: 'KI-Beratung starten für individuelle Hinweise.' }];
     }
 
+    const inputState = getInputState();
+
     const recs = massnahmen.filter(m => {
+      // Nur anzeigen wenn Jahreswert + Umrechnungsbasis vorliegen
+      if (!inputState[m.metrik]?.ready) return false;
       // Profilbedingung prüfen (nur wenn Profil vorhanden)
       if (m.nur_wenn_profil && profilKueche !== null) {
         if (m.nur_wenn_profil.kueche && m.nur_wenn_profil.kueche !== profilKueche) return false;
@@ -2008,12 +2012,24 @@ Antworte NUR mit validem JSON ohne Markdown:
       pot:   render(m.pot),
     }));
 
-    if (recs.length === 0) recs.push({
-      icon: '✅', bg: '#E1F5EE',
-      title: 'Ausgezeichnete Umweltbilanz',
-      desc: 'Alle Kennzahlen liegen im oder unter dem Branchendurchschnitt. Der Betrieb ist vorbildlich aufgestellt.',
-      pot: 'ÖKOPROFIT-Zertifizierung empfohlen.'
-    });
+    if (recs.length === 0) {
+      const anyReady = Object.values(inputState).some(s => s.ready);
+      if (!anyReady) {
+        recs.push({
+          icon: 'ℹ️', bg: '#F5F5F3',
+          title: 'Noch keine Kennzahlen eingegeben',
+          desc: 'Geben Sie im Bereich "Betriebsdaten" Ihre Jahreswerte ein, um personalisierte Empfehlungen zu erhalten.',
+          pot: 'Empfehlungen erscheinen, sobald die erste Kennzahl vorliegt.'
+        });
+      } else {
+        recs.push({
+          icon: '✅', bg: '#E1F5EE',
+          title: 'Ausgezeichnete Umweltbilanz',
+          desc: 'Alle eingegebenen Kennzahlen liegen im oder unter dem Branchendurchschnitt. Der Betrieb ist vorbildlich aufgestellt.',
+          pot: 'ÖKOPROFIT-Zertifizierung empfohlen.'
+        });
+      }
+    }
     return recs;
   }
 
