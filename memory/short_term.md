@@ -4,62 +4,36 @@ _Zuletzt aktualisiert: 2026-06-04_
 
 ## Aktueller Stand
 
-- **Verlauf:** Score-Trend (Chart.js) + Snapshot-Vergleich A/B; localStorage-Snapshots.
-- **Recycling-Benchmark:** `recyclingquote_pct` in allen Branchen; Öko-Score nutzt dynamisches Scoring.
-- **Dark Mode:** Toggle im Header (`data-theme`, `localStorage`, System-Präferenz-Fallback).
-- **Agentic Coding:** `AGENTS.md` + `prompts/agent-runs/` (6 Persona-Runs + Template).
-- **KI-Backend:** Vercel Serverless Function (`api/ki-consulting.js`) → OpenRouter Free Tier.
-- **Frontend:** Single-file `index.html` (vanilla HTML/CSS/JS, kein Framework, kein Build-Step).
+- **Fokus:** Zwei Fallbeispiele — Gasthaus (Gastronomie) und Bäckerei (Handwerksbäckerei)
+- **Benchmark-Tab:** Balken pro Metrik individuell befüllt; Score-Ring erst bei vollständigen Daten; Legende modusbewusst
+- **Reinigungsmittel:** Eingabe in L/Jahr (Gesamtliter); interne Umrechnung auf L/MA via `computeFromJahreswerte()`
+- **Gemini Document Reader:** Extraktion von Strom, Gas, Wasser, Abfall, Reinigungsmittel (Gesamtliter)
+- **Deterministisch Empfehlungen:** `buildDeterministicRecs()` mit Template-Variablen und Betriebsprofil
+- **Dark Mode:** Toggle im Header (`data-theme`, `localStorage`, System-Präferenz-Fallback)
+- **Agentic Coding:** `AGENTS.md` + `prompts/agent-runs/` (6 Persona-Runs + Template)
+- **KI-Backend:** Vercel Serverless Function (`api/ki-consulting.js`) → OpenRouter Free Tier
+- **Frontend:** Single-file `index.html` (vanilla HTML/CSS/JS, kein Framework, kein Build-Step)
 
-## Refokus-Entscheidung (2026-05-30, nach Professorenbesprechung)
+## Auf main gemergte Branches (Tasks 1–8 + waste-kpi)
 
-Das Tool fokussiert sich jetzt auf **zwei Fallbeispiele**:
-- **Gasthaus** (Gastronomie) — bereits vorhanden, verfeinert
-- **Bäckerei (Produktion)** — neu hinzugefügt
-
-## Neue Branches (2026-05-31)
-
-| Branch | Status | Was |
-|--------|--------|-----|
-| `feat/gemini-document-reader` | ✅ mehrfach erweitert | Files API statt inline Base64; gemini-3.1-flash-lite; abfall_kg Extraktion; input-Event-Fix |
-| `feat/waste-kpi` | ✅ bereit für Merge | CO2-Faktor Restmüll (0,15 kg/kg), Abfall in CO2-Berechnung, KI-Prompt-Benchmarks |
-
-## Feature-Branches
-
-| Branch | Status | Was geändert wurde |
-|--------|--------|--------------------|
-| `feat/bakery-benchmarks` | ✅ committed | Bäckerei-Kennzahlen, Quick Wins, Hauptverbraucher + massnahmen-Array in `benchmarks.js` |
-| `feat/ui-focus-two-cases` | ✅ committed | Dropdown auf 2 Optionen (inkl. Label „Bäckerei (Produktion)"), Bäckerei-Mediane in UI |
-| `feat/branch-specific-inputs` | ✅ committed | Betriebsprofil-Felder, Jahreswert-Inputs (kWh/Jahr), Slider als versteckte State-Holder, `buildClaudePrompt()` mit Profil angereichert |
-| `feat/gemini-document-reader` | ✅ committed | Neue `api/document-reader.js` (gemini-3.1-flash-lite), Multi-file PDF/Foto-Upload, Browser-Fallback mit User-Key, autofill-Badge; **Reinigungsmittel-Extraktion:** (`reinigungsmittel_liter`) + `applyDocumentResult()`-Block |
-| `feat/deterministic-recommendations` | ✅ committed | `buildDeterministicRecs()` ersetzt generische Empfehlungslogik; Template-Variablen inkl. Betriebsgröße |
-| `feat/sharper-ai-recommendations` | ✅ committed | Bäckerei-Benchmarks im System-Prompt, 6 Quick Wins, kueche-Bedingung, neuer Abschnitt `## Warum das für Ihren Betrieb gilt` |
-| `feat/replace-recycling-metric` | ✅ committed | Recyclingquote → Reinigungsmittelverbrauch (L/MA/Jahr) in `benchmarks.js` (gastronomie), `index.html` (12 Stellen), `api/ki-consulting.js` |
-| `feat/benchmark-tab-update` | ✅ committed | Benchmark-Tab: Hauptverbraucher-Box, Quick-Wins-Card, Quellenzeile + metrics recycling→reinigungsmittel |
-
-## Kein Merge-Konflikt erwartet
-
-`feat/bakery-benchmarks` enthält den vollständigen `baeckerei`-Eintrag (kennzahlen + quick_wins + massnahmen).
-`feat/deterministic-recommendations` hat den Bäckerei-Stub entfernt → beim Merge kein Konflikt.
-
-## Lokales Testen (Integrations-Branch)
-
-```powershell
-git checkout main
-git checkout -b test/integration
-git merge feat/bakery-benchmarks
-git merge feat/ui-focus-two-cases
-git merge feat/branch-specific-inputs
-git merge feat/gemini-document-reader
-git merge feat/deterministic-recommendations
-python -m http.server 8080
-# Gemini API-Key im UI eingeben für Document-Upload-Test
-```
+| Branch | Was |
+|--------|-----|
+| `feat/bakery-benchmarks` | Bäckerei-Kennzahlen, Quick Wins, Hauptverbraucher, massnahmen-Array |
+| `feat/ui-focus-two-cases` | Dropdown auf 2 Optionen, Bäckerei-Mediane in UI |
+| `feat/branch-specific-inputs` | Betriebsprofil-Felder, Jahreswert-Inputs, Slider als State-Holder |
+| `feat/gemini-document-reader` | Gemini 2.0 Flash, Multi-file Upload, Reinigungsmittel + Abfall-Extraktion |
+| `feat/deterministic-recommendations` | `buildDeterministicRecs()`, Template-Variablen, Betriebsgröße |
+| `feat/sharper-ai-recommendations` | Bäckerei-Benchmarks im System-Prompt, kueche-Bedingung |
+| `feat/replace-recycling-metric` | Recyclingquote → Reinigungsmittel (L/MA/Jahr) |
+| `feat/benchmark-tab-update` | Hauptverbraucher-Box, Quick-Wins-Card, Quellenzeile |
+| `feat/waste-kpi` | Abfall-KPI (Restmüll CO2-Faktor, Score, KI-Prompt) |
 
 ## Aktueller Branch
 
-`feat/gastro-data-refresh` — Task 9 (Gastro-Quellen-Refresh + UX). Bereit zum lokalen Testen.
+`feat/gastro-data-refresh` — bereit zum Merge in `main`.
+
+Änderungen: Gastronomie-Quellen aktualisiert (DEHOGA 2023), Quick Wins verbessert, Reinigungsmittel-Input auf L/Jahr, pro-Metrik-Balken mit Umrechnungs-Guard, Score-Ring mit Fehlerliste, Legende modernisiert, Tab „Benchmark-Vergleich".
 
 ## Nächster Schritt
 
-Lokal testen (`python -m http.server 8080`), dann PR `feat/gastro-data-refresh` → `main`.
+`feat/gastro-data-refresh` in `main` mergen (lokal), dann auf origin pushen und PR erstellen.
