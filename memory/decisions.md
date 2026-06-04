@@ -205,3 +205,19 @@ Ersatz durch **Reinigungsmittelverbrauch (L/MA/Jahr)**.
 - `index.html`: 12 Stellen (Slider, Scoring, Prompt, Snapshot)
 - `api/document-reader.js`: neues Feld im Extraction-Prompt
 - `api/ki-consulting.js`: Benchmark-Werte im System-Prompt
+
+---
+
+## [2026-06-04] Entscheidung: Reinigungsmittel-Input in L/Jahr (Gesamtliter) statt L/MA
+
+**Kontext:**
+Das Eingabefeld `jw-reinigungsmittel` war mit der Einheit `L/MA` beschriftet, obwohl Rechnungen immer Gesamtliter ausweisen. Die Gemini-Extraktion hat Gesamtliter bereits durch MA dividiert, bevor sie ins Feld geschrieben wurden — inkonsistent mit der internen `computeFromJahreswerte()`-Logik, die ebenfalls dividiert hätte (doppelte Division).
+
+**Entscheidung:**
+Eingabefeld zeigt `L / Jahr` (Gesamtliter). `computeFromJahreswerte()` dividiert intern durch MA → Slider-Wert in L/MA. Gemini schreibt Gesamtliter ohne Vor-Division ins Feld.
+
+**Alternativen verworfen:**
+- L/MA beibehalten → schlechtere UX (Nutzer muss selbst rechnen), doppelte Division als Latent-Bug.
+
+**Impact:**
+- `index.html`: Input-Label, Unit, Placeholder, `applyDocumentResult()`, Missing-Hint

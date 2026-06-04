@@ -14,8 +14,35 @@
 | Task 7 | feat/replace-recycling-metric | Recyclingquote → Reinigungsmittel |
 | Task 8 | feat/benchmark-tab-update | Benchmark-Tab Überarbeitung |
 | — | feat/waste-kpi | Abfall-KPI (Gewicht) |
+| Task 9 | feat/gastro-data-refresh | Gastro-Quellen-Refresh + UX-Verbesserungen |
 
 _Die Bezeichnungen „Task 1"–„Task 8" wurden nur lokal zur Orientierung verwendet._
+
+---
+
+## [2026-06-04] feat/gastro-data-refresh: Gastro-Quellen-Refresh & UX-Verbesserungen
+
+**Branch:** `feat/gastro-data-refresh`
+**Persona:** Feature Implementer
+**Stage:** 03-feature-v2
+
+**Ziel:** Reinigungsmittel-Input vereinfachen (Gesamtliter statt L/MA), Benchmark-Balken pro Metrik individuell befüllen, Score-Ring erst bei vollständiger Datenbasis anzeigen, veraltete Gastronomie-Quellen aktualisieren, Quick Wins verbessern, Legende modernisieren.
+
+**Aktionen:**
+- `benchmarks.js`: `strom_kwh_per_m2`-Quelle → DEHOGA 2023 / dena 2022; `wasser_liter_per_gedeck`-Quelle → DEHOGA 2021; `energiekosten_anteil_umsatz_pct`-Quelle → DEHOGA Zahlenspiegel 2023
+- `benchmarks.js`: Quick Win „Minibar-Abschaltung (Hotel)" ersetzt durch „Speisereste-App (Too Good To Go / ResQ)" + „Außenbeleuchtung: Zeitschalter & LED"
+- `index.html`: Reinigungsmittel-Input auf L/Jahr (Gesamtliter) umgestellt; Label, Unit (`L / Jahr`), Placeholder (`z. B. 175`) angepasst; Input-Label „(gesamt)" entfernt
+- `index.html`: `applyDocumentResult()` — Gemini schreibt Gesamtliter ins Feld (keine Vor-Division mehr)
+- `index.html`: Missing-Hint in `computeFromJahreswerte()` um `jwReinigung` erweitert
+- `index.html`: `getInputState()` (Map pro Metrik: `hasVal`, `convOk`, `convLabel`, `ready`) ersetzt `hasUserInput()`
+- `index.html`: Balken dreistufig: (1) kein Jahreswert → leer, (2) Jahreswert aber Profilfeld fehlt → leer + Fehlerhinweis, (3) beides vorhanden → befüllt
+- `index.html`: Score-Ring leer (grauer Kreis, „—", Öko-Score: —/100) bis alle 5 ready; Fehlerliste mit Umrechnungshinweisen
+- `index.html`: Legende als farbige Badges + Median-Strich; Badge-Farben modusbewusst (`--green-50`, `--amber-50`, `--coral-50`); Median-Text in `--gray-900`; Legende + Median-Striche erst sichtbar wenn mind. ein Balken `ready`
+- `index.html`: Tab-Name „Benchmark" → „Benchmark-Vergleich"; Score-Ring-Titel „—/100 — —" → „—/100"
+
+**Ergebnis:** Nutzerführung im Benchmark-Tab klarer; pro-Metrik-Feedback ohne Rauschen; Legende in Light- und Dark-Mode gut lesbar; Quellenangaben aktuell; Quick Wins branchenspezifisch korrekt.
+
+**Nächster Schritt:** Lokal testen (`python -m http.server 8080`), dann PR `feat/gastro-data-refresh` → `main`.
 
 ---
 

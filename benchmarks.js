@@ -25,7 +25,7 @@ const OEKOPROFIT_BENCHMARKS = {
           einheit: "kWh/m²·a",
           p25: 180, median: 230, p75: 280,
           ziel_2030: 150,
-          quelle: "DEHOGA 'Nachhaltiges Wirtschaften 2016'"
+          quelle: "DEHOGA Branchenbericht Gastgewerbe 2023; dena/BMWK 'Energieeffizienz im Gastgewerbe' 2022"
         },
         waerme_kwh_per_m2: {
           einheit: "kWh/m²·a (Heizung/Kühlung/Wärme, Gebäudebezug)",
@@ -46,7 +46,7 @@ const OEKOPROFIT_BENCHMARKS = {
           einheit: "l/Gedeck",
           p25: 30, median: 55, p75: 80,
           ziel_2030: 25,
-          quelle: "DEHOGA 2014"
+          quelle: "DEHOGA 'Wasserleitfaden Gastgewerbe' 2021"
         },
         wasser_liter_per_gericht_grosskueche: {
           einheit: "l/Gericht (Großküche)",
@@ -56,7 +56,7 @@ const OEKOPROFIT_BENCHMARKS = {
         energiekosten_anteil_umsatz_pct: {
           einheit: "% des Umsatzes",
           p25: 4, median: 6, p75: 10,
-          quelle: "DEHOGA / g-wie-gastro.de"
+          quelle: "DEHOGA Zahlenspiegel 2023; Statista Gastgewerbe DE 2023"
         },
         lebensmittelabfall_g_per_speise: {
           einheit: "g/Speise",
@@ -88,7 +88,8 @@ const OEKOPROFIT_BENCHMARKS = {
         { massnahme: "Kühlraum-Türschleier", invest_eur: 400, einsparung_eur_pa: 180, amort_jahre: 2.2 },
         { massnahme: "Heizung 1°C absenken", invest_eur: 0, einsparung_pct: 6, bereich: "heizung" },
         { massnahme: "LED-Umrüstung", invest_eur: 3000, einsparung_pct: 50, bereich: "beleuchtung", amort_jahre: 2 },
-        { massnahme: "Minibar-Abschaltung (Hotel)", invest_eur: 0, einsparung_kwh_pa: 16500, einsparung_eur_pa: 3300, co2_t_pa: 9.3 },
+        { massnahme: "Speisereste-App (Too Good To Go / ResQ)", invest_eur: 0, einsparung_eur_pa: 800, bereich: "abfall", co2_kg_pa: 180, quelle: "Too Good To Go Wirkungsbericht 2023" },
+        { massnahme: "Außenbeleuchtung: Zeitschalter & LED", invest_eur: 200, einsparung_kwh_pa: 1200, einsparung_eur_pa: 240, amort_jahre: 0.8, quelle: "dena Leitfaden Außenbeleuchtung 2022" },
         { massnahme: "Wassersparende Perlatoren", invest_eur: 50, einsparung_wasser_pct: 40, amort_jahre: 0.5 }
       ],
       // Deterministische Empfehlungsregeln: zeige_wenn_score_unter = Ampelgrenze (Score < X → Empfehlung sichtbar)
