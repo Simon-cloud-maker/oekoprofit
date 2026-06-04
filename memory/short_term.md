@@ -1,6 +1,6 @@
 # Short-Term Memory — Aktueller Projektstand
 
-_Zuletzt aktualisiert: 2026-06-01_
+_Zuletzt aktualisiert: 2026-06-04_
 
 ## Aktueller Stand
 
@@ -56,6 +56,10 @@ python -m http.server 8080
 # Gemini API-Key im UI eingeben für Document-Upload-Test
 ```
 
+## Aktueller Branch
+
+`feat/gastro-data-refresh` — Task 9 (Gastro-Quellen-Refresh + UX). Bereit zum lokalen Testen.
+
 ## Nächster Schritt
 
-`feat/waste-kpi` in `main` mergen — Abfall-KPI (Restmüll CO2-Faktor, Score-Integration, KI-Prompt) ist fertig und getestet. Danach alle Feature-Branches lokal archivieren.
+Lokal testen (`python -m http.server 8080`), dann PR `feat/gastro-data-refresh` → `main`.

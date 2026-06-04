@@ -535,12 +535,15 @@
       color: var(--gray-400);
       margin-top: 8px;
     }
-    .legend-dot {
-      width: 10px; height: 10px;
-      border-radius: 2px;
-      display: inline-block;
-      margin-right: 4px;
-      vertical-align: middle;
+    .legend-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 10px;
+      border-radius: 3px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 500;
     }
 
     .ai-controls {
@@ -1006,9 +1009,9 @@
         <span class="jw-unit">kg / Jahr</span>
       </div>
       <div class="jw-row">
-        <label>Reinigungsmittel</label>
-        <input type="number" id="jw-reinigungsmittel" min="0" max="500" placeholder="z. B. 35" oninput="computeFromJahreswerte()">
-        <span class="jw-unit">L/MA</span>
+        <label>Reinigungsmittel (gesamt)</label>
+        <input type="number" id="jw-reinigungsmittel" min="0" placeholder="z. B. 175" oninput="computeFromJahreswerte()">
+        <span class="jw-unit">L / Jahr</span>
       </div>
       <p id="profil-hint" class="profil-hint" style="display:none;"></p>
 
@@ -1066,10 +1069,10 @@
         <div id="bench-hv-list" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
       </div>
       <div class="legend" style="margin-top:12px;">
-        <span><span class="legend-dot" style="background:var(--green-600);"></span>Gut (Ampel grün)</span>
-        <span><span class="legend-dot" style="background:var(--amber-400);"></span>Mittelfeld (Ampel gelb)</span>
-        <span><span class="legend-dot" style="background:#c44d28;"></span>Handlungsbedarf (Ampel rot)</span>
-        <span><span class="legend-dot" style="background:var(--gray-900); opacity:0.55;"></span>Strich = Median-Benchmark</span>
+        <span class="legend-badge" style="background:var(--green-600);">Gut</span>
+        <span class="legend-badge" style="background:var(--amber-400);">Mittelfeld</span>
+        <span class="legend-badge" style="background:#c44d28;">Handlungsbedarf</span>
+        <span class="legend-badge" style="background:var(--gray-900);opacity:0.55;">Median-Benchmark</span>
       </div>
       <div id="bench-quelle" style="display:none; font-size:11px; color:var(--gray-400); margin-top:8px;"></div>
     </div>
@@ -1466,11 +1469,10 @@ Antworte NUR mit validem JSON ohne Markdown:
       if (setJahreswert('jw-wasser', wasserJahr)) found.push('Wasser');
     }
 
-    // Reinigungsmittel (L/Abrechnungszeitraum → L/MA/Jahr)
+    // Reinigungsmittel (L/Abrechnungszeitraum → L/Jahr gesamt; Division durch MA in computeFromJahreswerte)
     const reinigungJahr = result.reinigungsmittel_liter;
     if (reinigungJahr && reinigungJahr > 0) {
-      const val = ma > 0 ? Math.round(reinigungJahr / ma) : Math.round(reinigungJahr);
-      if (setJahreswert('jw-reinigungsmittel', val)) found.push('Reinigungsmittel');
+      if (setJahreswert('jw-reinigungsmittel', Math.round(reinigungJahr))) found.push('Reinigungsmittel');
     }
 
     // Abfall (kg/Abrechnungszeitraum → kg/Jahr als Jahreswert)
@@ -1581,8 +1583,8 @@ Antworte NUR mit validem JSON ohne Markdown:
     else if (jwReinigung)      setSlider('reinigungsmittel', jwReinigung);
 
     const missing = [];
-    if (!p.flaeche && (jwStrom || jwGas))    missing.push('Nutzfläche');
-    if (!p.ma      && (jwWasser || jwAbfall)) missing.push('Mitarbeiter');
+    if (!p.flaeche && (jwStrom || jwGas))                  missing.push('Nutzfläche');
+    if (!p.ma      && (jwWasser || jwAbfall || jwReinigung)) missing.push('Mitarbeiter');
 
     if (missing.length && anyJw) {
       hint.style.display = 'block';
@@ -1727,6 +1729,11 @@ Antworte NUR mit validem JSON ohne Markdown:
     return better ? 'var(--green-600)' : 'var(--coral-400)';
   }
 
+  function hasUserInput() {
+    return ['jw-strom','jw-gas','jw-wasser','jw-abfall','jw-reinigungsmittel']
+      .some(id => !!document.getElementById(id)?.value);
+  }
+
   function update() {
     updateBranchUI();
     const vals = getVals();
@@ -1760,18 +1767,27 @@ Antworte NUR mit validem JSON ohne Markdown:
 
     // Score ring
     const arc = document.getElementById('score-arc');
-    const offset = Math.round(226 - (score / 100) * 226);
-    arc.setAttribute('stroke-dashoffset', offset);
-    arc.setAttribute('stroke', score >= 75 ? '#1D9E75' : score >= 50 ? '#378ADD' : '#D85A30');
-    document.getElementById('score-ring-num').textContent = score;
-    document.getElementById('score-ring-title').textContent = `Öko-Score: ${score}/100 — ${sl}`;
-    document.getElementById('score-ring-desc').textContent = score >= 75
-      ? 'Ihr Betrieb liegt deutlich über dem Branchendurchschnitt. Ausgezeichnete Umweltleistung.'
-      : score >= 55
-      ? 'Ihr Betrieb liegt leicht über dem Durchschnitt. Gezielte Maßnahmen können die Bilanz weiter verbessern.'
-      : score >= 35
-      ? 'Es besteht Verbesserungspotenzial. Die KI-Empfehlungen zeigen konkrete Hebel auf.'
-      : 'Deutlicher Handlungsbedarf – mehrere Kennzahlen liegen signifikant über dem Branchendurchschnitt.';
+    if (!hasUserInput()) {
+      arc.setAttribute('stroke-dashoffset', 226);
+      arc.setAttribute('stroke', '#E8E7E2');
+      document.getElementById('score-ring-num').textContent  = '—';
+      document.getElementById('score-ring-title').textContent = 'Öko-Score: —/100 — —';
+      document.getElementById('score-ring-desc').textContent  =
+        'Bitte geben Sie Betriebsdaten ein, um den Öko-Score Ihres Unternehmens zu sehen.';
+    } else {
+      const offset = Math.round(226 - (score / 100) * 226);
+      arc.setAttribute('stroke-dashoffset', offset);
+      arc.setAttribute('stroke', score >= 75 ? '#1D9E75' : score >= 50 ? '#378ADD' : '#D85A30');
+      document.getElementById('score-ring-num').textContent  = score;
+      document.getElementById('score-ring-title').textContent = `Öko-Score: ${score}/100 — ${sl}`;
+      document.getElementById('score-ring-desc').textContent  = score >= 75
+        ? 'Ihr Betrieb liegt deutlich über dem Branchendurchschnitt. Ausgezeichnete Umweltleistung.'
+        : score >= 55
+        ? 'Ihr Betrieb liegt leicht über dem Durchschnitt. Gezielte Maßnahmen können die Bilanz weiter verbessern.'
+        : score >= 35
+        ? 'Es besteht Verbesserungspotenzial. Die KI-Empfehlungen zeigen konkrete Hebel auf.'
+        : 'Deutlicher Handlungsbedarf – mehrere Kennzahlen liegen signifikant über dem Branchendurchschnitt.';
+    }
 
     // Benchmark bars (Ampel via calcBenchmarkScore — same logic as Öko-Score)
     const metrics = [
@@ -1808,27 +1824,33 @@ Antworte NUR mit validem JSON ohne Markdown:
       quelleEl.style.display = '';
     } else { quelleEl.style.display = 'none'; }
 
-    document.getElementById('bench-bars').innerHTML = metrics.map(m => {
-      const bval = metricMedian(m.key, b);
-      const maxV = Math.max(m.val, bval, 1) * 1.25;
-      const pct  = Math.round((m.val  / maxV) * 100);
-      const bpct = Math.round((bval / maxV) * 100);
-      const cls = barClassForMetric(m.key, m.val, bval, m.higher);
-      const rawDiff = m.val - bval;
-      const diffStr = rawDiff > 0 ? `+${rawDiff}` : `${rawDiff}`;
-      const diffColor = diffColorForMetric(m.key, m.val, bval, m.higher);
-      return `
-        <div class="bench-item">
-          <div class="bench-labels">
-            <span>${m.label}</span>
-            <span>Ihr Wert: ${m.val} ${m.unit} · Benchmark: ${bval} ${m.unit} (<span style="color:${diffColor}">${diffStr}</span>)</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill ${cls}" style="width:${pct}%">${m.val} ${m.unit}</div>
-            <div class="bar-marker" style="left:${bpct}%"></div>
-          </div>
-        </div>`;
-    }).join('');
+    if (!hasUserInput()) {
+      document.getElementById('bench-bars').innerHTML =
+        '<p style="color:var(--gray-500);font-size:13px;padding:12px 0;">' +
+        'Geben Sie Ihre Jahreswerte im Tab „Eingabe" ein, um den Vergleich zu sehen.</p>';
+    } else {
+      document.getElementById('bench-bars').innerHTML = metrics.map(m => {
+        const bval = metricMedian(m.key, b);
+        const maxV = Math.max(m.val, bval, 1) * 1.25;
+        const pct  = Math.round((m.val  / maxV) * 100);
+        const bpct = Math.round((bval / maxV) * 100);
+        const cls = barClassForMetric(m.key, m.val, bval, m.higher);
+        const rawDiff = m.val - bval;
+        const diffStr = rawDiff > 0 ? `+${rawDiff}` : `${rawDiff}`;
+        const diffColor = diffColorForMetric(m.key, m.val, bval, m.higher);
+        return `
+          <div class="bench-item">
+            <div class="bench-labels">
+              <span>${m.label}</span>
+              <span>Ihr Wert: ${m.val} ${m.unit} · Benchmark: ${bval} ${m.unit} (<span style="color:${diffColor}">${diffStr}</span>)</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill ${cls}" style="width:${pct}%">${m.val} ${m.unit}</div>
+              <div class="bar-marker" style="left:${bpct}%"></div>
+            </div>
+          </div>`;
+      }).join('');
+    }
 
     document.getElementById('rec-list').innerHTML = buildDeterministicRecs(vals, branch).map(r => `
       <div class="rec-item">
