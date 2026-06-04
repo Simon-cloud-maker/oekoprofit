@@ -541,10 +541,13 @@
       justify-content: center;
       padding: 3px 10px;
       border-radius: 3px;
-      color: #000;
       font-size: 11px;
       font-weight: 500;
     }
+    .legend-badge-green  { color: var(--green-50);  }
+    .legend-badge-amber  { color: var(--amber-50);  }
+    .legend-badge-coral  { color: var(--coral-50);  }
+    .legend-median-text  { color: var(--gray-900);  }
 
     .ai-controls {
       display: flex;
@@ -1068,11 +1071,11 @@
         <div style="font-size:12px; font-weight:600; color:var(--gray-600); margin-bottom:6px;">Hauptverbraucher in Ihrer Branche</div>
         <div id="bench-hv-list" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
       </div>
-      <div class="legend" style="margin-top:12px;">
-        <span class="legend-badge" style="background:var(--green-600);">Gut</span>
-        <span class="legend-badge" style="background:var(--amber-400);">Mittelfeld</span>
-        <span class="legend-badge" style="background:#c44d28;">Handlungsbedarf</span>
-        <span style="display:inline-flex;align-items:center;gap:5px;">
+      <div class="legend" id="bench-legend" style="margin-top:12px;display:none;">
+        <span class="legend-badge legend-badge-green"  style="background:var(--green-600);">Gut</span>
+        <span class="legend-badge legend-badge-amber"  style="background:var(--amber-400);">Mittelfeld</span>
+        <span class="legend-badge legend-badge-coral"  style="background:#c44d28;">Handlungsbedarf</span>
+        <span class="legend-median-text" style="display:inline-flex;align-items:center;gap:5px;">
           <span style="display:inline-block;width:3px;height:16px;background:var(--gray-900);opacity:0.55;box-shadow:0 0 0 1px rgba(255,255,255,0.35);border-radius:1px;"></span>
           Median-Benchmark
         </span>
@@ -1784,6 +1787,8 @@ Antworte NUR mit validem JSON ohne Markdown:
     // Score ring
     const inputState = getInputState();
     const allInputsPresent = Object.values(inputState).every(s => s.ready);
+    const anyReady        = Object.values(inputState).some(s => s.ready);
+    document.getElementById('bench-legend').style.display = anyReady ? '' : 'none';
     const arc = document.getElementById('score-arc');
     if (!allInputsPresent) {
       const metricLabels = {
@@ -1864,17 +1869,17 @@ Antworte NUR mit validem JSON ohne Markdown:
       const markerBase = Math.max(bval, 1) * 1.25;
       const bpct = Math.round((bval / markerBase) * 100);
 
+      const markerHtml = anyReady ? `<div class="bar-marker" style="left:${bpct}%"></div>` : '';
+
       if (!state.hasVal) {
-        // Kein Jahreswert eingegeben — leerer Track + Median-Strich
+        // Kein Jahreswert eingegeben — leerer Track (ggf. mit Median-Strich)
         return `
           <div class="bench-item">
             <div class="bench-labels">
               <span>${m.label}</span>
               <span style="color:var(--gray-400);font-style:italic;">Noch kein Wert eingegeben</span>
             </div>
-            <div class="bar-track">
-              <div class="bar-marker" style="left:${bpct}%"></div>
-            </div>
+            <div class="bar-track">${markerHtml}</div>
           </div>`;
       }
 
@@ -1886,9 +1891,7 @@ Antworte NUR mit validem JSON ohne Markdown:
               <span>${m.label}</span>
               <span style="color:var(--gray-400);font-style:italic;">Umrechnung ausstehend</span>
             </div>
-            <div class="bar-track">
-              <div class="bar-marker" style="left:${bpct}%"></div>
-            </div>
+            <div class="bar-track">${markerHtml}</div>
             <p class="profil-hint" style="display:block;margin-top:4px;">Fehlend für Umrechnung: ${state.convLabel} — bitte im Betriebsprofil eintragen.</p>
           </div>`;
       }
