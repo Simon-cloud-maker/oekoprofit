@@ -4,6 +4,9 @@
 
 node_modules/
 
+# MkDocs build output
+site/
+
 # Lokale Prompt-Telemetrie (optional)
 logs/prompt-log.ndjson
 

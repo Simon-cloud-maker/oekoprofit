@@ -6,7 +6,9 @@
   "scripts": {
     "check:transparency": "node scripts/check-agent-transparency.js --base HEAD~1 --head HEAD",
     "check:transparency:working": "node scripts/check-agent-transparency.js --working",
-    "agent:finish": "bash scripts/agent-finish.sh"
+    "agent:finish": "bash scripts/agent-finish.sh",
+    "docs:serve": "mkdocs serve",
+    "docs:build": "mkdocs build"
   },
   "dependencies": {
     "@vercel/kv": "^3.0.0"

@@ -1,0 +1,60 @@
+site_name: ÖKOPROFIT KI-Dashboard
+site_description: Dokumentation zum ÖKOPROFIT KI-Dashboard (aus Repository-Quellen abgeleitet)
+site_url: https://simon-cloud-maker.github.io/oekoprofit/
+
+repo_name: oekoprofit-ki
+repo_url: https://github.com/Simon-cloud-maker/oekoprofit
+
+theme:
+  name: material
+  language: de
+  palette:
+    - scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Dark Mode
+    - scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Light Mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+
+nav:
+  - Start: index.md
+  - Benutzer:
+    - Übersicht: benutzer/uebersicht.md
+    - Dateneingabe: benutzer/dateneingabe.md
+    - Benchmark: benutzer/benchmark.md
+    - KI-Empfehlungen: benutzer/ki-empfehlungen.md
+    - Verlauf & Snapshots: benutzer/verlauf.md
+  - Entwicklung:
+    - Lokales Setup: entwicklung/lokales-setup.md
+    - Deployment (Vercel): entwicklung/deployment.md
+    - Umgebungsvariablen: entwicklung/umgebungsvariablen.md
+    - npm-Scripts: entwicklung/npm-scripts.md
+  - Architektur:
+    - Übersicht: architektur/uebersicht.md
+    - Frontend: architektur/frontend.md
+    - API (Serverless): architektur/api.md
+  - Daten & Benchmarks:
+    - Benchmark-Daten: daten/benchmarks.md
+    - Bekannte Einschränkungen: daten/bekannte-einschraenkungen.md
+  - Agentic Workflow:
+    - AGENTS.md & Personas: agentic/agents-workflow.md
+    - CI & Transparenz: agentic/ci-transparenz.md
+  - Referenz:
+    - Projektstruktur: referenz/projektstruktur.md
+    - Abhängigkeiten: referenz/abhaengigkeiten.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
