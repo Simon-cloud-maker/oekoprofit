@@ -197,6 +197,99 @@
     #score-track { stroke: var(--gray-100); }
     #score-ring-num { fill: var(--gray-900); }
 
+    /* Dark-Mode Korrekturen für Buttons & Darstellungen */
+    [data-theme="dark"] .snap-btn.restore {
+      background: var(--green-400);
+      color: #fff;
+      border-color: var(--green-400);
+    }
+    [data-theme="dark"] .snap-btn.restore:hover {
+      background: var(--green-600);
+      border-color: var(--green-600);
+      color: var(--gray-900);
+    }
+    [data-theme="dark"] .snap-btn {
+      color: var(--gray-900);
+    }
+    [data-theme="dark"] .snap-btn:hover {
+      background: var(--gray-50);
+    }
+    [data-theme="dark"] .snap-btn.delete:hover {
+      color: var(--coral-400);
+      border-color: var(--coral-400);
+      background: var(--coral-50);
+    }
+    [data-theme="dark"] .snapshot-item:hover {
+      background: var(--gray-50);
+      border-color: var(--green-400);
+    }
+    [data-theme="dark"] .upload-row label.btn:hover {
+      background: var(--green-600);
+      color: var(--gray-900);
+    }
+    [data-theme="dark"] .snapshot-row button.btn-save:hover {
+      background: var(--green-600);
+      color: var(--gray-900);
+    }
+    [data-theme="dark"] .ai-btn:hover:not(:disabled) {
+      background: var(--green-600);
+      border-color: var(--green-600);
+      color: var(--gray-900);
+    }
+    [data-theme="dark"] .tab.active:hover {
+      background: var(--green-600);
+      color: var(--gray-900);
+    }
+    [data-theme="dark"] .theme-toggle[aria-pressed="true"] {
+      background: var(--green-400);
+      color: #fff;
+      border-color: var(--green-400);
+    }
+    [data-theme="dark"] .bar-marker {
+      background: var(--gray-900);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+    }
+    [data-theme="dark"] .slider-row input[type=range] {
+      background: var(--gray-200);
+    }
+    [data-theme="dark"] .slider-cap-hint {
+      background: rgba(216, 90, 48, 0.14);
+      color: var(--coral-400);
+    }
+    [data-theme="dark"] .cmp-controls select {
+      background: var(--gray-50);
+      color: var(--gray-900);
+    }
+    [data-theme="dark"] select option {
+      background: var(--surface);
+      color: var(--gray-900);
+    }
+    [data-theme="dark"] .cmp-table tr:hover td:not(.metric):not(.diff) {
+      background: var(--gray-50);
+    }
+    [data-theme="dark"] .cmp-table td.diff.better {
+      color: var(--green-600);
+    }
+    [data-theme="dark"] .trend-delta {
+      background: var(--gray-50);
+      color: var(--gray-900);
+    }
+    [data-theme="dark"] .trend-delta.up {
+      background: var(--green-100);
+      color: var(--green-800);
+    }
+    [data-theme="dark"] .badge {
+      background: var(--blue-50);
+      color: var(--blue-800);
+    }
+    [data-theme="dark"] .ai-response code {
+      background: var(--gray-50);
+      color: var(--green-600);
+    }
+    [data-theme="dark"] .ai-response pre {
+      background: var(--gray-50);
+    }
+
     /* Tabs */
     .tabs {
       display: flex;
@@ -788,6 +881,21 @@
     .snap-btn.restore { background: var(--gray-900); color: #fff; border-color: var(--gray-900); }
     .snap-btn.restore:hover { background: var(--green-600); border-color: var(--green-600); }
     .snap-btn.delete:hover { color: var(--coral-400); border-color: var(--coral-400); }
+    .snap-btn.export:hover { color: var(--green-600); border-color: var(--green-600); }
+    .snap-btn.export:disabled { opacity: 0.4; cursor: not-allowed; }
+    .snap-list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+    .snap-list-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
     .snap-empty {
       font-size: 0.85rem;
       color: var(--gray-400);
@@ -1156,11 +1264,19 @@
     </div>
 
     <div class="card">
-      <div class="label">Gespeicherte Snapshots</div>
+      <div class="snap-list-header">
+        <div class="label" style="margin:0;">Gespeicherte Snapshots</div>
+        <div class="snap-list-actions">
+          <button type="button" class="snap-btn export" id="btn-snap-export" onclick="exportSnapshotsCSV()" title="Alle Snapshots als CSV exportieren (UTF-8, Excel-kompatibel)">⬇ CSV-Export</button>
+          <button type="button" class="snap-btn export" id="btn-snap-json-export" onclick="exportSnapshotsJSON()" title="Komplettes Backup als JSON-Datei (verlustfrei, importierbar)">⬇ JSON-Backup</button>
+          <button type="button" class="snap-btn export" onclick="triggerSnapshotImport()" title="Snapshots aus JSON-Backup wiederherstellen">⬆ JSON-Import</button>
+          <input type="file" id="snapshot-import-input" accept="application/json,.json" style="display:none;" onchange="handleSnapshotImport(event)">
+        </div>
+      </div>
       <div id="snapshot-list" class="snapshot-list"></div>
     </div>
     <div style="font-size:12px; color:var(--gray-400); margin-top:-0.25rem; padding: 0 0.25rem;">
-      Snapshots werden lokal im Browser (localStorage) gespeichert und verlassen dieses Gerät nicht.
+      Snapshots werden lokal im Browser (localStorage) gespeichert und verlassen dieses Gerät nicht. <strong>CSV</strong> für externe Dokumentation, <strong>JSON-Backup</strong> für verlustfreie Sicherung und Wiederherstellung (z.&nbsp;B. nach Browser-Reset oder Gerätewechsel).
     </div>
   </div>
 
@@ -2528,9 +2644,143 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   }
 
   function deleteSnapshot(id) {
+    const snap = loadSnapshots().find(s => s.id === id);
+    if (!snap) return;
+    const label = `${formatSnapDate(snap.date)} – ${snap.brancheLabel} (Score ${snap.score})`;
+    if (!confirm(`Snapshot wirklich löschen?\n\n${label}\n\nDieser Vorgang kann nicht rückgängig gemacht werden.`)) return;
     const list = loadSnapshots().filter(s => s.id !== id);
     persistSnapshots(list);
     renderSnapshots();
+  }
+
+  function exportSnapshotsCSV() {
+    const list = loadSnapshots();
+    if (list.length === 0) {
+      alert('Keine Snapshots vorhanden, die exportiert werden könnten.');
+      return;
+    }
+    const sep = ';';
+    const headers = [
+      'Datum', 'Betrieb', 'Branche',
+      'Strom (kWh/m²)', 'Gas (kWh/m²)', 'Wasser (m³/MA)',
+      'Abfall (kg/MA)', 'Reinigungsmittel (L/MA)', 'Öko-Score'
+    ];
+    const esc = v => {
+      const s = v == null ? '' : String(v);
+      return /[";\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    const chrono = [...list].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const rows = chrono.map(s => [
+      new Date(s.date).toLocaleString('de-DE'),
+      s.betrieb || '',
+      s.brancheLabel || s.branche || '',
+      s.vals && s.vals.strom != null ? s.vals.strom : '',
+      s.vals && s.vals.gas != null ? s.vals.gas : '',
+      s.vals && s.vals.wasser != null ? s.vals.wasser : '',
+      s.vals && s.vals.abfall != null ? s.vals.abfall : '',
+      s.vals && s.vals.reinigungsmittel != null ? s.vals.reinigungsmittel : '',
+      s.score
+    ].map(esc).join(sep));
+    const csv = '﻿' + headers.join(sep) + '\r\n' + rows.join('\r\n') + '\r\n';
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const ts = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `oekoprofit-snapshots-${ts}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function exportSnapshotsJSON() {
+    const list = loadSnapshots();
+    if (list.length === 0) {
+      alert('Keine Snapshots vorhanden, die exportiert werden könnten.');
+      return;
+    }
+    const payload = {
+      app: 'oekoprofit-ki',
+      type: 'snapshots-backup',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      count: list.length,
+      snapshots: list
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const ts = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `oekoprofit-snapshots-${ts}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function triggerSnapshotImport() {
+    const input = document.getElementById('snapshot-import-input');
+    if (input) input.click();
+  }
+
+  function handleSnapshotImport(event) {
+    const file = event.target.files && event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      let data;
+      try {
+        data = JSON.parse(e.target.result);
+      } catch (err) {
+        alert('Datei ist kein gültiges JSON: ' + err.message);
+        return;
+      }
+      const incoming = Array.isArray(data)
+        ? data
+        : (data && Array.isArray(data.snapshots) ? data.snapshots : null);
+      if (!incoming) {
+        alert('Datei enthält keine Snapshot-Daten (erwartet: Array oder { snapshots: [...] }).');
+        return;
+      }
+      const valid = incoming.filter(s =>
+        s && typeof s === 'object'
+        && typeof s.id === 'number'
+        && typeof s.date === 'string'
+        && typeof s.score === 'number'
+        && s.vals && typeof s.vals === 'object'
+      );
+      const invalidCount = incoming.length - valid.length;
+      if (valid.length === 0) {
+        alert('Keine gültigen Snapshots in der Datei gefunden.');
+        return;
+      }
+      const existing = loadSnapshots();
+      const existingIds = new Set(existing.map(s => s.id));
+      const toAdd = valid.filter(s => !existingIds.has(s.id));
+      const skipped = valid.length - toAdd.length;
+
+      if (toAdd.length === 0) {
+        alert(`Nichts zu importieren — alle ${valid.length} Snapshots aus der Datei sind bereits vorhanden.`);
+        return;
+      }
+
+      const summary = `${valid.length} Snapshot(s) in Datei gefunden.\n`
+        + `• Neu zu importieren: ${toAdd.length}\n`
+        + (skipped > 0 ? `• Bereits vorhanden (übersprungen): ${skipped}\n` : '')
+        + (invalidCount > 0 ? `• Ungültig (übersprungen): ${invalidCount}\n` : '')
+        + `\nMit Import fortfahren?`;
+      if (!confirm(summary)) return;
+
+      const merged = [...existing, ...toAdd].sort((a, b) => new Date(b.date) - new Date(a.date));
+      persistSnapshots(merged);
+      renderSnapshots();
+      alert(`✓ ${toAdd.length} Snapshot(s) importiert.`);
+    };
+    reader.onerror = () => alert('Datei konnte nicht gelesen werden.');
+    reader.readAsText(file);
   }
 
   function restoreSnapshot(id) {
@@ -2570,6 +2820,11 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     const container = document.getElementById('snapshot-list');
     if (!container) return;
     const list = loadSnapshots();
+
+    const exportBtn = document.getElementById('btn-snap-export');
+    if (exportBtn) exportBtn.disabled = list.length === 0;
+    const jsonExportBtn = document.getElementById('btn-snap-json-export');
+    if (jsonExportBtn) jsonExportBtn.disabled = list.length === 0;
 
     if (list.length === 0) {
       container.innerHTML = '<div class="snap-empty">Noch keine Snapshots gespeichert. Im Tab <strong>Dateneingabe</strong> auf „💾 Snapshot speichern" klicken.</div>';
@@ -2766,6 +3021,7 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     const getTheme = () => document.documentElement.getAttribute('data-theme') || 'light';
 
     const applyTheme = (theme) => {
+      const prev = document.documentElement.getAttribute('data-theme');
       document.documentElement.setAttribute('data-theme', theme);
       try { localStorage.setItem('oekoprofit-theme', theme); } catch (e) {}
       const dark = theme === 'dark';
@@ -2773,6 +3029,9 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
       btn.setAttribute('aria-label', dark ? 'Hellmodus aktivieren' : 'Dark Mode aktivieren');
       if (icon) icon.textContent = dark ? '☀️' : '🌙';
       if (label) label.textContent = dark ? 'Hell' : 'Dark';
+      if (prev && prev !== theme && trendChart) {
+        renderTrendChart(loadSnapshots());
+      }
     };
 
     btn.addEventListener('click', () => applyTheme(getTheme() === 'dark' ? 'light' : 'dark'));

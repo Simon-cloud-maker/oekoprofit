@@ -20,6 +20,19 @@ _Die Bezeichnungen „Task 1"–„Task 8" wurden nur lokal zur Orientierung ver
 
 ---
 
+## [2026-06-18] style(ui): Dark-Mode-Korrekturen für Buttons und Tabellen
+
+**Ziel:** Im Dark Mode lesbare und konsistente Hover-/Aktivzustände für Snapshots, Upload-Buttons, KI-Button, Tabs und Vergleichstabelle.
+
+**Aktionen:**
+- `index.html`: CSS unter `[data-theme="dark"]` für `.snap-btn`, `.snapshot-item`, `.upload-row label.btn`, `.ai-btn`, `.tab.active`, Slider, `.cmp-controls select`, `.cmp-table`-Diff-Farben.
+
+**Ergebnis:** Verlauf-, Import- und Aktions-Buttons im Dark Mode mit grünem Akzent statt unreadable gray-on-dark.
+
+**Nächster Schritt:** Auf https://oekoprofit-ki.vercel.app im Dark Mode prüfen (nach Vercel-Deploy).
+
+---
+
 ## [2026-06-04] feat/gastro-data-refresh: Gastro-Quellen-Refresh & UX-Verbesserungen
 
 **Branch:** `feat/gastro-data-refresh`
