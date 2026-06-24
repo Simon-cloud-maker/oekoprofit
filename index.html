@@ -1036,6 +1036,7 @@
     <button class="tab" onclick="showTab('benchmark', this)">Benchmark-Vergleich</button>
     <button class="tab" onclick="showTab('empfehlungen', this)">KI-Empfehlungen</button>
     <button class="tab" onclick="showTab('verlauf', this)">Verlauf</button>
+    <button class="tab" onclick="showTab('aufgaben', this)">Aufgaben</button>
   </div>
 
   <!-- TAB: Eingabe -->
@@ -1277,6 +1278,24 @@
     </div>
     <div style="font-size:12px; color:var(--gray-400); margin-top:-0.25rem; padding: 0 0.25rem;">
       Snapshots werden lokal im Browser (localStorage) gespeichert und verlassen dieses Gerät nicht. <strong>CSV</strong> für externe Dokumentation, <strong>JSON-Backup</strong> für verlustfreie Sicherung und Wiederherstellung (z.&nbsp;B. nach Browser-Reset oder Gerätewechsel).
+    </div>
+  </div>
+
+  <!-- TAB: Aufgaben (serverseitig in Neon-DB via /api/tasks) -->
+  <div id="tab-aufgaben" style="display:none;">
+    <div class="card">
+      <div class="label">Aufgaben</div>
+      <p style="font-size:13px; color:var(--gray-400); margin-top:-0.25rem;">
+        Aufgaben werden serverseitig in der Datenbank gespeichert und sind dadurch geräteübergreifend verfügbar
+        (im Gegensatz zu den lokal gespeicherten Snapshots).
+      </p>
+      <div style="display:flex; gap:0.5rem; margin:0.75rem 0;">
+        <input type="text" id="task-title" class="ai-input" placeholder="Neue Aufgabe…" style="flex:1;"
+               onkeydown="if(event.key==='Enter') addTask();">
+        <button type="button" class="btn" onclick="addTask()">Hinzufügen</button>
+      </div>
+      <div id="task-status" style="font-size:13px; min-height:1.2em;"></div>
+      <div id="task-list"></div>
     </div>
   </div>
 
@@ -2588,12 +2607,77 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   }
 
   function showTab(name, btn) {
-    ['eingabe','benchmark','empfehlungen','verlauf'].forEach(t => {
+    ['eingabe','benchmark','empfehlungen','verlauf','aufgaben'].forEach(t => {
       document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
     });
     document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
     if (btn) btn.classList.add('active');
     if (name === 'verlauf') renderSnapshots();
+    if (name === 'aufgaben') renderTasks();
+  }
+
+  // --- Aufgaben (DB-gestützt via /api/tasks) ---
+  const TASK_USER_ID = 'demo'; // Platzhalter, bis es echte Anmeldung gibt
+
+  async function renderTasks() {
+    const listEl = document.getElementById('task-list');
+    const statusEl = document.getElementById('task-status');
+    statusEl.textContent = '';
+    statusEl.style.color = '';
+    listEl.textContent = 'Lädt…';
+    try {
+      const res = await fetch('/api/tasks?user_id=' + encodeURIComponent(TASK_USER_ID));
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      listEl.textContent = '';
+      if (!data.tasks || !data.tasks.length) {
+        listEl.textContent = 'Noch keine Aufgaben.';
+        return;
+      }
+      for (const t of data.tasks) {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex; justify-content:space-between; gap:1rem; padding:0.5rem 0.25rem; border-bottom:1px solid var(--border);';
+        const title = document.createElement('span');
+        title.textContent = t.title; // textContent => XSS-sicher
+        const meta = document.createElement('span');
+        meta.style.cssText = 'color:var(--gray-400); font-size:12px; white-space:nowrap;';
+        meta.textContent = t.created_at ? new Date(t.created_at).toLocaleString('de-DE') : '';
+        row.appendChild(title);
+        row.appendChild(meta);
+        listEl.appendChild(row);
+      }
+    } catch (err) {
+      listEl.textContent = '';
+      statusEl.style.color = '#c0392b';
+      statusEl.textContent = 'Fehler beim Laden: ' + err.message;
+    }
+  }
+
+  async function addTask() {
+    const input = document.getElementById('task-title');
+    const statusEl = document.getElementById('task-status');
+    const title = (input.value || '').trim();
+    if (!title) {
+      statusEl.style.color = '#c0392b';
+      statusEl.textContent = 'Bitte einen Titel eingeben.';
+      return;
+    }
+    statusEl.style.color = '';
+    statusEl.textContent = 'Speichert…';
+    try {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, user_id: TASK_USER_ID })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      input.value = '';
+      statusEl.textContent = '';
+      await renderTasks();
+    } catch (err) {
+      statusEl.style.color = '#c0392b';
+      statusEl.textContent = 'Fehler beim Speichern: ' + err.message;
+    }
   }
 
   // --- Verlauf / Snapshots ---
