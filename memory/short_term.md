@@ -11,8 +11,9 @@ _Zuletzt aktualisiert: 2026-06-24_
 - **Reinigungsmittel:** Eingabe in L/Jahr (Gesamtliter); interne Umrechnung auf L/MA via `computeFromJahreswerte()`
 - **Gemini Document Reader:** Extraktion von Strom, Gas, Wasser, Abfall, Reinigungsmittel (Gesamtliter)
 - **Deterministisch Empfehlungen:** `buildDeterministicRecs()` mit Template-Variablen und Betriebsprofil
-- **Lernkarten-Tab:** `api/lernkarten.js` + UI-Tab (Neon, analog Aufgaben).
-- **Aufgaben-Tab:** `api/tasks.js` + UI (bereits auf Branch).
+- **Maßnahmen-Tab (NEU):** `api/massnahmen.js` (GET/POST/PATCH) + UI-Tab + `db/0002_massnahme.sql`. Effizienzmaßnahmen mit ROI/Amortisation, Status-Pipeline (idee→geplant→in_umsetzung→umgesetzt→verifiziert), Kennzahlen-Leiste. Erster Baustein der Industrie-Neuausrichtung (Spec/Plan in `docs/superpowers/`).
+- **Entfernt:** Tabs Aufgaben + Empfehlungen (in Maßnahmen aufgegangen); `api/tasks.js`, `api/empfehlungen.js` gelöscht. Tabellen `task`/`empfehlung` bleiben in DB (kein Drop).
+- **Ausgeblendet:** Tabs Produkte + Lernkarten (nur Buttons weg; HTML/JS/`api/produkte.js`+`api/lernkarten.js` bleiben — gehören zu späteren Bausteinen Standorte / Maßnahmen-Katalog).
 - **KI-Backend:** Vercel Serverless Function (`api/ki-consulting.js`) → OpenRouter Free Tier
 - **Frontend:** Single-file `index.html` (vanilla HTML/CSS/JS, kein Framework, kein Build-Step)
 
