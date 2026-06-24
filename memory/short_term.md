@@ -5,6 +5,12 @@ _Zuletzt aktualisiert: 2026-06-18_
 ## Aktueller Stand
 
 - **Dark Mode:** Toggle im Header (`data-theme`, `localStorage`); CSS-Korrekturen für Buttons, Snapshots, Tabs und Vergleichstabelle.
+- **MkDocs:** GitHub Pages unter https://simon-cloud-maker.github.io/oekoprofit/ (inkl. Lessons Learned)
+- **Fokus:** Zwei Fallbeispiele — Gasthaus (Gastronomie) und Bäckerei (Handwerksbäckerei)
+- **Benchmark-Tab:** Balken pro Metrik individuell befüllt; Score-Ring erst bei vollständigen Daten; Legende modusbewusst
+- **Reinigungsmittel:** Eingabe in L/Jahr (Gesamtliter); interne Umrechnung auf L/MA via `computeFromJahreswerte()`
+- **Gemini Document Reader:** Extraktion von Strom, Gas, Wasser, Abfall, Reinigungsmittel (Gesamtliter)
+- **Deterministisch Empfehlungen:** `buildDeterministicRecs()` mit Template-Variablen und Betriebsprofil
 - **Agentic Coding:** `AGENTS.md` + `prompts/agent-runs/` (6 Persona-Runs + Template)
 - **KI-Backend:** Vercel Serverless Function (`api/ki-consulting.js`) → OpenRouter Free Tier
 - **Frontend:** Single-file `index.html` (vanilla HTML/CSS/JS, kein Framework, kein Build-Step)
@@ -25,10 +31,8 @@ _Zuletzt aktualisiert: 2026-06-18_
 
 ## Aktueller Branch
 
-`fix/det-recs-missing-input` — Bug: Deterministische Empfehlungen wurden anhand von Default-Slider-Werten angezeigt, auch wenn noch kein Jahreswert eingegeben wurde.
-
-**Fix:** In `buildDeterministicRecs()` wird nun `getInputState()` aufgerufen; der `massnahmen.filter()` prüft als erste Bedingung `inputState[m.metrik]?.ready`. Empfehlungen ohne vorliegenden Nutzerwert werden unterdrückt. Fallback-Text differenziert zwischen „keine Daten" und „alle Werte gut".
+`main` — Dark-Mode-Korrekturen und MkDocs (Lessons Learned) auf main.
 
 ## Nächster Schritt
 
-`fix/det-recs-missing-input` testen, committen und PR → `main` erstellen.
+Dark Mode auf Vercel prüfen; optional `known-issues.md` mit Reinigungsmittel-Stand abgleichen.
