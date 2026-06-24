@@ -49,3 +49,7 @@ mkdocs build    # Ausgabe in site/
 ```
 
 Alternativ (wenn npm-Scripts gesetzt): `npm run docs:serve`
+
+## Lessons Learned
+
+Erfahrungen aus Entwicklung, Bugs und Architekturentscheidungen: [Lessons Learned](reflexion/lessons-learned.md)

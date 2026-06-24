@@ -52,6 +52,8 @@ nav:
   - Referenz:
     - Projektstruktur: referenz/projektstruktur.md
     - Abhängigkeiten: referenz/abhaengigkeiten.md
+  - Reflexion:
+    - Lessons Learned: reflexion/lessons-learned.md
 
 markdown_extensions:
   - admonition

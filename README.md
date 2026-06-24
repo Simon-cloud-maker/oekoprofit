@@ -179,6 +179,7 @@ Quellen liegen unter `docs/`; Inhalte sind aus README, Code und Konfiguration ab
 | [memory/long_term.md](memory/long_term.md) | Architektur |
 | [memory/decisions.md](memory/decisions.md) | Entscheidungslog |
 | [known-issues.md](known-issues.md) | Benchmark-Einschränkungen |
+| [docs/reflexion/lessons-learned.md](docs/reflexion/lessons-learned.md) | Lessons Learned (MkDocs) |
 | [prompts/README.md](prompts/README.md) | Prompt-System |
 
 ---
