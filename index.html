@@ -1036,6 +1036,7 @@
     <button class="tab" onclick="showTab('benchmark', this)">Benchmark-Vergleich</button>
     <button class="tab" onclick="showTab('empfehlungen', this)">KI-Empfehlungen</button>
     <button class="tab" onclick="showTab('verlauf', this)">Verlauf</button>
+    <button class="tab" onclick="showTab('massnahmen', this)">Maßnahmen</button>
     <button class="tab" onclick="showTab('aufgaben', this)">Aufgaben</button>
     <button class="tab" onclick="showTab('lernkarten', this)">Lernkarten</button>
     <button class="tab" onclick="showTab('produkte', this)">Produkte</button>
@@ -1356,6 +1357,34 @@
       </div>
       <div id="emp-status" style="font-size:13px; min-height:1.2em;"></div>
       <div id="emp-list"></div>
+    </div>
+  </div>
+
+  <!-- TAB: Maßnahmen (Effizienzmaßnahmen mit ROI, Neon via /api/massnahmen) -->
+  <div id="tab-massnahmen" style="display:none;">
+    <div class="card">
+      <div class="label">Maßnahmen</div>
+      <p style="font-size:13px; color:var(--gray-400); margin-top:-0.25rem;">
+        Effizienzmaßnahmen mit Wirtschaftlichkeit (Amortisation) und Status-Pipeline — serverseitig gespeichert.
+      </p>
+      <div id="m-stats" style="display:flex; flex-wrap:wrap; gap:1.25rem; margin:0.75rem 0; font-size:13px;"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin:0.75rem 0;">
+        <input type="text" id="m-title" class="ai-input" placeholder="Titel der Maßnahme…" style="grid-column:1 / -1;"
+               onkeydown="if(event.key==='Enter') addMassnahme();">
+        <select id="m-ressource" class="ai-input">
+          <option value="">Ressource…</option>
+          <option>Strom</option><option>Gas</option><option>Wasser</option>
+          <option>Wärme</option><option>Druckluft</option><option>Sonstige</option>
+        </select>
+        <input type="text" id="m-verantwortlich" class="ai-input" placeholder="Verantwortlich…">
+        <input type="number" id="m-einsparung" class="ai-input" placeholder="Einsparung €/Jahr" min="0" step="any">
+        <input type="number" id="m-invest" class="ai-input" placeholder="Investition €" min="0" step="any">
+        <input type="date" id="m-termin" class="ai-input">
+        <input type="text" id="m-standort" class="ai-input" placeholder="Standort (optional)…">
+      </div>
+      <div><button type="button" class="btn" onclick="addMassnahme()">Maßnahme hinzufügen</button></div>
+      <div id="m-status" style="font-size:13px; min-height:1.2em; margin-top:0.5rem;"></div>
+      <div id="m-list" style="margin-top:0.5rem;"></div>
     </div>
   </div>
 
@@ -2667,12 +2696,13 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   }
 
   function showTab(name, btn) {
-    ['eingabe','benchmark','empfehlungen','verlauf','aufgaben','lernkarten','produkte','empfdb'].forEach(t => {
+    ['eingabe','benchmark','empfehlungen','verlauf','massnahmen','aufgaben','lernkarten','produkte','empfdb'].forEach(t => {
       document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
     });
     document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
     if (btn) btn.classList.add('active');
     if (name === 'verlauf') renderSnapshots();
+    if (name === 'massnahmen') renderMassnahmen();
     if (name === 'aufgaben') renderTasks();
     if (name === 'lernkarten') renderLernkarten();
     if (name === 'produkte') renderProdukte();
@@ -2983,6 +3013,131 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
       statusEl.style.color = '#c0392b';
       statusEl.textContent = 'Fehler beim Speichern: ' + err.message;
     }
+  }
+
+  // --- Maßnahmen (DB-gestützt via /api/massnahmen, ROI + Status-Pipeline) ---
+  const MASSNAHME_STATUS = ['idee','geplant','in_umsetzung','umgesetzt','verifiziert'];
+  const MASSNAHME_STATUS_LABEL = { idee:'Idee', geplant:'Geplant', in_umsetzung:'In Umsetzung', umgesetzt:'Umgesetzt', verifiziert:'Verifiziert' };
+
+  function amortisationLabel(einsparung, invest) {
+    const e = Number(einsparung), i = Number(invest);
+    if (!Number.isFinite(e) || !Number.isFinite(i) || e <= 0 || i <= 0) return '—';
+    const jahre = i / e;
+    if (jahre < 1) return '~' + (jahre * 12).toFixed(1).replace('.', ',') + ' Monate';
+    return '~' + jahre.toFixed(1).replace('.', ',') + ' Jahre';
+  }
+  function eurLabel(v) {
+    const n = Number(v);
+    return Number.isFinite(n) && v !== null && v !== '' ? n.toLocaleString('de-DE') + ' €' : '—';
+  }
+
+  async function renderMassnahmen() {
+    const listEl = document.getElementById('m-list');
+    const statsEl = document.getElementById('m-stats');
+    const statusEl = document.getElementById('m-status');
+    statusEl.textContent = ''; statusEl.style.color = '';
+    listEl.textContent = 'Lädt…';
+    try {
+      const res = await fetch('/api/massnahmen?user_id=' + encodeURIComponent(TASK_USER_ID));
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const items = (data.massnahmen || []).slice();
+
+      // Kennzahlen
+      const sum = (arr, f) => arr.reduce((a, x) => a + (Number(x[f]) || 0), 0);
+      const gesEin = sum(items, 'einsparung_eur');
+      const gesInv = sum(items, 'invest_eur');
+      const umgesetzt = items.filter(m => m.status === 'umgesetzt' || m.status === 'verifiziert');
+      const umEin = sum(umgesetzt, 'einsparung_eur');
+      statsEl.textContent = '';
+      const stat = (label, val) => {
+        const d = document.createElement('div');
+        const b = document.createElement('strong'); b.textContent = val;
+        const s = document.createElement('div'); s.style.cssText = 'color:var(--gray-400);'; s.textContent = label;
+        d.appendChild(b); d.appendChild(s); return d;
+      };
+      statsEl.appendChild(stat('Maßnahmen', String(items.length)));
+      statsEl.appendChild(stat('Einsparung/Jahr', eurLabel(gesEin)));
+      statsEl.appendChild(stat('Investition', eurLabel(gesInv)));
+      statsEl.appendChild(stat('Ø Amortisation', amortisationLabel(gesEin, gesInv)));
+      statsEl.appendChild(stat('umgesetzt €/Jahr', eurLabel(umEin)));
+
+      // Sortierung: beste Amortisation zuerst, ohne Wert ans Ende
+      const amort = (m) => { const e = Number(m.einsparung_eur), i = Number(m.invest_eur); return (e > 0 && i > 0) ? i / e : Infinity; };
+      items.sort((a, b) => amort(a) - amort(b));
+
+      listEl.textContent = '';
+      if (!items.length) { listEl.textContent = 'Noch keine Maßnahmen.'; return; }
+      for (const m of items) {
+        const row = document.createElement('div');
+        row.style.cssText = 'padding:0.6rem 0.25rem; border-bottom:1px solid var(--border);';
+        const head = document.createElement('div');
+        head.style.cssText = 'display:flex; justify-content:space-between; gap:1rem; align-items:center;';
+        const title = document.createElement('strong'); title.textContent = m.title; // textContent => XSS-sicher
+        const sel = document.createElement('select');
+        sel.className = 'ai-input'; sel.style.cssText = 'width:auto; padding:0.2rem 0.4rem;';
+        for (const s of MASSNAHME_STATUS) {
+          const o = document.createElement('option'); o.value = s; o.textContent = MASSNAHME_STATUS_LABEL[s];
+          if (s === m.status) o.selected = true; sel.appendChild(o);
+        }
+        sel.onchange = () => updateMassnahmeStatus(m.id, sel.value);
+        head.appendChild(title); head.appendChild(sel);
+        row.appendChild(head);
+        const meta = document.createElement('div');
+        meta.style.cssText = 'font-size:13px; color:var(--gray-600); margin-top:0.25rem; display:flex; flex-wrap:wrap; gap:0.75rem;';
+        const parts = [];
+        if (m.ressource) parts.push(m.ressource);
+        parts.push('Einsparung: ' + eurLabel(m.einsparung_eur) + '/J');
+        parts.push('Invest: ' + eurLabel(m.invest_eur));
+        parts.push('Amortisation: ' + amortisationLabel(m.einsparung_eur, m.invest_eur));
+        if (m.verantwortlich) parts.push('👤 ' + m.verantwortlich);
+        if (m.termin) parts.push('📅 ' + m.termin);
+        if (m.standort) parts.push('📍 ' + m.standort);
+        for (const p of parts) { const s = document.createElement('span'); s.textContent = p; meta.appendChild(s); }
+        row.appendChild(meta);
+        listEl.appendChild(row);
+      }
+    } catch (err) {
+      listEl.textContent = '';
+      statusEl.style.color = '#c0392b';
+      statusEl.textContent = 'Fehler beim Laden: ' + err.message;
+    }
+  }
+
+  async function addMassnahme() {
+    const statusEl = document.getElementById('m-status');
+    const title = (document.getElementById('m-title').value || '').trim();
+    if (!title) { statusEl.style.color = '#c0392b'; statusEl.textContent = 'Bitte einen Titel eingeben.'; return; }
+    const payload = {
+      title,
+      ressource: document.getElementById('m-ressource').value || undefined,
+      einsparung_eur: document.getElementById('m-einsparung').value || undefined,
+      invest_eur: document.getElementById('m-invest').value || undefined,
+      verantwortlich: (document.getElementById('m-verantwortlich').value || '').trim() || undefined,
+      termin: document.getElementById('m-termin').value || undefined,
+      standort: (document.getElementById('m-standort').value || '').trim() || undefined,
+      user_id: TASK_USER_ID
+    };
+    statusEl.style.color = ''; statusEl.textContent = 'Speichert…';
+    try {
+      const res = await fetch('/api/massnahmen', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      for (const id of ['m-title','m-einsparung','m-invest','m-verantwortlich','m-termin','m-standort']) document.getElementById(id).value = '';
+      document.getElementById('m-ressource').value = '';
+      statusEl.textContent = '';
+      await renderMassnahmen();
+    } catch (err) { statusEl.style.color = '#c0392b'; statusEl.textContent = 'Fehler beim Speichern: ' + err.message; }
+  }
+
+  async function updateMassnahmeStatus(id, status) {
+    const statusEl = document.getElementById('m-status');
+    statusEl.style.color = ''; statusEl.textContent = 'Aktualisiere…';
+    try {
+      const res = await fetch('/api/massnahmen', { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id, status }) });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      statusEl.textContent = '';
+      await renderMassnahmen();
+    } catch (err) { statusEl.style.color = '#c0392b'; statusEl.textContent = 'Fehler beim Aktualisieren: ' + err.message; }
   }
 
   // --- Verlauf / Snapshots ---
