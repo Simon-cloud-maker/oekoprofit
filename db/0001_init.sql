@@ -1,4 +1,4 @@
--- 0001_init.sql — Initiales Schema fuer oekoprofit-ki
+22-- 0001_init.sql — Initiales Schema fuer oekoprofit-ki
 -- Ziel: Neon Postgres (Vercel Marketplace)
 -- Anwenden: Neon SQL Editor einfuegen ODER  psql "$DATABASE_URL" -f db/0001_init.sql
 --
