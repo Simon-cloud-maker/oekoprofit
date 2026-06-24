@@ -33,6 +33,15 @@ _Zuletzt aktualisiert: 2026-06-18_
 
 `main` — Dark-Mode-Korrekturen und MkDocs (Lessons Learned) auf main.
 
+## Persistenz-Entscheidung (2026-06-24)
+
+- **Richtung:** Falls DB nötig → **SQL/Postgres** (Neon via Vercel Marketplace). Begründung: kleine, tabellarisch modellierbare Datensätze (`title, status, user_id, created_at`), Konsistenz wichtig. NoSQL-Argumente treffen nicht zu.
+- **DB bewusst aufgeschoben:** Prototyp hat keine Persistenz; `localStorage` reicht aktuell. DB erst, wenn einer dieser Auslöser eintritt: (1) Stand geräteübergreifend wiederfinden, (2) mehrere getrennte Nutzer, (3) serverseitige Auswertung.
+- **Persistieren (späteres Schema):** Task, Lernkarte, Produkt, Empfehlung (je `id, title, status, user_id, created_at`). `user_id` = FK-Referenz, keine PII.
+- **Nicht persistieren:** AI-Chatverlauf, Prompt-Historie, Fehlerlogs, Session, Cache.
+- **Benchmarks:** bleiben versionierte Seed-Daten in `benchmarks.js` (keine DB).
+- **`@vercel/kv`:** abgekündigt (Vercel KV gibt es nicht mehr; Ersatz Upstash Redis). Nur opt-in für Prompt-Logging (`PROMPT_LOG_DEST=kv`); nicht entfernt, aber als VERALTET markiert in `.env.example`, `api/ki-consulting.js`, `api/prompt-logs.js`.
+
 ## Nächster Schritt
 
 Dark Mode auf Vercel prüfen; optional `known-issues.md` mit Reinigungsmittel-Stand abgleichen.

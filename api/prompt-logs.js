@@ -31,6 +31,8 @@ module.exports = async function handler(req, res) {
     }
 
     // Lazy-load so deploys without KV enabled can still build (endpoint will fail at runtime).
+    // VERALTET: @vercel/kv zielt auf das abgekuendigte Vercel-KV-Produkt (Ersatz:
+    // Upstash Redis via Marketplace). Dieser Endpoint funktioniert nur mit Legacy-KV.
     // eslint-disable-next-line global-require, import/no-extraneous-dependencies
     const { kv } = require('@vercel/kv');
 

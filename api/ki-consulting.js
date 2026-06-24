@@ -142,6 +142,9 @@ async function appendNdjsonLine(filePath, obj) {
 
 async function persistPromptLogToKv(event) {
   // Lazy-load so local usage without deps still works unless enabled.
+  // VERALTET: @vercel/kv zielt auf das abgekuendigte Vercel-KV-Produkt. Vercel bietet
+  // KV nicht mehr an (Ersatz: Upstash Redis via Marketplace). Dieser kv-Modus ist opt-in
+  // (PROMPT_LOG_DEST=kv) und laeuft nur mit einem Legacy-/alternativen Redis-Store.
   // eslint-disable-next-line global-require, import/no-extraneous-dependencies
   const { kv } = require('@vercel/kv');
 
