@@ -20,6 +20,22 @@ _Die Bezeichnungen „Task 1"–„Task 8" wurden nur lokal zur Orientierung ver
 
 ---
 
+## [2026-06-24] feat(ui): Lernkarten-Tab an /api/lernkarten anbinden
+
+**Branch:** `chore/persistence-design-and-kv-deprecation`
+
+**Ziel:** Lernkarten serverseitig in Neon Postgres speichern (analog Aufgaben-Tab).
+
+**Aktionen:**
+- `api/lernkarten.js`: GET/POST für Tabelle `lernkarte` (title, content, status, user_id).
+- `index.html`: Tab „Lernkarten“, `renderLernkarten()` / `addLernkarte()` an `/api/lernkarten`.
+
+**Ergebnis:** Lernkarten geräteübergreifend über `DATABASE_URL` (Vercel/Neon).
+
+**Nächster Schritt:** Auf Vercel Preview mit gesetztem `DATABASE_URL` testen.
+
+---
+
 ## [2026-06-18] style(ui): Dark-Mode-Korrekturen für Buttons und Tabellen
 
 **Ziel:** Im Dark Mode lesbare und konsistente Hover-/Aktivzustände für Snapshots, Upload-Buttons, KI-Button, Tabs und Vergleichstabelle.
