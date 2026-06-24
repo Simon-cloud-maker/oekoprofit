@@ -7,7 +7,8 @@
 -- Bewusst NICHT persistiert: AI-Chatverlauf, Prompt-Historie, Logs, Session, Cache.
 -- Benchmarks bleiben versionierte Seed-Daten in benchmarks.js (keine DB).
 
-create extension if not exists "pgcrypto"; -- liefert gen_random_uuid()
+-- pgcrypto liefert gen_random_uuid()
+create extension if not exists "pgcrypto";
 
 create table if not exists task (
   id          uuid        primary key default gen_random_uuid(),

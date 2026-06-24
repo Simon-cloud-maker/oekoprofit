@@ -36,7 +36,7 @@ _Zuletzt aktualisiert: 2026-06-18_
 ## Persistenz-Entscheidung (2026-06-24)
 
 - **Richtung:** Falls DB nötig → **SQL/Postgres** (Neon via Vercel Marketplace). Begründung: kleine, tabellarisch modellierbare Datensätze (`title, status, user_id, created_at`), Konsistenz wichtig. NoSQL-Argumente treffen nicht zu.
-- **DB bewusst aufgeschoben:** Prototyp hat keine Persistenz; `localStorage` reicht aktuell. DB erst, wenn einer dieser Auslöser eintritt: (1) Stand geräteübergreifend wiederfinden, (2) mehrere getrennte Nutzer, (3) serverseitige Auswertung.
+- **DB eingerichtet (2026-06-24):** Neon Postgres via Vercel Marketplace provisioniert (Store `neon-byzantium-ribbon`, mit `oekoprofit-ki` verbunden). Env-Vars (u. a. `DATABASE_URL`) liegen in `.env.local` (gitignored). Schema eingespielt via `node --env-file=.env.local scripts/db-migrate.js` → Tabellen `task, lernkarte, produkt, empfehlung` bestätigt. Treiber: `@neondatabase/serverless`.
 - **Persistieren (späteres Schema):** Task, Lernkarte, Produkt, Empfehlung (je `id, title, status, user_id, created_at`). `user_id` = FK-Referenz, keine PII.
 - **Nicht persistieren:** AI-Chatverlauf, Prompt-Historie, Fehlerlogs, Session, Cache.
 - **Benchmarks:** bleiben versionierte Seed-Daten in `benchmarks.js` (keine DB).

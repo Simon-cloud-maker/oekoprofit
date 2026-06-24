@@ -11,7 +11,7 @@
     "docs:build": "mkdocs build"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@vercel/kv": "^3.0.0"
   }
 }
-
