@@ -4,6 +4,9 @@
 
 node_modules/
 
+# Lokale Claude-Code-Harness-Config
+.claude/
+
 # MkDocs build output
 site/
 
