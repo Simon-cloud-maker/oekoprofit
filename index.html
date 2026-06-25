@@ -1037,6 +1037,7 @@
     <button class="tab" onclick="showTab('empfehlungen', this)">KI-Empfehlungen</button>
     <button class="tab" onclick="showTab('verlauf', this)">Verlauf</button>
     <button class="tab" onclick="showTab('massnahmen', this)">Maßnahmen</button>
+    <button class="tab" onclick="showTab('standorte', this)">Standorte</button>
   </div>
 
   <!-- TAB: Eingabe -->
@@ -1342,6 +1343,23 @@
       <div><button type="button" class="btn" onclick="addMassnahme()">Maßnahme hinzufügen</button></div>
       <div id="m-status" style="font-size:13px; min-height:1.2em; margin-top:0.5rem;"></div>
       <div id="m-list" style="margin-top:0.5rem;"></div>
+    </div>
+  </div>
+
+  <!-- TAB: Standorte (Multi-Standort-Benchmarking, Neon via /api/standorte) -->
+  <div id="tab-standorte" style="display:none;">
+    <div class="card">
+      <div class="label">Standorte – Vergleich</div>
+      <p style="font-size:13px; color:var(--gray-400); margin-top:-0.25rem;">
+        Standorte legst du im Tab „Dateneingabe" über „🏭 Als Standort speichern" an.
+        Vergleich je Branche gegen den Branchen-Median; bester Wert grün, schlechtester rot.
+      </p>
+      <div style="margin:0.75rem 0;">
+        <label for="st-branche" style="font-size:13px;">Branche</label>
+        <select id="st-branche" class="ai-input" onchange="renderStandorte()"></select>
+      </div>
+      <div id="st-status" style="font-size:13px; min-height:1.2em;"></div>
+      <div id="st-table" style="overflow-x:auto;"></div>
     </div>
   </div>
 
@@ -2653,13 +2671,14 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   }
 
   function showTab(name, btn) {
-    ['eingabe','benchmark','empfehlungen','verlauf','massnahmen'].forEach(t => {
+    ['eingabe','benchmark','empfehlungen','verlauf','massnahmen','standorte'].forEach(t => {
       document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
     });
     document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
     if (btn) btn.classList.add('active');
     if (name === 'verlauf') renderSnapshots();
     if (name === 'massnahmen') renderMassnahmen();
+    if (name === 'standorte') renderStandorte();
   }
 
   // --- Gemeinsame User-Kennung (Platzhalter bis echte Anmeldung) ---
@@ -2926,6 +2945,155 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
       statusEl.textContent = '';
       await renderMassnahmen();
     } catch (err) { statusEl.style.color = '#c0392b'; statusEl.textContent = 'Fehler beim Aktualisieren: ' + err.message; }
+  }
+
+  // --- Standorte (Multi-Standort-Benchmarking via /api/standorte) ---
+  const STANDORT_BRANCHE_LABEL = { gastro: 'Gastronomie', baeckerei: 'Bäckerei' };
+  const STANDORT_KPIS = [
+    { key: 'strom', label: 'Strom/m²' },
+    { key: 'gas', label: 'Gas/m²' },
+    { key: 'wasser', label: 'Wasser/MA' },
+    { key: 'abfall', label: 'Abfall/MA' },
+    { key: 'reinigungsmittel', label: 'Reinigung/MA' },
+  ];
+
+  function benchmarkMedian(branche, key) {
+    const bk = BRANCH_BENCHMARK_MAP[branche];
+    const k = OEKOPROFIT_BENCHMARKS.branchen[bk] && OEKOPROFIT_BENCHMARKS.branchen[bk].kennzahlen;
+    if (!k) return null;
+    if (key === 'strom') return k.strom_kwh_per_m2 ? k.strom_kwh_per_m2.median : null;
+    if (key === 'gas') { const g = k.heizwaerme_kwh_per_m2 || k.waerme_kwh_per_m2; return g ? g.median : null; }
+    if (key === 'wasser') return k.wasser_liter_per_ma_tag ? Math.round((k.wasser_liter_per_ma_tag.median * 250) / 1000) : null;
+    if (key === 'abfall') return k.abfall_kg_per_ma ? k.abfall_kg_per_ma.median : null;
+    if (key === 'reinigungsmittel') return k.reinigungsmittel_l_per_ma ? k.reinigungsmittel_l_per_ma.median : null;
+    return null;
+  }
+
+  async function renderStandorte() {
+    const tableEl = document.getElementById('st-table');
+    const statusEl = document.getElementById('st-status');
+    const sel = document.getElementById('st-branche');
+    statusEl.textContent = ''; statusEl.style.color = '';
+    tableEl.textContent = 'Lädt…';
+    let all;
+    try {
+      const res = await fetch('/api/standorte?user_id=' + encodeURIComponent(TASK_USER_ID));
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      all = (await res.json()).standorte || [];
+    } catch (err) {
+      tableEl.textContent = '';
+      statusEl.style.color = '#c0392b';
+      statusEl.textContent = 'Fehler beim Laden: ' + err.message;
+      return;
+    }
+    if (!all.length) {
+      sel.textContent = '';
+      tableEl.textContent = 'Noch keine Standorte — im Tab „Dateneingabe" Werte erfassen und „🏭 Als Standort speichern".';
+      return;
+    }
+    // Branchen-Filter füllen (Auswahl bewahren, Default = häufigste Branche)
+    const counts = {};
+    all.forEach((s) => { counts[s.branche] = (counts[s.branche] || 0) + 1; });
+    const branchen = Object.keys(counts);
+    const prev = sel.value;
+    sel.textContent = '';
+    for (const b of branchen) {
+      const o = document.createElement('option');
+      o.value = b;
+      o.textContent = (STANDORT_BRANCHE_LABEL[b] || b) + ' (' + counts[b] + ')';
+      sel.appendChild(o);
+    }
+    const branche = branchen.includes(prev) ? prev : branchen.slice().sort((a, b) => counts[b] - counts[a])[0];
+    sel.value = branche;
+
+    const items = all.filter((s) => s.branche === branche);
+    const numVals = (key) => items.map((s) => Number(s[key])).filter(Number.isFinite);
+    const minOf = {}, maxOf = {};
+    for (const { key } of STANDORT_KPIS) {
+      const v = numVals(key);
+      minOf[key] = v.length ? Math.min(...v) : null;
+      maxOf[key] = v.length ? Math.max(...v) : null;
+    }
+    const scores = numVals('score');
+    const scoreMin = scores.length ? Math.min(...scores) : null;
+    const scoreMax = scores.length ? Math.max(...scores) : null;
+    const fmt = (v) => (v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v))) ? Number(v).toLocaleString('de-DE') : '—';
+    const markBest = (td) => { td.style.color = '#1f9d55'; td.style.fontWeight = '600'; };
+    const markWorst = (td) => { td.style.color = '#c0392b'; td.style.fontWeight = '600'; };
+
+    const tbl = document.createElement('table');
+    tbl.className = 'cmp-table';
+    tbl.style.width = '100%';
+    const thead = document.createElement('thead');
+    const htr = document.createElement('tr');
+    ['Standort', ...STANDORT_KPIS.map((k) => k.label), 'Score', ''].forEach((h) => {
+      const th = document.createElement('th'); th.textContent = h; htr.appendChild(th);
+    });
+    thead.appendChild(htr); tbl.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    for (const s of items) {
+      const tr = document.createElement('tr');
+      const tdName = document.createElement('td'); tdName.textContent = s.name; tr.appendChild(tdName);
+      for (const { key } of STANDORT_KPIS) {
+        const td = document.createElement('td');
+        td.textContent = fmt(s[key]);
+        const v = Number(s[key]);
+        if (items.length >= 2 && Number.isFinite(v)) {
+          if (v === minOf[key]) markBest(td);
+          else if (v === maxOf[key]) markWorst(td);
+        }
+        tr.appendChild(td);
+      }
+      const tdScore = document.createElement('td');
+      tdScore.textContent = fmt(s.score);
+      const sc = Number(s.score);
+      if (items.length >= 2 && Number.isFinite(sc)) {
+        if (sc === scoreMax) markBest(tdScore);
+        else if (sc === scoreMin) markWorst(tdScore);
+      }
+      tr.appendChild(tdScore);
+      const tdDel = document.createElement('td');
+      const del = document.createElement('button');
+      del.type = 'button'; del.className = 'snap-btn'; del.textContent = '🗑';
+      del.title = 'Standort löschen';
+      del.onclick = () => deleteStandort(s.id, s.name);
+      tdDel.appendChild(del); tr.appendChild(tdDel);
+      tbody.appendChild(tr);
+    }
+    // Median-Zeile
+    const medTr = document.createElement('tr'); medTr.className = 'score-row';
+    const medName = document.createElement('td'); medName.textContent = 'Branchen-Median'; medName.style.fontWeight = '600';
+    medTr.appendChild(medName);
+    for (const { key } of STANDORT_KPIS) {
+      const td = document.createElement('td');
+      const m = benchmarkMedian(branche, key);
+      td.textContent = m == null ? '—' : Number(m).toLocaleString('de-DE');
+      td.style.fontStyle = 'italic';
+      medTr.appendChild(td);
+    }
+    medTr.appendChild(document.createElement('td'));
+    medTr.appendChild(document.createElement('td'));
+    tbody.appendChild(medTr);
+
+    tbl.appendChild(tbody);
+    tableEl.textContent = '';
+    tableEl.appendChild(tbl);
+  }
+
+  async function deleteStandort(id, name) {
+    if (!confirm('Standort „' + name + '" löschen?')) return;
+    const statusEl = document.getElementById('st-status');
+    statusEl.style.color = ''; statusEl.textContent = 'Lösche…';
+    try {
+      const res = await fetch('/api/standorte?id=' + encodeURIComponent(id), { method: 'DELETE' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      statusEl.textContent = '';
+      await renderStandorte();
+    } catch (err) {
+      statusEl.style.color = '#c0392b';
+      statusEl.textContent = 'Fehler beim Löschen: ' + err.message;
+    }
   }
 
   // --- Verlauf / Snapshots ---
