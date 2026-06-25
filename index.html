@@ -223,8 +223,18 @@
       background: var(--gray-50);
       border-color: var(--green-400);
     }
-    [data-theme="dark"] .upload-row label.btn:hover {
+    [data-theme="dark"] .upload-row label.btn:hover,
+    [data-theme="dark"] .upload-row label.btn-secondary:hover {
+      background: var(--gray-50);
+    }
+    [data-theme="dark"] .btn-primary,
+    [data-theme="dark"] button.btn-primary {
+      color: #fff;
+    }
+    [data-theme="dark"] .btn-primary:hover,
+    [data-theme="dark"] button.btn-primary:hover {
       background: var(--green-600);
+      border-color: var(--green-600);
       color: var(--gray-900);
     }
     [data-theme="dark"] .snapshot-row button.btn-save:hover {
@@ -316,6 +326,239 @@
       background: var(--gray-900);
       color: #fff;
       border-color: var(--gray-900);
+    }
+
+    /* Workflow navigation */
+    .nav-workflow { margin-bottom: 1.25rem; }
+    .tab-group { margin-bottom: 0.65rem; }
+    .tab-group:last-child { margin-bottom: 0; }
+    .tab-group-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gray-400);
+      margin-bottom: 6px;
+      padding-left: 2px;
+    }
+    .tab-group-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* Section hierarchy */
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .section-head { margin-bottom: 1rem; }
+    .section-head h2 {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--gray-900);
+    }
+    .section-sub {
+      font-size: 13px;
+      color: var(--gray-400);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+    .tab-intro {
+      font-size: 13px;
+      color: var(--gray-400);
+      margin: -0.25rem 0 1rem;
+      line-height: 1.55;
+    }
+    .inline-help {
+      font-size: 12px;
+      color: var(--gray-400);
+      margin-top: 0.35rem;
+      line-height: 1.45;
+    }
+
+    /* Summary strip (Dateneingabe) */
+    .summary-strip {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1rem 1.25rem;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .summary-score {
+      text-align: center;
+      min-width: 72px;
+      padding-right: 1rem;
+      border-right: 1px solid var(--border);
+    }
+    .summary-score-num {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .summary-score-lbl {
+      font-size: 11px;
+      color: var(--gray-400);
+      margin-top: 4px;
+    }
+    .summary-body { min-width: 0; }
+    .summary-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .summary-metrics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      font-size: 12px;
+      color: var(--gray-600);
+    }
+    .summary-metrics strong { color: var(--gray-900); font-weight: 600; }
+    .summary-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .summary-desc { font-size: 12px; color: var(--gray-400); flex: 1; min-width: 140px; }
+    .summary-link {
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--green-600);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+      white-space: nowrap;
+    }
+    .summary-link:hover { color: var(--green-400); }
+
+    /* Unified buttons */
+    button.btn, .btn {
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 7px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--gray-900);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    button.btn:hover, .btn:hover { background: var(--gray-50); }
+    .btn-primary, button.btn-primary, label.btn-primary {
+      background: var(--green-400);
+      border-color: var(--green-400);
+      color: #fff;
+    }
+    .btn-primary:hover, button.btn-primary:hover, label.btn-primary:hover {
+      background: var(--green-600);
+      border-color: var(--green-600);
+    }
+    .btn-secondary, button.btn-secondary {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--gray-600);
+    }
+    .btn-secondary:hover, button.btn-secondary:hover { background: var(--gray-50); }
+    .btn-ghost, button.btn-ghost {
+      background: transparent;
+      border-color: transparent;
+      color: var(--gray-600);
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .btn-ghost:hover, button.btn-ghost:hover {
+      background: transparent;
+      color: var(--green-600);
+    }
+
+    /* Save blocks */
+    .save-block {
+      margin-top: 0.85rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+    .save-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+    .save-block-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-600);
+      margin-bottom: 0.5rem;
+    }
+
+    /* List rows */
+    .list-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.5rem 0.15rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .list-row:last-child { border-bottom: none; }
+    .list-row-info { min-width: 0; }
+    .list-row-title { font-weight: 600; font-size: 14px; }
+    .list-row-meta { font-size: 12px; color: var(--gray-600); margin-top: 2px; }
+
+    /* KPI strip */
+    .kpi-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem 1.5rem;
+      font-size: 13px;
+      margin-bottom: 0.75rem;
+    }
+    .kpi-strip strong { display: block; font-size: 15px; font-weight: 600; }
+    .kpi-strip span { color: var(--gray-400); font-size: 12px; }
+
+    .massnahmen-section { margin-bottom: 1.25rem; }
+    .massnahmen-section:last-child { margin-bottom: 0; }
+
+    .verlauf-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--gray-400);
+      margin: 0 0 0.65rem 2px;
+    }
+
+    .bench-teaser-link {
+      margin-top: 10px;
+      font-size: 12px;
+    }
+    .bench-teaser-link button {
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--green-600);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 540px) {
+      .summary-strip { grid-template-columns: 1fr; }
+      .summary-score {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding-right: 0;
+        padding-bottom: 0.75rem;
+      }
     }
 
     /* Cards */
@@ -483,7 +726,8 @@
       animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .doc-upload-row label.btn {
+    .doc-upload-row label.btn,
+    .doc-upload-row label.btn-primary {
       display: inline-block;
       padding: 7px 14px;
       background: var(--green-400);
@@ -493,8 +737,10 @@
       font-weight: 500;
       cursor: pointer;
       white-space: nowrap;
+      border: 1px solid var(--green-400);
     }
-    .doc-upload-row label.btn:hover { background: var(--green-600); }
+    .doc-upload-row label.btn:hover,
+    .doc-upload-row label.btn-primary:hover { background: var(--green-600); border-color: var(--green-600); }
     .doc-upload-status { font-size: 0.8rem; color: var(--gray-600); font-family: 'DM Mono', monospace; }
     .doc-upload-hint { font-size: 12px; color: var(--gray-600); white-space: nowrap; }
     .autofill-badge {
@@ -779,18 +1025,21 @@
       margin-bottom: 10px;
       flex-wrap: wrap;
     }
-    .upload-row label.btn {
+    .upload-row label.btn,
+    .upload-row label.btn-secondary {
       display: inline-block;
       padding: 7px 14px;
-      background: var(--green-400);
-      color: #fff;
+      background: var(--surface);
+      color: var(--gray-900);
+      border: 1px solid var(--border);
       border-radius: 6px;
       font-size: 0.85rem;
       font-weight: 500;
       cursor: pointer;
       white-space: nowrap;
     }
-    .upload-row label.btn:hover { background: var(--green-600); }
+    .upload-row label.btn:hover,
+    .upload-row label.btn-secondary:hover { background: var(--gray-50); }
     .upload-row input[type=file] { display: none; }
     .upload-status {
       font-size: 0.8rem;
@@ -1031,33 +1280,48 @@
     </div>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="showTab('eingabe', this)">Dateneingabe</button>
-    <button class="tab" onclick="showTab('benchmark', this)">Benchmark-Vergleich</button>
-    <button class="tab" onclick="showTab('empfehlungen', this)">KI-Empfehlungen</button>
-    <button class="tab" onclick="showTab('verlauf', this)">Verlauf</button>
-    <button class="tab" onclick="showTab('massnahmen', this)">Maßnahmen</button>
-    <button class="tab" onclick="showTab('standorte', this)">Standorte</button>
-    <button class="tab" onclick="showTab('monitoring', this)">Monitoring</button>
-  </div>
+  <nav class="nav-workflow" aria-label="Dashboard-Bereiche">
+    <div class="tab-group">
+      <div class="tab-group-title">Analyse</div>
+      <div class="tab-group-row">
+        <button type="button" class="tab active" data-tab="eingabe" onclick="showTab('eingabe', this)">Dateneingabe</button>
+        <button type="button" class="tab" data-tab="benchmark" onclick="showTab('benchmark', this)">Benchmark</button>
+        <button type="button" class="tab" data-tab="empfehlungen" onclick="showTab('empfehlungen', this)">KI-Empfehlungen</button>
+      </div>
+    </div>
+    <div class="tab-group">
+      <div class="tab-group-title">Betrieb</div>
+      <div class="tab-group-row">
+        <button type="button" class="tab" data-tab="massnahmen" onclick="showTab('massnahmen', this)">Maßnahmen</button>
+        <button type="button" class="tab" data-tab="standorte" onclick="showTab('standorte', this)">Standorte</button>
+        <button type="button" class="tab" data-tab="monitoring" onclick="showTab('monitoring', this)">Monitoring</button>
+        <button type="button" class="tab" data-tab="verlauf" onclick="showTab('verlauf', this)">Verlauf</button>
+      </div>
+    </div>
+  </nav>
 
   <!-- TAB: Eingabe -->
   <div id="tab-eingabe">
-    <div class="card">
-      <!-- Hidden sliders: internal state for calcScore / Excel-Import / Snapshot-Restore -->
-      <input type="range" min="10"  max="500"  value="180" id="strom"     step="1" style="display:none" oninput="update()">
-      <input type="range" min="0"   max="600"  value="95"  id="gas"       step="1" style="display:none" oninput="update()">
-      <input type="range" min="1"   max="200"  value="28"  id="wasser"    step="1" style="display:none" oninput="update()">
-      <input type="range" min="10"  max="1000" value="120" id="abfall"    step="1" style="display:none" oninput="update()">
-      <input type="range" min="0"   max="200"  value="30"  id="reinigungsmittel" step="1" style="display:none" oninput="update()">
-      <span id="strom-v" style="display:none">180</span>
-      <span id="gas-v"   style="display:none">95</span>
-      <span id="wasser-v"   style="display:none">28</span>
-      <span id="abfall-v"   style="display:none">120</span>
-      <span id="reinigungsmittel-v" style="display:none">30</span>
-      <p id="slider-cap-hint" class="slider-cap-hint" style="display:none;"></p>
+    <p class="tab-intro">Schritt 1: Betriebsdaten erfassen oder importieren. Schritt 2: Ergebnis prüfen. Schritt 3: Standort, Messung oder Snapshot speichern.</p>
 
-      <!-- Betriebsprofil -->
+    <!-- Hidden sliders: internal state for calcScore / Excel-Import / Snapshot-Restore -->
+    <input type="range" min="10"  max="500"  value="180" id="strom"     step="1" style="display:none" oninput="update()">
+    <input type="range" min="0"   max="600"  value="95"  id="gas"       step="1" style="display:none" oninput="update()">
+    <input type="range" min="1"   max="200"  value="28"  id="wasser"    step="1" style="display:none" oninput="update()">
+    <input type="range" min="10"  max="1000" value="120" id="abfall"    step="1" style="display:none" oninput="update()">
+    <input type="range" min="0"   max="200"  value="30"  id="reinigungsmittel" step="1" style="display:none" oninput="update()">
+    <span id="strom-v" style="display:none">180</span>
+    <span id="gas-v"   style="display:none">95</span>
+    <span id="wasser-v"   style="display:none">28</span>
+    <span id="abfall-v"   style="display:none">120</span>
+    <span id="reinigungsmittel-v" style="display:none">30</span>
+    <p id="slider-cap-hint" class="slider-cap-hint" style="display:none;"></p>
+
+    <section class="section-card" aria-labelledby="sec-erfassen">
+      <div class="section-head">
+        <h2 id="sec-erfassen">Erfassen</h2>
+        <p class="section-sub">Betriebsprofil und Jahresverbrauch — Grundlage für Score, Benchmark und Empfehlungen.</p>
+      </div>
       <div class="label">Betriebsprofil</div>
       <div class="profil-grid">
         <div class="profil-field">
@@ -1068,7 +1332,6 @@
           <label>Mitarbeiter (Vollzeit)</label>
           <input type="number" id="profil-ma" min="1" max="200" placeholder="z. B. 5" oninput="computeFromJahreswerte()">
         </div>
-        <!-- Gasthaus-spezifisch -->
         <div class="profil-field branch-field-gastro">
           <label>Sitzplätze</label>
           <input type="number" id="profil-sitzplaetze" min="1" max="500" placeholder="z. B. 60">
@@ -1085,7 +1348,6 @@
             <option value="nein">Nein (Ausschank / Café)</option>
           </select>
         </div>
-        <!-- Bäckerei-spezifisch -->
         <div class="profil-field branch-field-baeckerei">
           <label>Anzahl Backöfen</label>
           <input type="number" id="profil-oefen" min="1" max="20" placeholder="z. B. 3">
@@ -1099,8 +1361,6 @@
           </select>
         </div>
       </div>
-
-      <!-- Jahreswerte -->
       <div class="section-divider">Jahresverbrauch</div>
       <div class="jw-row">
         <label>Stromverbrauch</label>
@@ -1128,59 +1388,112 @@
         <span class="jw-unit">L / Jahr</span>
       </div>
       <p id="profil-hint" class="profil-hint" style="display:none;"></p>
+    </section>
 
-      <!-- Daten importieren -->
-      <div class="section-divider">Daten importieren</div>
-      <!-- Rechnungs-Upload via Gemini -->
-      <div class="gemini-key-row">
-        <label for="gemini-api-key">Gemini API-Key</label>
-        <input type="password" id="gemini-api-key" placeholder="AIza… (kostenlos: aistudio.google.com)" autocomplete="off">
+    <div class="summary-strip" id="eingabe-summary" aria-live="polite">
+      <div class="summary-score">
+        <div class="summary-score-num" id="eingabe-score-num">—</div>
+        <div class="summary-score-lbl">Öko-Score</div>
+      </div>
+      <div class="summary-body">
+        <div class="summary-title" id="eingabe-score-title">Noch keine vollständige Datenbasis</div>
+        <div class="summary-metrics">
+          <span>CO₂: <strong id="co2-num">—</strong> kg/m²</span>
+          <span>Energie: <strong id="energy-num">—</strong> kWh/m²</span>
+          <span>Wasser: <strong id="wasser-tag-num">—</strong> L/MA·Tag</span>
+        </div>
+        <div class="metric-sub" id="co2-sub" style="display:none;"></div>
+        <div class="metric-sub" id="energy-sub" style="display:none;"></div>
+        <div class="summary-foot">
+          <span class="summary-desc" id="eingabe-score-desc">Tragen Sie Profil und Jahreswerte ein, um Ihren Score zu sehen.</span>
+          <button type="button" class="summary-link" onclick="gotoTab('benchmark')">Benchmark-Details →</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="section-card" aria-labelledby="sec-import">
+      <div class="section-head">
+        <h2 id="sec-import">Importieren</h2>
+        <p class="section-sub">Rechnungen oder Excel-Dateien einlesen, um Felder automatisch zu befüllen.</p>
       </div>
       <div class="doc-upload-row">
-        <label class="btn" id="btn-rechnungen" for="doc-upload">📄 Rechnungen einlesen</label>
+        <label class="btn btn-primary" id="btn-rechnungen" for="doc-upload">📄 Rechnungen einlesen</label>
         <input type="file" id="doc-upload" accept=".pdf,image/*" multiple onchange="handleDocumentUpload(event)" style="display:none;">
         <div class="doc-upload-spinner" id="doc-spinner"></div>
         <span class="doc-upload-status" id="doc-status">Keine ausgewählt</span>
-        <span class="doc-upload-hint">PDF oder Foto (Strom, Gas, Wasser — mehrere möglich)</span>
       </div>
+      <p class="inline-help">PDF oder Foto (Strom, Gas, Wasser — mehrere möglich)</p>
       <div class="upload-row">
-        <label class="btn" id="btn-excel" for="excel-upload">📂 Excel importieren</label>
+        <label class="btn btn-secondary" id="btn-excel" for="excel-upload">📂 Excel importieren</label>
         <input type="file" id="excel-upload" accept=".xlsx" onchange="handleExcelUpload(event)">
         <span class="upload-status" id="upload-status">Noch keine Datei geladen</span>
       </div>
-      <div class="snapshot-row">
-        <button type="button" class="btn-save" id="btn-snapshot" onclick="saveSnapshot()">💾 Snapshot speichern</button>
-        <button type="button" class="btn-save" id="btn-standort" onclick="saveCurrentAsStandort()">🏭 Als Standort speichern</button>
-        <span class="save-status" id="save-status"></span>
-      </div>
-      <div class="snapshot-row" style="flex-wrap:wrap;">
-        <select id="ms-standort" class="ai-input" style="width:auto;"></select>
-        <input type="month" id="ms-datum" class="ai-input" style="width:auto;">
-        <button type="button" class="btn-save" id="btn-messung" onclick="saveCurrentAsMessung()">📈 Als Messung speichern</button>
-      </div>
-    </div>
+      <details style="margin-top:0.75rem;">
+        <summary style="cursor:pointer; font-size:12px; font-weight:600; color:var(--gray-600);">Erweitert: Gemini API-Key</summary>
+        <div class="gemini-key-row" style="margin-top:0.5rem;">
+          <label for="gemini-api-key">Gemini API-Key</label>
+          <input type="password" id="gemini-api-key" placeholder="AIza… (kostenlos: aistudio.google.com)" autocomplete="off">
+        </div>
+        <p class="inline-help">Nur für lokales Testen ohne Vercel-Proxy nötig.</p>
+      </details>
+    </section>
 
-    <div class="metric-grid">
-      <div class="metric-card">
-        <div class="metric-lbl">CO₂-Äquivalent</div>
-        <div><span class="metric-num bad" id="co2-num">—</span><span class="metric-unit">kg/m²</span></div>
-        <div class="metric-sub" id="co2-sub"></div>
+    <section class="section-card" aria-labelledby="sec-speichern">
+      <div class="section-head">
+        <h2 id="sec-speichern">Speichern</h2>
+        <p class="section-sub">Lokal im Browser oder serverseitig für Standorte und Monitoring.</p>
       </div>
-      <div class="metric-card">
-        <div class="metric-lbl">Energie gesamt</div>
-        <div><span class="metric-num" id="energy-num">—</span><span class="metric-unit">kWh/m²</span></div>
-        <div class="metric-sub" id="energy-sub"></div>
+      <div class="save-block">
+        <div class="save-block-title">Lokal (dieses Gerät)</div>
+        <div class="snapshot-row">
+          <button type="button" class="btn-secondary" id="btn-snapshot" onclick="saveSnapshot()">💾 Snapshot speichern</button>
+          <span class="save-status" id="save-status"></span>
+        </div>
+        <p class="inline-help">Für Vergleich und Verlauf im Tab „Verlauf".</p>
       </div>
-      <div class="metric-card">
-        <div class="metric-lbl">Wasser pro MA·Tag</div>
-        <div><span class="metric-num" id="wasser-tag-num">—</span><span class="metric-unit">L</span></div>
-        <div class="metric-sub">Umrechnung aus m³/MA (250 Arbeitstage/Jahr)</div>
+      <div class="save-block">
+        <div class="save-block-title">Standort anlegen</div>
+        <div class="snapshot-row">
+          <button type="button" class="btn-primary" id="btn-standort" onclick="saveCurrentAsStandort()">🏭 Als Standort speichern</button>
+        </div>
+        <p class="inline-help">Aktuelle Kennzahlen als Standort — ansehen unter <button type="button" class="btn-ghost" onclick="gotoTab('standorte')">Standorte →</button></p>
       </div>
-    </div>
+      <div class="save-block">
+        <div class="save-block-title">Messung erfassen</div>
+        <div class="snapshot-row" style="flex-wrap:wrap;">
+          <select id="ms-standort" class="ai-input" style="width:auto;"></select>
+          <input type="month" id="ms-datum" class="ai-input" style="width:auto;">
+          <button type="button" class="btn-primary" id="btn-messung" onclick="saveCurrentAsMessung()">📈 Als Messung speichern</button>
+        </div>
+        <p class="inline-help">Zeitreihe je Standort — ansehen unter <button type="button" class="btn-ghost" onclick="gotoTab('monitoring')">Monitoring →</button></p>
+      </div>
+    </section>
   </div>
 
   <!-- TAB: Benchmark -->
   <div id="tab-benchmark" style="display:none;">
+    <p class="tab-intro">Ihr Öko-Score und der detaillierte Branchenvergleich — basierend auf den Daten aus „Dateneingabe".</p>
+    <div class="card">
+      <div class="label">Öko-Score</div>
+      <div class="score-wrap">
+        <svg width="88" height="88" viewBox="0 0 88 88" style="flex-shrink:0;">
+          <circle cx="44" cy="44" r="36" fill="none" id="score-track" stroke="#E8E7E2" stroke-width="10"/>
+          <circle cx="44" cy="44" r="36" fill="none" id="score-arc"
+            stroke="#1D9E75" stroke-width="10"
+            stroke-dasharray="226" stroke-dashoffset="113"
+            stroke-linecap="round" transform="rotate(-90 44 44)"
+            style="transition: stroke-dashoffset 0.5s ease, stroke 0.3s;"/>
+          <text x="44" y="50" text-anchor="middle"
+            font-family="'DM Sans', sans-serif"
+            font-size="20" font-weight="600"
+            id="score-ring-num">—</text>
+        </svg>
+        <div class="score-text-wrap">
+          <div class="score-title" id="score-ring-title">Öko-Score</div>
+          <div class="score-desc" id="score-ring-desc">Gib deine Kennzahlen im Reiter Dateneingabe ein.</div>
+        </div>
+      </div>
+    </div>
     <div class="card">
       <div class="label">Branchenvergleich</div>
       <div id="bench-bars"></div>
@@ -1202,38 +1515,28 @@
     <div class="card" id="bench-quickwins-card" style="display:none;">
       <div class="label">Branchentypische Quick Wins</div>
       <ol id="bench-qw-list" style="padding-left:1.2em; margin-top:8px; font-size:13px; color:var(--gray-600); line-height:1.8;"></ol>
-    </div>
-    <div class="card">
-      <div class="score-wrap">
-        <svg width="88" height="88" viewBox="0 0 88 88" style="flex-shrink:0;">
-          <circle cx="44" cy="44" r="36" fill="none" id="score-track" stroke="#E8E7E2" stroke-width="10"/>
-          <circle cx="44" cy="44" r="36" fill="none" id="score-arc"
-            stroke="#1D9E75" stroke-width="10"
-            stroke-dasharray="226" stroke-dashoffset="113"
-            stroke-linecap="round" transform="rotate(-90 44 44)"
-            style="transition: stroke-dashoffset 0.5s ease, stroke 0.3s;"/>
-          <text x="44" y="50" text-anchor="middle"
-            font-family="'DM Sans', sans-serif"
-            font-size="20" font-weight="600"
-            id="score-ring-num">—</text>
-        </svg>
-        <div class="score-text-wrap">
-          <div class="score-title" id="score-ring-title">Öko-Score</div>
-          <div class="score-desc" id="score-ring-desc">Gib deine Kennzahlen im Reiter Dateneingabe ein.</div>
-        </div>
+      <div class="bench-teaser-link" id="bench-qw-teaser" style="display:none;">
+        <button type="button" onclick="gotoTab('massnahmen')">Alle Vorschläge &amp; Übernahme in Maßnahmen →</button>
       </div>
     </div>
   </div>
 
   <!-- TAB: Empfehlungen -->
   <div id="tab-empfehlungen" style="display:none;">
+    <p class="tab-intro">Regelbasierte Empfehlungen aus Ihren Kennzahlen — ergänzt durch freie KI-Beratung. Strukturierte Maßnahmen-Vorschläge finden Sie im Tab <button type="button" class="btn-ghost" onclick="gotoTab('massnahmen')">Maßnahmen</button>.</p>
     <div class="card">
-      <div class="label">KI-gestützte Empfehlungen</div>
+      <div class="label">Regelbasierte Empfehlungen</div>
       <div id="rec-list"><div style="font-size:13px; color:var(--gray-400);">Empfehlungen erscheinen nach Dateneingabe.</div></div>
-      <div class="gemini-key-row" style="margin-top:0.75rem;">
-        <label for="openrouter-api-key">OpenRouter API-Key (optional, lokal)</label>
-        <input type="password" id="openrouter-api-key" placeholder="sk-or-… (kostenlos: openrouter.ai/keys)" autocomplete="off">
-      </div>
+    </div>
+    <div class="card">
+      <div class="label">KI-Beratung (freier Text)</div>
+      <details style="margin-bottom:0.75rem;">
+        <summary style="cursor:pointer; font-size:12px; font-weight:600; color:var(--gray-600);">Erweitert: OpenRouter API-Key</summary>
+        <div class="gemini-key-row" style="margin-top:0.5rem;">
+          <label for="openrouter-api-key">OpenRouter API-Key (optional, lokal)</label>
+          <input type="password" id="openrouter-api-key" placeholder="sk-or-… (kostenlos: openrouter.ai/keys)" autocomplete="off">
+        </div>
+      </details>
       <div class="ai-controls">
         <input id="claude-api-key" class="ai-input" type="password" placeholder="(Bei Ollama nicht benoetigt)" autocomplete="off" style="display:none;">
         <button id="ai-start-btn" class="ai-btn" onclick="startAIConsulting()">KI-Beratung starten</button>
@@ -1241,13 +1544,13 @@
       <div id="ai-status" class="ai-status">Lokal via Ollama. Wenn nicht erreichbar: OpenRouter (Key oben oder Server-Proxy).</div>
       <div id="ai-response" class="ai-response" style="display:none;"></div>
     </div>
-    <div style="font-size:12px; color:var(--gray-400); margin-top:-0.25rem; padding: 0 0.25rem;">
-      Alle Empfehlungen basieren auf anonymisierten Benchmarkdaten aus dem ÖKOPROFIT-Netzwerk (n ≈ 4.500 Betriebe).
-    </div>
+    <p class="inline-help" style="padding:0 0.25rem;">Alle Empfehlungen basieren auf anonymisierten Benchmarkdaten aus dem ÖKOPROFIT-Netzwerk (n ≈ 4.500 Betriebe).</p>
   </div>
 
   <!-- TAB: Verlauf -->
   <div id="tab-verlauf" style="display:none;">
+    <p class="tab-intro">Lokale Snapshots für Trends und Vergleiche — getrennt von serverseitigen Standorten und Messungen.</p>
+    <div class="verlauf-section-title">Verlauf &amp; Trends</div>
     <div class="card" id="trend-card" style="display:none;">
       <div class="trend-head">
         <div class="label" style="margin:0;">Score-Verlauf</div>
@@ -1272,6 +1575,7 @@
       <div id="cmp-branche-note" class="cmp-branche-note" style="display:none;"></div>
     </div>
 
+    <div class="verlauf-section-title" style="margin-top:0.5rem;">Snapshot-Bibliothek</div>
     <div class="card">
       <div class="snap-list-header">
         <div class="label" style="margin:0;">Gespeicherte Snapshots</div>
@@ -1284,9 +1588,9 @@
       </div>
       <div id="snapshot-list" class="snapshot-list"></div>
     </div>
-    <div style="font-size:12px; color:var(--gray-400); margin-top:-0.25rem; padding: 0 0.25rem;">
-      Snapshots werden lokal im Browser (localStorage) gespeichert und verlassen dieses Gerät nicht. <strong>CSV</strong> für externe Dokumentation, <strong>JSON-Backup</strong> für verlustfreie Sicherung und Wiederherstellung (z.&nbsp;B. nach Browser-Reset oder Gerätewechsel).
-    </div>
+    <p class="inline-help" style="padding:0 0.25rem;">
+      Snapshots werden lokal im Browser (localStorage) gespeichert. <strong>CSV</strong> für externe Dokumentation, <strong>JSON-Backup</strong> für verlustfreie Sicherung.
+    </p>
   </div>
 
   <!-- TAB: Lernkarten (serverseitig in Neon-DB via /api/lernkarten) -->
@@ -1326,28 +1630,44 @@
 
   <!-- TAB: Maßnahmen (Effizienzmaßnahmen mit ROI, Neon via /api/massnahmen) -->
   <div id="tab-massnahmen" style="display:none;">
-    <div class="card">
-      <div class="label">Maßnahmen</div>
-      <p style="font-size:13px; color:var(--gray-400); margin-top:-0.25rem;">
-        Effizienzmaßnahmen mit Wirtschaftlichkeit (Amortisation) und Status-Pipeline — serverseitig gespeichert.
-      </p>
+    <p class="tab-intro">Zentrale Stelle für Maßnahmen-Vorschläge, Portfolio und Umsetzungsstatus — serverseitig gespeichert.</p>
 
-      <details id="vs-box" style="margin:0.75rem 0; border:1px solid var(--border); border-radius:8px; padding:0.5rem 0.75rem;">
-        <summary style="cursor:pointer; font-weight:600;">💡 Vorschläge</summary>
+    <section class="section-card massnahmen-section" aria-labelledby="sec-vorschlaege">
+      <div class="section-head">
+        <h2 id="sec-vorschlaege">Vorschläge</h2>
+        <p class="section-sub">Katalog aus Benchmark-Daten und optionale KI-Vorschläge — direkt ins Portfolio übernehmen.</p>
+      </div>
+      <details id="vs-box" open>
+        <summary style="cursor:pointer; font-weight:600; margin-bottom:0.5rem;">Katalog &amp; KI-Vorschläge</summary>
         <div style="margin:0.5rem 0;">
           <label for="vs-branche" style="font-size:13px;">Branche</label>
           <select id="vs-branche" class="ai-input" onchange="renderVorschlaege()"></select>
         </div>
         <div id="vs-katalog"></div>
         <div style="margin:0.75rem 0;">
-          <button type="button" class="btn" id="vs-ki-btn" onclick="generateKIVorschlaege()">🤖 KI-Vorschläge generieren</button>
+          <button type="button" class="btn btn-secondary" id="vs-ki-btn" onclick="generateKIVorschlaege()">🤖 KI-Vorschläge generieren</button>
         </div>
-        <div id="vs-status" style="font-size:13px; min-height:1.2em;"></div>
+        <div id="vs-status" class="inline-help" style="min-height:1.2em;"></div>
         <div id="vs-ki-list"></div>
       </details>
+    </section>
 
-      <div id="m-stats" style="display:flex; flex-wrap:wrap; gap:1.25rem; margin:0.75rem 0; font-size:13px;"></div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin:0.75rem 0;">
+    <section class="section-card massnahmen-section" aria-labelledby="sec-portfolio">
+      <div class="section-head">
+        <h2 id="sec-portfolio">Portfolio</h2>
+        <p class="section-sub">Übersicht aller erfassten Effizienzmaßnahmen mit Wirtschaftlichkeit und Status.</p>
+      </div>
+      <div id="m-stats" class="kpi-strip"></div>
+      <div id="m-status" class="inline-help" style="min-height:1.2em;"></div>
+      <div id="m-list"></div>
+    </section>
+
+    <section class="section-card massnahmen-section" aria-labelledby="sec-neu">
+      <div class="section-head">
+        <h2 id="sec-neu">Neue Maßnahme</h2>
+        <p class="section-sub">Manuell anlegen oder aus Vorschlägen übernehmen.</p>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
         <input type="text" id="m-title" class="ai-input" placeholder="Titel der Maßnahme…" style="grid-column:1 / -1;"
                onkeydown="if(event.key==='Enter') addMassnahme();">
         <select id="m-ressource" class="ai-input">
@@ -1361,43 +1681,44 @@
         <input type="date" id="m-termin" class="ai-input">
         <input type="text" id="m-standort" class="ai-input" placeholder="Standort (optional)…">
       </div>
-      <div><button type="button" class="btn" onclick="addMassnahme()">Maßnahme hinzufügen</button></div>
-      <div id="m-status" style="font-size:13px; min-height:1.2em; margin-top:0.5rem;"></div>
-      <div id="m-list" style="margin-top:0.5rem;"></div>
-    </div>
+      <div style="margin-top:0.75rem;">
+        <button type="button" class="btn btn-primary" onclick="addMassnahme()">Maßnahme hinzufügen</button>
+      </div>
+    </section>
   </div>
 
   <!-- TAB: Standorte (Multi-Standort-Benchmarking, Neon via /api/standorte) -->
   <div id="tab-standorte" style="display:none;">
-    <div class="card">
-      <div class="label">Standorte – Vergleich</div>
-      <p style="font-size:13px; color:var(--gray-400); margin-top:-0.25rem;">
-        Standorte legst du im Tab „Dateneingabe" über „🏭 Als Standort speichern" an.
-        Vergleich je Branche gegen den Branchen-Median; bester Wert grün, schlechtester rot.
-      </p>
-      <div style="margin:0.75rem 0;">
+    <p class="tab-intro">Standorte werden in <button type="button" class="btn-ghost" onclick="gotoTab('eingabe')">Dateneingabe</button> angelegt — hier vergleichen Sie Kennzahlen je Branche.</p>
+    <div class="section-card">
+      <div class="section-head">
+        <h2>Standorte – Vergleich</h2>
+        <p class="section-sub">Bester Wert grün, schlechtester rot — inkl. Branchen-Median-Zeile.</p>
+      </div>
+      <div style="margin:0.5rem 0;">
         <label for="st-branche" style="font-size:13px;">Branche</label>
         <select id="st-branche" class="ai-input" onchange="renderStandorte()"></select>
       </div>
-      <div id="st-status" style="font-size:13px; min-height:1.2em;"></div>
+      <div id="st-status" class="inline-help" style="min-height:1.2em;"></div>
       <div id="st-table" style="overflow-x:auto;"></div>
     </div>
   </div>
 
   <!-- TAB: Monitoring (Zeitreihe je Standort, Neon via /api/messungen) -->
   <div id="tab-monitoring" style="display:none;">
-    <div class="card">
-      <div class="label">Monitoring – Zeitreihe</div>
-      <p style="font-size:13px; color:var(--gray-400); margin-top:-0.25rem;">
-        Verbrauchsverlauf je Standort. Messungen legst du im Tab „Dateneingabe" über „📈 Als Messung speichern" an.
-      </p>
-      <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin:0.75rem 0;">
+    <p class="tab-intro">Messungen werden in <button type="button" class="btn-ghost" onclick="gotoTab('eingabe')">Dateneingabe</button> erfasst — hier sehen Sie den Verlauf je Standort.</p>
+    <div class="section-card">
+      <div class="section-head">
+        <h2>Monitoring – Zeitreihe</h2>
+        <p class="section-sub">Kennzahl über Zeit mit Branchen-Median als Referenzlinie.</p>
+      </div>
+      <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin:0.5rem 0;">
         <span><label for="mon-standort" style="font-size:13px;">Standort</label>
           <select id="mon-standort" class="ai-input" style="width:auto;" onchange="renderMonitoring()"></select></span>
         <span><label for="mon-kpi" style="font-size:13px;">Kennzahl</label>
           <select id="mon-kpi" class="ai-input" style="width:auto;" onchange="renderMonitoringChart()"></select></span>
       </div>
-      <div id="mon-status" style="font-size:13px; min-height:1.2em;"></div>
+      <div id="mon-status" class="inline-help" style="min-height:1.2em;"></div>
       <div class="trend-chart-wrap"><canvas id="mon-chart"></canvas></div>
       <div id="mon-table" style="overflow-x:auto; margin-top:0.75rem;"></div>
     </div>
@@ -2051,6 +2372,10 @@ Antworte NUR mit validem JSON ohne Markdown:
       document.getElementById('score-ring-desc').innerHTML     =
         'Bitte stellen Sie noch folgende Betriebsdaten bereit, um Ihren Öko-Score zu sehen:' +
         `<ul style="margin:4px 0 0 16px;padding:0;">${missingItems}</ul>`;
+      document.getElementById('eingabe-score-num').textContent = '—';
+      document.getElementById('eingabe-score-num').style.color = '';
+      document.getElementById('eingabe-score-title').textContent = 'Öko-Score: —/100';
+      document.getElementById('eingabe-score-desc').textContent = 'Profil und Jahreswerte vervollständigen.';
     } else {
       const offset = Math.round(226 - (score / 100) * 226);
       arc.setAttribute('stroke-dashoffset', offset);
@@ -2064,6 +2389,10 @@ Antworte NUR mit validem JSON ohne Markdown:
         : score >= 35
         ? 'Es besteht Verbesserungspotenzial. Die KI-Empfehlungen zeigen konkrete Hebel auf.'
         : 'Deutlicher Handlungsbedarf – mehrere Kennzahlen liegen signifikant über dem Branchendurchschnitt.';
+      document.getElementById('eingabe-score-num').textContent = String(score);
+      document.getElementById('eingabe-score-num').style.color = score >= 75 ? 'var(--green-600)' : score >= 50 ? 'var(--blue-400)' : 'var(--coral-400)';
+      document.getElementById('eingabe-score-title').textContent = `Öko-Score: ${score}/100 — ${sl}`;
+      document.getElementById('eingabe-score-desc').textContent = document.getElementById('score-ring-desc').textContent;
     }
 
     // Benchmark bars (Ampel via calcBenchmarkScore — same logic as Öko-Score)
@@ -2087,13 +2416,18 @@ Antworte NUR mit validem JSON ohne Markdown:
 
     const qwCard = document.getElementById('bench-quickwins-card');
     const qwList = document.getElementById('bench-qw-list');
+    const qwTeaser = document.getElementById('bench-qw-teaser');
     if (bData && bData.quick_wins && bData.quick_wins.length) {
       qwList.innerHTML = bData.quick_wins.map(q => {
         const text = typeof q === 'string' ? q : q.massnahme;
         return `<li>${text}</li>`;
       }).join('');
       qwCard.style.display = '';
-    } else { qwCard.style.display = 'none'; }
+      if (qwTeaser) qwTeaser.style.display = '';
+    } else {
+      qwCard.style.display = 'none';
+      if (qwTeaser) qwTeaser.style.display = 'none';
+    }
 
     const quelleEl = document.getElementById('bench-quelle');
     if (anyReady && bData && bData.kennzahlen && bData.kennzahlen.strom_kwh_per_m2 && bData.kennzahlen.strom_kwh_per_m2.quelle) {
@@ -2716,11 +3050,21 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     });
     document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
     if (btn) btn.classList.add('active');
+    else {
+      const fallback = document.querySelector('.tab[data-tab="' + name + '"]');
+      if (fallback) fallback.classList.add('active');
+    }
     if (name === 'eingabe') populateMessungStandorte();
     if (name === 'verlauf') renderSnapshots();
     if (name === 'massnahmen') renderMassnahmen();
     if (name === 'standorte') renderStandorte();
     if (name === 'monitoring') renderMonitoring();
+  }
+
+  function gotoTab(name) {
+    const btn = document.querySelector('.tab[data-tab="' + name + '"]');
+    showTab(name, btn);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   // --- Gemeinsame User-Kennung (Platzhalter bis echte Anmeldung) ---
@@ -2903,7 +3247,7 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
       const stat = (label, val) => {
         const d = document.createElement('div');
         const b = document.createElement('strong'); b.textContent = val;
-        const s = document.createElement('div'); s.style.cssText = 'color:var(--gray-400);'; s.textContent = label;
+        const s = document.createElement('span'); s.textContent = label;
         d.appendChild(b); d.appendChild(s); return d;
       };
       statsEl.appendChild(stat('Maßnahmen', String(items.length)));
@@ -2920,21 +3264,16 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
       if (!items.length) { listEl.textContent = 'Noch keine Maßnahmen.'; return; }
       for (const m of items) {
         const row = document.createElement('div');
-        row.style.cssText = 'padding:0.6rem 0.25rem; border-bottom:1px solid var(--border);';
-        const head = document.createElement('div');
-        head.style.cssText = 'display:flex; justify-content:space-between; gap:1rem; align-items:center;';
-        const title = document.createElement('strong'); title.textContent = m.title; // textContent => XSS-sicher
-        const sel = document.createElement('select');
-        sel.className = 'ai-input'; sel.style.cssText = 'width:auto; padding:0.2rem 0.4rem;';
-        for (const s of MASSNAHME_STATUS) {
-          const o = document.createElement('option'); o.value = s; o.textContent = MASSNAHME_STATUS_LABEL[s];
-          if (s === m.status) o.selected = true; sel.appendChild(o);
-        }
-        sel.onchange = () => updateMassnahmeStatus(m.id, sel.value);
-        head.appendChild(title); head.appendChild(sel);
-        row.appendChild(head);
+        row.className = 'list-row';
+        row.style.cssText = 'align-items:flex-start; padding:0.65rem 0.15rem;';
+        const info = document.createElement('div');
+        info.className = 'list-row-info';
+        const title = document.createElement('div');
+        title.className = 'list-row-title';
+        title.textContent = m.title;
+        info.appendChild(title);
         const meta = document.createElement('div');
-        meta.style.cssText = 'font-size:13px; color:var(--gray-600); margin-top:0.25rem; display:flex; flex-wrap:wrap; gap:0.75rem;';
+        meta.className = 'list-row-meta';
         const parts = [];
         if (m.ressource) parts.push(m.ressource);
         parts.push('Einsparung: ' + eurLabel(m.einsparung_eur) + '/J');
@@ -2943,8 +3282,16 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
         if (m.verantwortlich) parts.push('👤 ' + m.verantwortlich);
         if (m.termin) parts.push('📅 ' + m.termin);
         if (m.standort) parts.push('📍 ' + m.standort);
-        for (const p of parts) { const s = document.createElement('span'); s.textContent = p; meta.appendChild(s); }
-        row.appendChild(meta);
+        meta.textContent = parts.join(' · ');
+        info.appendChild(meta);
+        const sel = document.createElement('select');
+        sel.className = 'ai-input'; sel.style.cssText = 'width:auto; padding:0.2rem 0.4rem; flex-shrink:0;';
+        for (const s of MASSNAHME_STATUS) {
+          const o = document.createElement('option'); o.value = s; o.textContent = MASSNAHME_STATUS_LABEL[s];
+          if (s === m.status) o.selected = true; sel.appendChild(o);
+        }
+        sel.onchange = () => updateMassnahmeStatus(m.id, sel.value);
+        row.appendChild(info); row.appendChild(sel);
         listEl.appendChild(row);
       }
     } catch (err) {
@@ -3202,17 +3549,18 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     if (!eintraege.length) { listEl.textContent = 'Keine Katalog-Vorschläge für diese Branche.'; return; }
     for (const e of eintraege) {
       const card = document.createElement('div');
-      card.style.cssText = 'display:flex; justify-content:space-between; gap:1rem; align-items:center; padding:0.4rem 0.25rem; border-bottom:1px solid var(--border);';
+      card.className = 'list-row';
       const info = document.createElement('div');
-      const t = document.createElement('div'); t.style.fontWeight = '600'; t.textContent = e.massnahme; info.appendChild(t);
-      const meta = document.createElement('div'); meta.style.cssText = 'font-size:12px; color:var(--gray-600);';
+      info.className = 'list-row-info';
+      const t = document.createElement('div'); t.className = 'list-row-title'; t.textContent = e.massnahme; info.appendChild(t);
+      const meta = document.createElement('div'); meta.className = 'list-row-meta';
       const parts = [];
       if (e.invest_eur != null) parts.push('Invest ' + e.invest_eur.toLocaleString('de-DE') + ' €');
       parts.push('Einsparung ' + einsparungText(e));
       if (e.amort_jahre != null) parts.push('Amort. ' + e.amort_jahre + ' J');
       if (e.quelle) parts.push('Quelle: ' + e.quelle);
       meta.textContent = parts.join(' · '); info.appendChild(meta);
-      const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn'; btn.textContent = '+ Übernehmen';
+      const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn btn-secondary'; btn.textContent = '+ Übernehmen';
       btn.onclick = () => uebernehmeMassnahme({
         title: e.massnahme,
         invest_eur: (e.invest_eur != null ? e.invest_eur : null),
@@ -3267,16 +3615,17 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
       statusEl.textContent = items.length + ' KI-Vorschläge:';
       for (const it of items) {
         const card = document.createElement('div');
-        card.style.cssText = 'display:flex; justify-content:space-between; gap:1rem; align-items:center; padding:0.4rem 0.25rem; border-bottom:1px solid var(--border);';
+        card.className = 'list-row';
         const info = document.createElement('div');
-        const t = document.createElement('div'); t.style.fontWeight = '600'; t.textContent = it.title; info.appendChild(t);
-        const meta = document.createElement('div'); meta.style.cssText = 'font-size:12px; color:var(--gray-600);';
+        info.className = 'list-row-info';
+        const t = document.createElement('div'); t.className = 'list-row-title'; t.textContent = it.title; info.appendChild(t);
+        const meta = document.createElement('div'); meta.className = 'list-row-meta';
         const parts = [];
         if (it.ressource) parts.push(it.ressource);
         if (it.einsparung_eur != null) parts.push('Einsparung ' + it.einsparung_eur.toLocaleString('de-DE') + ' €/J');
         if (it.invest_eur != null) parts.push('Invest ' + it.invest_eur.toLocaleString('de-DE') + ' €');
         meta.textContent = parts.join(' · '); info.appendChild(meta);
-        const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = '+ Übernehmen';
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'btn btn-secondary'; b.textContent = '+ Übernehmen';
         b.onclick = () => uebernehmeMassnahme(it);
         card.appendChild(info); card.appendChild(b); listEl.appendChild(card);
       }
@@ -3902,19 +4251,6 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   initThemeToggle();
   update();
   checkOllamaReachability();
-
-  // Alle drei Upload-/Speichern-Buttons auf die Breite von "Rechnungen einlesen" angleichen
-  requestAnimationFrame(() => {
-    const ref = document.getElementById('btn-rechnungen');
-    if (!ref) return;
-    const w = ref.getBoundingClientRect().width + 'px';
-    ['btn-excel', 'btn-snapshot'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) { el.style.width = w; el.style.textAlign = 'center'; }
-    });
-    ref.style.width = w;
-    ref.style.textAlign = 'center';
-  });
 </script>
 </body>
 </html>

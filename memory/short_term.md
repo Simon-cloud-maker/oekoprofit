@@ -1,8 +1,10 @@
 # Short-Term Memory — Aktueller Projektstand
 
-_Zuletzt aktualisiert: 2026-06-24_
+_Zuletzt aktualisiert: 2026-06-25_
 
 ## Aktueller Stand
+
+- **UI-Neustruktur (NEU):** Navigation in Analyse/Betrieb-Gruppen; Dateneingabe in Erfassen/Importieren/Speichern; Ergebnis-Strip mit Öko-Score; Maßnahmen-Tab in Vorschläge/Portfolio/Neu; einheitliche Button-/Listen-Klassen (`btn-primary`, `list-row`, `section-card`).
 
 - **Dark Mode:** Toggle im Header (`data-theme`, `localStorage`); CSS-Korrekturen für Buttons, Snapshots, Tabs und Vergleichstabelle.
 - **MkDocs:** GitHub Pages unter https://simon-cloud-maker.github.io/oekoprofit/ (inkl. Lessons Learned)

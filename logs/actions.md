@@ -20,7 +20,22 @@ _Die Bezeichnungen „Task 1"–„Task 8" wurden nur lokal zur Orientierung ver
 
 ---
 
-## [2026-06-24] feat(ui): Lernkarten-Tab an /api/lernkarten anbinden
+## [2026-06-25] style(ui): Dashboard UI-Neustruktur (Navigation, Sektionen, Hierarchie)
+
+**Ziel:** Unstrukturierte Single-File-UI klarer gliedern — ohne Feature-Verlust.
+
+**Aktionen:**
+- `index.html`: Navigation in **Analyse** (Eingabe, Benchmark, KI) und **Betrieb** (Maßnahmen, Standorte, Monitoring, Verlauf) gruppiert; `gotoTab()` ergänzt.
+- Dateneingabe in drei Sektionen **Erfassen / Importieren / Speichern** mit klarer CTA-Hierarchie (`btn-primary` / `btn-secondary`).
+- Kompakte **Ergebnis-Zusammenfassung** (Öko-Score + KPIs) direkt unter Erfassung; Benchmark mit Score zuerst.
+- Maßnahmen-Tab intern: Vorschläge → Portfolio → Neue Maßnahme; Quick-Win-Teaser verweist auf Maßnahmen.
+- Wiederverwendbare Klassen: `section-card`, `summary-strip`, `list-row`, `kpi-strip`, `tab-intro`.
+
+**Ergebnis:** Klarerer Nutzerfluss und visuelle Hierarchie bei unverändertem Funktionsumfang.
+
+**Nächster Schritt:** Lokal im Browser prüfen (alle Tabs, Dark Mode, Speichern/Import).
+
+---
 
 **Branch:** `chore/persistence-design-and-kv-deprecation`
 
