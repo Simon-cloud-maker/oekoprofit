@@ -1038,6 +1038,7 @@
     <button class="tab" onclick="showTab('verlauf', this)">Verlauf</button>
     <button class="tab" onclick="showTab('massnahmen', this)">Maßnahmen</button>
     <button class="tab" onclick="showTab('standorte', this)">Standorte</button>
+    <button class="tab" onclick="showTab('monitoring', this)">Monitoring</button>
   </div>
 
   <!-- TAB: Eingabe -->
@@ -1380,6 +1381,25 @@
       </div>
       <div id="st-status" style="font-size:13px; min-height:1.2em;"></div>
       <div id="st-table" style="overflow-x:auto;"></div>
+    </div>
+  </div>
+
+  <!-- TAB: Monitoring (Zeitreihe je Standort, Neon via /api/messungen) -->
+  <div id="tab-monitoring" style="display:none;">
+    <div class="card">
+      <div class="label">Monitoring – Zeitreihe</div>
+      <p style="font-size:13px; color:var(--gray-400); margin-top:-0.25rem;">
+        Verbrauchsverlauf je Standort. Messungen legst du im Tab „Dateneingabe" über „📈 Als Messung speichern" an.
+      </p>
+      <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin:0.75rem 0;">
+        <span><label for="mon-standort" style="font-size:13px;">Standort</label>
+          <select id="mon-standort" class="ai-input" style="width:auto;" onchange="renderMonitoring()"></select></span>
+        <span><label for="mon-kpi" style="font-size:13px;">Kennzahl</label>
+          <select id="mon-kpi" class="ai-input" style="width:auto;" onchange="renderMonitoringChart()"></select></span>
+      </div>
+      <div id="mon-status" style="font-size:13px; min-height:1.2em;"></div>
+      <div class="trend-chart-wrap"><canvas id="mon-chart"></canvas></div>
+      <div id="mon-table" style="overflow-x:auto; margin-top:0.75rem;"></div>
     </div>
   </div>
 
@@ -2691,7 +2711,7 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   }
 
   function showTab(name, btn) {
-    ['eingabe','benchmark','empfehlungen','verlauf','massnahmen','standorte'].forEach(t => {
+    ['eingabe','benchmark','empfehlungen','verlauf','massnahmen','standorte','monitoring'].forEach(t => {
       document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
     });
     document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
@@ -2700,6 +2720,7 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     if (name === 'verlauf') renderSnapshots();
     if (name === 'massnahmen') renderMassnahmen();
     if (name === 'standorte') renderStandorte();
+    if (name === 'monitoring') renderMonitoring();
   }
 
   // --- Gemeinsame User-Kennung (Platzhalter bis echte Anmeldung) ---
@@ -3265,6 +3286,102 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     } finally {
       btn.disabled = false;
     }
+  }
+
+  // --- Monitoring (Zeitreihe je Standort via /api/messungen) ---
+  let monitorChart = null;
+  let monitorData = [];        // aktuell geladene Messungen (datum aufsteigend)
+  let monitorStandort = null;  // aktueller Standort (für Branche/Median)
+
+  async function renderMonitoring() {
+    const sel = document.getElementById('mon-standort');
+    const kpiSel = document.getElementById('mon-kpi');
+    const statusEl = document.getElementById('mon-status');
+    const tableEl = document.getElementById('mon-table');
+    if (!sel) return;
+    statusEl.textContent = ''; statusEl.style.color = '';
+    if (kpiSel && !kpiSel.options.length) {
+      for (const { key, label } of STANDORT_KPIS) { const o = document.createElement('option'); o.value = key; o.textContent = label; kpiSel.appendChild(o); }
+    }
+    let standorte = [];
+    try {
+      const res = await fetch('/api/standorte?user_id=' + encodeURIComponent(TASK_USER_ID));
+      standorte = res.ok ? ((await res.json()).standorte || []) : [];
+    } catch (e) { /* unten behandelt */ }
+    const prev = sel.value;
+    sel.textContent = '';
+    if (!standorte.length) {
+      tableEl.textContent = '';
+      if (monitorChart) { monitorChart.destroy(); monitorChart = null; }
+      statusEl.textContent = 'Noch keine Standorte — erst im Dateneingabe-Tab „🏭 Als Standort speichern".';
+      return;
+    }
+    for (const s of standorte) { const o = document.createElement('option'); o.value = s.id; o.textContent = s.name; sel.appendChild(o); }
+    sel.value = standorte.some(s => s.id === prev) ? prev : standorte[0].id;
+    monitorStandort = standorte.find(s => s.id === sel.value) || standorte[0];
+    try {
+      const res = await fetch('/api/messungen?standort_id=' + encodeURIComponent(sel.value));
+      monitorData = res.ok ? ((await res.json()).messungen || []) : [];
+    } catch (e) { monitorData = []; statusEl.style.color = '#c0392b'; statusEl.textContent = 'Fehler beim Laden der Messungen.'; }
+    renderMonitoringChart();
+    renderMonitoringTable();
+  }
+
+  function renderMonitoringChart() {
+    const canvas = document.getElementById('mon-chart');
+    const kpiSel = document.getElementById('mon-kpi');
+    const statusEl = document.getElementById('mon-status');
+    if (!canvas || !kpiSel) return;
+    const key = kpiSel.value || 'strom';
+    if (monitorChart) { monitorChart.destroy(); monitorChart = null; }
+    if (!monitorData.length) {
+      statusEl.textContent = 'Noch keine Messungen — im Dateneingabe-Tab „📈 Als Messung speichern".';
+      return;
+    }
+    statusEl.textContent = '';
+    const labels = monitorData.map(m => String(m.datum).slice(0, 7));
+    const data = monitorData.map(m => (m[key] == null ? null : Number(m[key])));
+    const median = monitorStandort ? benchmarkMedian(monitorStandort.branche, key) : null;
+    const kpiLabel = (STANDORT_KPIS.find(k => k.key === key) || {}).label || key;
+    const datasets = [{ label: kpiLabel, data, borderColor: '#2e7d32', backgroundColor: 'rgba(46,125,50,0.15)', tension: 0.2, spanGaps: true }];
+    if (median != null) datasets.push({ label: 'Branchen-Median', data: labels.map(() => median), borderColor: '#c0392b', borderDash: [6, 4], pointRadius: 0, fill: false });
+    monitorChart = new Chart(canvas, { type: 'line', data: { labels, datasets }, options: { responsive: true, plugins: { legend: { display: true } } } });
+  }
+
+  function renderMonitoringTable() {
+    const tableEl = document.getElementById('mon-table');
+    if (!tableEl) return;
+    tableEl.textContent = '';
+    if (!monitorData.length) return;
+    const tbl = document.createElement('table'); tbl.className = 'cmp-table'; tbl.style.width = '100%';
+    const thead = document.createElement('thead'); const htr = document.createElement('tr');
+    ['Datum', ...STANDORT_KPIS.map(k => k.label), ''].forEach(h => { const th = document.createElement('th'); th.textContent = h; htr.appendChild(th); });
+    thead.appendChild(htr); tbl.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    const fmt = (v) => (v != null && v !== '' && Number.isFinite(Number(v))) ? Number(v).toLocaleString('de-DE') : '—';
+    for (const m of monitorData) {
+      const tr = document.createElement('tr');
+      const td0 = document.createElement('td'); td0.textContent = String(m.datum).slice(0, 7); tr.appendChild(td0);
+      for (const { key } of STANDORT_KPIS) { const td = document.createElement('td'); td.textContent = fmt(m[key]); tr.appendChild(td); }
+      const tdDel = document.createElement('td');
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'snap-btn'; b.textContent = '🗑'; b.title = 'Messung löschen';
+      b.onclick = () => deleteMessung(m.id);
+      tdDel.appendChild(b); tr.appendChild(tdDel);
+      tbody.appendChild(tr);
+    }
+    tbl.appendChild(tbody); tableEl.appendChild(tbl);
+  }
+
+  async function deleteMessung(id) {
+    if (!confirm('Messung löschen?')) return;
+    const statusEl = document.getElementById('mon-status');
+    statusEl.style.color = ''; statusEl.textContent = 'Lösche…';
+    try {
+      const res = await fetch('/api/messungen?id=' + encodeURIComponent(id), { method: 'DELETE' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      statusEl.textContent = '';
+      await renderMonitoring();
+    } catch (err) { statusEl.style.color = '#c0392b'; statusEl.textContent = 'Fehler beim Löschen: ' + err.message; }
   }
 
   // --- Verlauf / Snapshots ---
