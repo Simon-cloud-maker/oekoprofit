@@ -11,7 +11,9 @@ _Zuletzt aktualisiert: 2026-06-24_
 - **Reinigungsmittel:** Eingabe in L/Jahr (Gesamtliter); interne Umrechnung auf L/MA via `computeFromJahreswerte()`
 - **Gemini Document Reader:** Extraktion von Strom, Gas, Wasser, Abfall, Reinigungsmittel (Gesamtliter)
 - **Deterministisch Empfehlungen:** `buildDeterministicRecs()` mit Template-Variablen und Betriebsprofil
-- **Maßnahmen-Tab (NEU):** `api/massnahmen.js` (GET/POST/PATCH) + UI-Tab + `db/0002_massnahme.sql`. Effizienzmaßnahmen mit ROI/Amortisation, Status-Pipeline (idee→geplant→in_umsetzung→umgesetzt→verifiziert), Kennzahlen-Leiste. Erster Baustein der Industrie-Neuausrichtung (Spec/Plan in `docs/superpowers/`).
+- **Maßnahmen-Tab:** `api/massnahmen.js` (GET/POST/PATCH) + UI-Tab + `db/0002_massnahme.sql`. Effizienzmaßnahmen mit ROI/Amortisation, Status-Pipeline (idee→geplant→in_umsetzung→umgesetzt→verifiziert), Kennzahlen-Leiste. Baustein 1 der Industrie-Neuausrichtung.
+- **Standorte-Tab (NEU):** `api/standorte.js` (GET/POST/DELETE) + UI-Tab + `db/0003_standort.sql`. „🏭 Als Standort speichern" im Dateneingabe-Tab (übernimmt `getVals()`+Branche+`calcScore`). Vergleichstabelle je Branche mit Best/Schlecht-Markierung + Branchen-Median-Zeile. Baustein 2. (Spec/Plan in `docs/superpowers/`.)
+- **Backlog (nächster Baustein, vom Nutzer gewünscht):** Maßnahmen-Vorschläge im Maßnahmen-Tab — Katalog aus `benchmarks.js` (quick_wins/massnahmen je Branche) + KI-Vorschläge (`/api/ki-consulting`), per Klick als Maßnahme übernehmen.
 - **Entfernt:** Tabs Aufgaben + Empfehlungen (in Maßnahmen aufgegangen); `api/tasks.js`, `api/empfehlungen.js` gelöscht. Tabellen `task`/`empfehlung` bleiben in DB (kein Drop).
 - **Ausgeblendet:** Tabs Produkte + Lernkarten (nur Buttons weg; HTML/JS/`api/produkte.js`+`api/lernkarten.js` bleiben — gehören zu späteren Bausteinen Standorte / Maßnahmen-Katalog).
 - **KI-Backend:** Vercel Serverless Function (`api/ki-consulting.js`) → OpenRouter Free Tier
