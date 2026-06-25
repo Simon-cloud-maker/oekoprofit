@@ -1148,6 +1148,7 @@
       </div>
       <div class="snapshot-row">
         <button type="button" class="btn-save" id="btn-snapshot" onclick="saveSnapshot()">💾 Snapshot speichern</button>
+        <button type="button" class="btn-save" id="btn-standort" onclick="saveCurrentAsStandort()">🏭 Als Standort speichern</button>
         <span class="save-status" id="save-status"></span>
       </div>
     </div>
@@ -2941,6 +2942,34 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   function persistSnapshots(list) {
     try { localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(list)); }
     catch (e) { console.warn('Snapshot-Speicherung fehlgeschlagen:', e); }
+  }
+
+  // Speichert den aktuellen Dateneingabe-Stand als persistenten Standort (DB).
+  async function saveCurrentAsStandort() {
+    const name = (prompt('Name des Standorts (z. B. „Werk München"):') || '').trim();
+    if (!name) return;
+    const vals = getVals();
+    const brancheVal = document.getElementById('branche').value;
+    let score = null;
+    try { score = calcScore(vals, benchmarks[brancheVal]); } catch (e) { score = null; }
+    const statusEl = document.getElementById('save-status');
+    if (statusEl) statusEl.textContent = 'Speichert Standort…';
+    try {
+      const res = await fetch('/api/standorte', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name, branche: brancheVal,
+          strom: vals.strom, gas: vals.gas, wasser: vals.wasser,
+          abfall: vals.abfall, reinigungsmittel: vals.reinigungsmittel,
+          score, user_id: TASK_USER_ID
+        })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      if (statusEl) statusEl.textContent = 'Standort „' + name + '" gespeichert ✓ (siehe Tab „Standorte")';
+    } catch (err) {
+      if (statusEl) statusEl.textContent = 'Fehler: ' + err.message;
+    }
   }
 
   function saveSnapshot() {
