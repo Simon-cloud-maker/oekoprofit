@@ -1152,6 +1152,11 @@
         <button type="button" class="btn-save" id="btn-standort" onclick="saveCurrentAsStandort()">🏭 Als Standort speichern</button>
         <span class="save-status" id="save-status"></span>
       </div>
+      <div class="snapshot-row" style="flex-wrap:wrap;">
+        <select id="ms-standort" class="ai-input" style="width:auto;"></select>
+        <input type="month" id="ms-datum" class="ai-input" style="width:auto;">
+        <button type="button" class="btn-save" id="btn-messung" onclick="saveCurrentAsMessung()">📈 Als Messung speichern</button>
+      </div>
     </div>
 
     <div class="metric-grid">
@@ -2691,6 +2696,7 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     });
     document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
     if (btn) btn.classList.add('active');
+    if (name === 'eingabe') populateMessungStandorte();
     if (name === 'verlauf') renderSnapshots();
     if (name === 'massnahmen') renderMassnahmen();
     if (name === 'standorte') renderStandorte();
@@ -3278,6 +3284,51 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   }
 
   // Speichert den aktuellen Dateneingabe-Stand als persistenten Standort (DB).
+  // Füllt das Standort-Dropdown der Messungs-Erfassung (Dateneingabe-Tab).
+  async function populateMessungStandorte() {
+    const sel = document.getElementById('ms-standort');
+    const dat = document.getElementById('ms-datum');
+    if (!sel) return;
+    if (dat && !dat.value) dat.value = new Date().toISOString().slice(0, 7); // JJJJ-MM
+    try {
+      const res = await fetch('/api/standorte?user_id=' + encodeURIComponent(TASK_USER_ID));
+      const list = res.ok ? ((await res.json()).standorte || []) : [];
+      const prev = sel.value;
+      sel.textContent = '';
+      if (!list.length) {
+        const o = document.createElement('option'); o.value = ''; o.textContent = 'Erst Standort anlegen';
+        sel.appendChild(o); return;
+      }
+      for (const s of list) {
+        const o = document.createElement('option'); o.value = s.id; o.textContent = s.name; sel.appendChild(o);
+      }
+      if (prev) sel.value = prev;
+    } catch { /* Auswahl bleibt leer, Speichern meldet dann fehlenden Standort */ }
+  }
+
+  // Speichert den aktuellen Dateneingabe-Stand als datierte Messung eines Standorts.
+  async function saveCurrentAsMessung() {
+    const sid = document.getElementById('ms-standort').value;
+    const monat = document.getElementById('ms-datum').value;
+    const statusEl = document.getElementById('save-status');
+    if (!sid) { if (statusEl) statusEl.textContent = 'Bitte Standort wählen (ggf. erst anlegen).'; return; }
+    if (!monat) { if (statusEl) statusEl.textContent = 'Bitte Monat wählen.'; return; }
+    const vals = getVals();
+    if (statusEl) statusEl.textContent = 'Speichert Messung…';
+    try {
+      const res = await fetch('/api/messungen', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          standort_id: sid, datum: monat,
+          strom: vals.strom, gas: vals.gas, wasser: vals.wasser,
+          abfall: vals.abfall, reinigungsmittel: vals.reinigungsmittel, user_id: TASK_USER_ID
+        })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      if (statusEl) statusEl.textContent = 'Messung gespeichert ✓ (siehe Tab „Monitoring")';
+    } catch (err) { if (statusEl) statusEl.textContent = 'Fehler: ' + err.message; }
+  }
+
   async function saveCurrentAsStandort() {
     const name = (prompt('Name des Standorts (z. B. „Werk München"):') || '').trim();
     if (!name) return;
