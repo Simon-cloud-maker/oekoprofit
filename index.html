@@ -1325,6 +1325,21 @@
       <p style="font-size:13px; color:var(--gray-400); margin-top:-0.25rem;">
         Effizienzmaßnahmen mit Wirtschaftlichkeit (Amortisation) und Status-Pipeline — serverseitig gespeichert.
       </p>
+
+      <details id="vs-box" style="margin:0.75rem 0; border:1px solid var(--border); border-radius:8px; padding:0.5rem 0.75rem;">
+        <summary style="cursor:pointer; font-weight:600;">💡 Vorschläge</summary>
+        <div style="margin:0.5rem 0;">
+          <label for="vs-branche" style="font-size:13px;">Branche</label>
+          <select id="vs-branche" class="ai-input" onchange="renderVorschlaege()"></select>
+        </div>
+        <div id="vs-katalog"></div>
+        <div style="margin:0.75rem 0;">
+          <button type="button" class="btn" id="vs-ki-btn" onclick="generateKIVorschlaege()">🤖 KI-Vorschläge generieren</button>
+        </div>
+        <div id="vs-status" style="font-size:13px; min-height:1.2em;"></div>
+        <div id="vs-ki-list"></div>
+      </details>
+
       <div id="m-stats" style="display:flex; flex-wrap:wrap; gap:1.25rem; margin:0.75rem 0; font-size:13px;"></div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin:0.75rem 0;">
         <input type="text" id="m-title" class="ai-input" placeholder="Titel der Maßnahme…" style="grid-column:1 / -1;"
@@ -2839,6 +2854,7 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
   }
 
   async function renderMassnahmen() {
+    renderVorschlaege(); // Katalog-Vorschläge beim Öffnen des Tabs aufbauen
     const listEl = document.getElementById('m-list');
     const statsEl = document.getElementById('m-stats');
     const statusEl = document.getElementById('m-status');
@@ -3093,6 +3109,155 @@ Inhaltliche Regeln: plausible Zahlen zum Betrieb/Benchmark nutzen; insgesamt geh
     } catch (err) {
       statusEl.style.color = '#c0392b';
       statusEl.textContent = 'Fehler beim Löschen: ' + err.message;
+    }
+  }
+
+  // --- Maßnahmen-Vorschläge (Katalog aus benchmarks.js + KI via /api/ki-consulting) ---
+  const VS_BRANCHE_LABEL = { gastronomie:'Gastronomie', baeckerei:'Bäckerei', buero:'Büro', einzelhandel_food:'Einzelhandel (Food)', einzelhandel_nonfood:'Einzelhandel (Non-Food)', produktion:'Produktion' };
+
+  function vorschlagBranchen() {
+    return Object.keys(OEKOPROFIT_BENCHMARKS.branchen)
+      .filter(k => Array.isArray(OEKOPROFIT_BENCHMARKS.branchen[k].quick_wins) && OEKOPROFIT_BENCHMARKS.branchen[k].quick_wins.length);
+  }
+
+  function einsparungText(e) {
+    if (e.einsparung_eur_pa) return e.einsparung_eur_pa.toLocaleString('de-DE') + ' €/Jahr';
+    if (e.einsparung_pct) return '−' + e.einsparung_pct + ' %';
+    if (e.einsparung_wasser_pct) return '−' + e.einsparung_wasser_pct + ' % Wasser';
+    if (e.einsparung_kwh_pa) return e.einsparung_kwh_pa.toLocaleString('de-DE') + ' kWh/Jahr';
+    return '—';
+  }
+
+  // Gemeinsamer Übernehmen-Helfer: legt eine Maßnahme an.
+  async function uebernehmeMassnahme(obj) {
+    const statusEl = document.getElementById('vs-status');
+    statusEl.style.color = ''; statusEl.textContent = 'Übernehme…';
+    try {
+      const res = await fetch('/api/massnahmen', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: obj.title,
+          ressource: obj.ressource || undefined,
+          einsparung_eur: (obj.einsparung_eur != null ? obj.einsparung_eur : undefined),
+          invest_eur: (obj.invest_eur != null ? obj.invest_eur : undefined),
+          status: 'idee', user_id: TASK_USER_ID
+        })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      statusEl.textContent = 'Übernommen ✓ – „' + obj.title + '"';
+      await renderMassnahmen();
+    } catch (err) {
+      statusEl.style.color = '#c0392b';
+      statusEl.textContent = 'Fehler: ' + (err && err.message ? err.message : err);
+    }
+  }
+
+  // Katalog-Vorschläge rendern (ruft NICHT renderMassnahmen → kein Rekursionsschutz nötig).
+  function renderVorschlaege() {
+    const sel = document.getElementById('vs-branche');
+    const listEl = document.getElementById('vs-katalog');
+    if (!sel || !listEl) return;
+    const branchen = vorschlagBranchen();
+    if (!sel.options.length) {
+      const selEl = document.getElementById('branche');
+      const def = selEl ? BRANCH_BENCHMARK_MAP[selEl.value] : null;
+      for (const b of branchen) {
+        const o = document.createElement('option');
+        o.value = b; o.textContent = (VS_BRANCHE_LABEL[b] || b);
+        sel.appendChild(o);
+      }
+      sel.value = branchen.includes(def) ? def : branchen[0];
+    }
+    const branche = sel.value;
+    const data = OEKOPROFIT_BENCHMARKS.branchen[branche] || {};
+    const eintraege = [].concat(data.quick_wins || [], Array.isArray(data.massnahmen) ? data.massnahmen : []);
+    listEl.textContent = '';
+    if (!eintraege.length) { listEl.textContent = 'Keine Katalog-Vorschläge für diese Branche.'; return; }
+    for (const e of eintraege) {
+      const card = document.createElement('div');
+      card.style.cssText = 'display:flex; justify-content:space-between; gap:1rem; align-items:center; padding:0.4rem 0.25rem; border-bottom:1px solid var(--border);';
+      const info = document.createElement('div');
+      const t = document.createElement('div'); t.style.fontWeight = '600'; t.textContent = e.massnahme; info.appendChild(t);
+      const meta = document.createElement('div'); meta.style.cssText = 'font-size:12px; color:var(--gray-600);';
+      const parts = [];
+      if (e.invest_eur != null) parts.push('Invest ' + e.invest_eur.toLocaleString('de-DE') + ' €');
+      parts.push('Einsparung ' + einsparungText(e));
+      if (e.amort_jahre != null) parts.push('Amort. ' + e.amort_jahre + ' J');
+      if (e.quelle) parts.push('Quelle: ' + e.quelle);
+      meta.textContent = parts.join(' · '); info.appendChild(meta);
+      const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn'; btn.textContent = '+ Übernehmen';
+      btn.onclick = () => uebernehmeMassnahme({
+        title: e.massnahme,
+        invest_eur: (e.invest_eur != null ? e.invest_eur : null),
+        einsparung_eur: (e.einsparung_eur_pa != null ? e.einsparung_eur_pa : null)
+      });
+      card.appendChild(info); card.appendChild(btn); listEl.appendChild(card);
+    }
+  }
+
+  // Reiner Parser: extrahiert ein JSON-Array aus KI-Text (robust gegen Fließtext-Umrandung).
+  function parseKIVorschlaege(text) {
+    if (typeof text !== 'string') return [];
+    const a = text.indexOf('['), b = text.lastIndexOf(']');
+    if (a === -1 || b === -1 || b <= a) return [];
+    let arr;
+    try { arr = JSON.parse(text.slice(a, b + 1)); } catch { return []; }
+    if (!Array.isArray(arr)) return [];
+    return arr.filter(o => o && typeof o.title === 'string' && o.title.trim())
+      .map(o => ({
+        title: o.title.trim(),
+        ressource: typeof o.ressource === 'string' ? o.ressource : null,
+        einsparung_eur: Number.isFinite(Number(o.einsparung_eur)) ? Number(o.einsparung_eur) : null,
+        invest_eur: Number.isFinite(Number(o.invest_eur)) ? Number(o.invest_eur) : null,
+      }));
+  }
+
+  async function generateKIVorschlaege() {
+    const btn = document.getElementById('vs-ki-btn');
+    const statusEl = document.getElementById('vs-status');
+    const listEl = document.getElementById('vs-ki-list');
+    const vals = getVals();
+    const branche = document.getElementById('vs-branche').value;
+    const prompt = 'Du bist Energieeffizienz-Berater. Betrieb Branche "' + branche + '". '
+      + 'Aktuelle Kennzahlen (normalisiert): Strom ' + vals.strom + ' kWh/m², Gas ' + vals.gas
+      + ' kWh/m², Wasser ' + vals.wasser + ' m³/MA, Abfall ' + vals.abfall + ' kg/MA, Reinigungsmittel '
+      + vals.reinigungsmittel + ' L/MA. Schlage 3-5 konkrete Effizienzmaßnahmen vor. '
+      + 'Antworte AUSSCHLIESSLICH mit einem JSON-Array, ohne Fließtext, Format: '
+      + '[{"title":"…","ressource":"Strom|Gas|Wasser|Wärme|Druckluft|Sonstige","einsparung_eur":<Zahl oder null>,"invest_eur":<Zahl oder null>}].';
+    btn.disabled = true; statusEl.style.color = ''; statusEl.textContent = 'KI generiert…'; listEl.textContent = '';
+    try {
+      const text = await callOpenRouterDirect(prompt);
+      const items = parseKIVorschlaege(text);
+      if (!items.length) {
+        statusEl.style.color = '#c0392b';
+        statusEl.textContent = 'KI-Antwort konnte nicht als Maßnahmen gelesen werden (Rohtext unten).';
+        const pre = document.createElement('pre');
+        pre.style.cssText = 'white-space:pre-wrap; font-size:12px; color:var(--gray-600);';
+        pre.textContent = text;
+        listEl.appendChild(pre);
+        return;
+      }
+      statusEl.textContent = items.length + ' KI-Vorschläge:';
+      for (const it of items) {
+        const card = document.createElement('div');
+        card.style.cssText = 'display:flex; justify-content:space-between; gap:1rem; align-items:center; padding:0.4rem 0.25rem; border-bottom:1px solid var(--border);';
+        const info = document.createElement('div');
+        const t = document.createElement('div'); t.style.fontWeight = '600'; t.textContent = it.title; info.appendChild(t);
+        const meta = document.createElement('div'); meta.style.cssText = 'font-size:12px; color:var(--gray-600);';
+        const parts = [];
+        if (it.ressource) parts.push(it.ressource);
+        if (it.einsparung_eur != null) parts.push('Einsparung ' + it.einsparung_eur.toLocaleString('de-DE') + ' €/J');
+        if (it.invest_eur != null) parts.push('Invest ' + it.invest_eur.toLocaleString('de-DE') + ' €');
+        meta.textContent = parts.join(' · '); info.appendChild(meta);
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = '+ Übernehmen';
+        b.onclick = () => uebernehmeMassnahme(it);
+        card.appendChild(info); card.appendChild(b); listEl.appendChild(card);
+      }
+    } catch (err) {
+      statusEl.style.color = '#c0392b';
+      statusEl.textContent = 'KI-Fehler: ' + (err && err.message ? err.message : err);
+    } finally {
+      btn.disabled = false;
     }
   }
 
